@@ -1,0 +1,682 @@
+import { Lesson } from '@/types';
+
+export const lessons: Lesson[] = [
+  {
+    id: 'lesson-thermopylae',
+    title: 'The 300 Spartans',
+    unitId: 'ancient-beginnings',
+    orderIndex: 0,
+    estimatedMinutes: 3,
+    battleId: 'thermopylae',
+    xpReward: 15,
+    steps: [
+      {
+        id: 'therm-1',
+        type: 'multiChoice',
+        prompt: 'Which famous king led the Spartans at Thermopylae?',
+        feedbackCorrect: 'Leonidas I led his 300 Spartans in their legendary last stand.',
+        feedbackWrong: 'The correct answer is Leonidas I, the Spartan king.',
+        data: {
+          options: ['Leonidas I', 'Xerxes I', 'Alexander', 'Pericles'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'therm-2',
+        type: 'mapTap',
+        prompt: 'Tap the region where the Battle of Thermopylae took place',
+        feedbackCorrect: 'Correct! Thermopylae is in central Greece.',
+        feedbackWrong: 'Thermopylae is located in central Greece, near a narrow coastal pass.',
+        data: {
+          regions: [
+            { id: 'greece', name: 'Greece', lat: 38.79, lng: 22.53 },
+            { id: 'persia', name: 'Persia', lat: 32.42, lng: 53.68 },
+            { id: 'egypt', name: 'Egypt', lat: 26.82, lng: 30.80 },
+            { id: 'italy', name: 'Italy', lat: 41.87, lng: 12.56 },
+          ],
+          correctRegionId: 'greece',
+        },
+      },
+      {
+        id: 'therm-3',
+        type: 'timelineSlider',
+        prompt: 'When did the Battle of Thermopylae take place?',
+        feedbackCorrect: 'Correct! The battle was in 480 BC.',
+        feedbackWrong: 'The battle took place in 480 BC during the Second Persian Invasion.',
+        data: {
+          correctYear: -480,
+          minYear: -600,
+          maxYear: -300,
+          tolerance: 20,
+        },
+      },
+      {
+        id: 'therm-4',
+        type: 'twoTruths',
+        prompt: 'Find the FALSE statement about Thermopylae:',
+        feedbackCorrect: 'Right! The battle lasted 3 days, not 7.',
+        feedbackWrong: 'The false statement is that it lasted 7 days - it was actually 3 days.',
+        data: {
+          statements: [
+            { text: '300 Spartans made the final stand', isLie: false },
+            { text: 'The pass was betrayed by Ephialtes', isLie: false },
+            { text: 'The battle lasted 7 days', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'therm-5',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Thermopylae',
+          narrative: 'In 480 BC, King Leonidas led 300 Spartans and 7,000 Greeks against the massive Persian army. Their heroic last stand at the narrow coastal pass bought precious time for Greece to prepare its defenses. Though they fell, their sacrifice became eternal.',
+          battleId: 'thermopylae',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-marathon',
+    title: 'The Marathon Run',
+    unitId: 'ancient-beginnings',
+    orderIndex: 1,
+    estimatedMinutes: 3,
+    battleId: 'marathon',
+    xpReward: 15,
+    steps: [
+      {
+        id: 'mar-1',
+        type: 'multiChoice',
+        prompt: 'What famous athletic event was inspired by this battle?',
+        feedbackCorrect: 'The marathon race commemorates the legendary run from Marathon to Athens.',
+        feedbackWrong: 'The marathon race was inspired by Pheidippides\' run to announce victory.',
+        data: {
+          options: ['Marathon', 'Triathlon', 'Decathlon', 'Sprint'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'mar-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence about the Battle of Marathon:',
+        feedbackCorrect: 'Athens defeated Persia at Marathon in 490 BC.',
+        feedbackWrong: 'The Athenians won a decisive victory at Marathon.',
+        data: {
+          sentence: 'The battle was a decisive _____ victory over Persia.',
+          blankWord: 'Athenian',
+          options: ['Athenian', 'Spartan', 'Persian', 'Roman'],
+        },
+      },
+      {
+        id: 'mar-3',
+        type: 'orderEvents',
+        prompt: 'Put these events in the correct order:',
+        feedbackCorrect: 'Perfect! You got the sequence right.',
+        feedbackWrong: 'The battle came first, then the run, then the announcement.',
+        data: {
+          events: [
+            { id: 'e1', text: 'Persians land at Marathon', order: 1 },
+            { id: 'e2', text: 'Athenians defeat Persians', order: 2 },
+            { id: 'e3', text: 'Pheidippides runs to Athens', order: 3 },
+            { id: 'e4', text: 'Victory announced', order: 4 },
+          ],
+        },
+      },
+      {
+        id: 'mar-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Marathon',
+          narrative: 'In 490 BC, the Athenians achieved a stunning victory against the Persian invasion force. Legend says Pheidippides ran 26 miles to Athens to announce "We have won!" before collapsing - inspiring the modern marathon race.',
+          battleId: 'marathon',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-hastings',
+    title: 'The Norman Conquest',
+    unitId: 'medieval-clashes',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'hastings',
+    xpReward: 20,
+    steps: [
+      {
+        id: 'hast-1',
+        type: 'multiChoice',
+        prompt: 'Who led the Norman invasion of England in 1066?',
+        feedbackCorrect: 'William the Conqueror led the Normans to victory at Hastings.',
+        feedbackWrong: 'William the Conqueror (William I) invaded from Normandy.',
+        data: {
+          options: ['William the Conqueror', 'Charlemagne', 'Richard the Lionheart', 'Henry V'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'hast-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their sides:',
+        feedbackCorrect: 'Well done! You matched them correctly.',
+        feedbackWrong: 'William led the Normans, Harold led the Anglo-Saxons.',
+        data: {
+          pairs: [
+            { left: 'William', right: 'Normans' },
+            { left: 'Harold', right: 'Anglo-Saxons' },
+          ],
+        },
+      },
+      {
+        id: 'hast-3',
+        type: 'twoTruths',
+        prompt: 'Which statement about Hastings is FALSE?',
+        feedbackCorrect: 'Correct! Harold was the English king, not the Norman leader.',
+        feedbackWrong: 'Harold Godwinson was the Anglo-Saxon king who was defeated.',
+        data: {
+          statements: [
+            { text: 'Harold may have died from an arrow to the eye', isLie: false },
+            { text: 'The Bayeux Tapestry depicts this battle', isLie: false },
+            { text: 'Harold was the Norman commander', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'hast-4',
+        type: 'timelineSlider',
+        prompt: 'When did the Battle of Hastings occur?',
+        feedbackCorrect: '1066 - one of the most famous dates in English history!',
+        feedbackWrong: 'The Battle of Hastings was fought in 1066.',
+        data: {
+          correctYear: 1066,
+          minYear: 900,
+          maxYear: 1200,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'hast-5',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Hastings',
+          narrative: 'On October 14, 1066, William of Normandy defeated King Harold II, changing England forever. The Norman Conquest brought new language, customs, and castles to England, shaping the nation we know today.',
+          battleId: 'hastings',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-agincourt',
+    title: 'The Longbow Triumph',
+    unitId: 'medieval-clashes',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'agincourt',
+    xpReward: 20,
+    steps: [
+      {
+        id: 'agin-1',
+        type: 'multiChoice',
+        prompt: 'Which weapon was decisive at Agincourt?',
+        feedbackCorrect: 'English longbowmen devastated the French cavalry at Agincourt.',
+        feedbackWrong: 'The English longbow was the key to victory at Agincourt.',
+        data: {
+          options: ['Longbow', 'Crossbow', 'Pike', 'Musket'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'agin-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'Henry V led his army to a famous victory.',
+        feedbackWrong: 'King Henry V of England led the army at Agincourt.',
+        data: {
+          sentence: 'King _____ of England led his troops at Agincourt.',
+          blankWord: 'Henry V',
+          options: ['Henry V', 'Richard III', 'Edward I', 'John'],
+        },
+      },
+      {
+        id: 'agin-3',
+        type: 'mapTap',
+        prompt: 'Where did the Battle of Agincourt take place?',
+        feedbackCorrect: 'Correct! Agincourt is in northern France.',
+        feedbackWrong: 'Agincourt was fought in northern France.',
+        data: {
+          regions: [
+            { id: 'france', name: 'France', lat: 50.46, lng: 2.14 },
+            { id: 'england', name: 'England', lat: 51.50, lng: -0.12 },
+            { id: 'spain', name: 'Spain', lat: 40.41, lng: -3.70 },
+            { id: 'germany', name: 'Germany', lat: 52.52, lng: 13.40 },
+          ],
+          correctRegionId: 'france',
+        },
+      },
+      {
+        id: 'agin-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Agincourt',
+          narrative: 'On St. Crispin\'s Day 1415, Henry V\'s exhausted army faced a French force four times their size. The muddy terrain and English longbows turned the battle into a slaughter, cementing Henry\'s legend.',
+          battleId: 'agincourt',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-austerlitz',
+    title: 'Napoleon\'s Masterpiece',
+    unitId: 'napoleonic-era',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'austerlitz',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'aust-1',
+        type: 'multiChoice',
+        prompt: 'Austerlitz is also known as the Battle of...',
+        feedbackCorrect: 'Three emperors were present: Napoleon, Alexander I, and Francis II.',
+        feedbackWrong: 'It\'s called the Battle of Three Emperors.',
+        data: {
+          options: ['Three Emperors', 'Two Empires', 'The Nations', 'The Crown'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'aust-2',
+        type: 'orderEvents',
+        prompt: 'Order Napoleon\'s tactical moves:',
+        feedbackCorrect: 'Napoleon\'s brilliant deception led to total victory.',
+        feedbackWrong: 'Napoleon feigned weakness, lured the enemy, then struck their center.',
+        data: {
+          events: [
+            { id: 'e1', text: 'Napoleon weakens his right flank deliberately', order: 1 },
+            { id: 'e2', text: 'Allies attack the weak flank', order: 2 },
+            { id: 'e3', text: 'Napoleon strikes the weakened center', order: 3 },
+            { id: 'e4', text: 'Allied army is split and destroyed', order: 4 },
+          ],
+        },
+      },
+      {
+        id: 'aust-3',
+        type: 'twoTruths',
+        prompt: 'Find the FALSE statement:',
+        feedbackCorrect: 'Napoleon won decisively - it wasn\'t close at all.',
+        feedbackWrong: 'Austerlitz was Napoleon\'s greatest victory, not a narrow win.',
+        data: {
+          statements: [
+            { text: 'Napoleon deliberately appeared weak', isLie: false },
+            { text: 'The battle was fought in 1805', isLie: false },
+            { text: 'Napoleon barely won by a narrow margin', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'aust-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Austerlitz',
+          narrative: 'December 2, 1805 - Napoleon\'s tactical masterpiece. By feigning weakness, he lured the Russian and Austrian armies into a trap, then crushed them utterly. This victory dissolved the Holy Roman Empire.',
+          battleId: 'austerlitz',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-waterloo',
+    title: 'Napoleon\'s End',
+    unitId: 'napoleonic-era',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'waterloo',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'water-1',
+        type: 'multiChoice',
+        prompt: 'Who commanded the British forces at Waterloo?',
+        feedbackCorrect: 'The Duke of Wellington led the British to victory.',
+        feedbackWrong: 'The Duke of Wellington commanded the British army.',
+        data: {
+          options: ['Duke of Wellington', 'Duke of Marlborough', 'Lord Nelson', 'General Haig'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'water-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their armies:',
+        feedbackCorrect: 'Wellington, Blücher, and Napoleon faced off at Waterloo.',
+        feedbackWrong: 'Wellington led Britain, Blücher led Prussia, Napoleon led France.',
+        data: {
+          pairs: [
+            { left: 'Wellington', right: 'Britain' },
+            { left: 'Blücher', right: 'Prussia' },
+            { left: 'Napoleon', right: 'France' },
+          ],
+        },
+      },
+      {
+        id: 'water-3',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'The Prussian arrival sealed Napoleon\'s fate.',
+        feedbackWrong: 'Prussian reinforcements arrived to help Wellington.',
+        data: {
+          sentence: 'The arrival of _____ reinforcements sealed Napoleon\'s defeat.',
+          blankWord: 'Prussian',
+          options: ['Prussian', 'Austrian', 'Russian', 'Spanish'],
+        },
+      },
+      {
+        id: 'water-4',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Waterloo?',
+        feedbackCorrect: 'June 18, 1815 - the end of the Napoleonic Wars.',
+        feedbackWrong: 'Waterloo was fought in 1815.',
+        data: {
+          correctYear: 1815,
+          minYear: 1750,
+          maxYear: 1850,
+          tolerance: 5,
+        },
+      },
+      {
+        id: 'water-5',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Waterloo',
+          narrative: 'June 18, 1815 - Napoleon\'s final gamble. Wellington\'s forces held the line until Prussian reinforcements arrived. Napoleon\'s defeat ended 23 years of war and sent him to exile on St. Helena forever.',
+          battleId: 'waterloo',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-somme',
+    title: 'Horror in the Trenches',
+    unitId: 'great-war',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'somme',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'somme-1',
+        type: 'multiChoice',
+        prompt: 'What new weapon was first used at the Somme?',
+        feedbackCorrect: 'Tanks made their combat debut at the Somme.',
+        feedbackWrong: 'The tank was first used in battle during the Somme.',
+        data: {
+          options: ['Tank', 'Machine Gun', 'Poison Gas', 'Airplane'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'somme-2',
+        type: 'timelineSlider',
+        prompt: 'When did the Battle of the Somme begin?',
+        feedbackCorrect: 'The Somme began on July 1, 1916.',
+        feedbackWrong: 'The battle started in 1916, during World War I.',
+        data: {
+          correctYear: 1916,
+          minYear: 1914,
+          maxYear: 1918,
+          tolerance: 0,
+        },
+      },
+      {
+        id: 'somme-3',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'The battle was not a clear victory - it was inconclusive with massive losses.',
+        feedbackWrong: 'The Somme was a devastating battle with no clear winner.',
+        data: {
+          statements: [
+            { text: '57,000 British casualties on day one', isLie: false },
+            { text: 'Over 1 million total casualties', isLie: false },
+            { text: 'It was a decisive Allied victory', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'somme-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of the Somme',
+          narrative: 'July 1, 1916 - the bloodiest day in British military history. Over five months, more than one million soldiers were killed or wounded. The battle gained just six miles - a testament to the horror of trench warfare.',
+          battleId: 'somme',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-stalingrad',
+    title: 'The Turning Point',
+    unitId: 'world-war-2',
+    orderIndex: 0,
+    estimatedMinutes: 5,
+    battleId: 'stalingrad',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'stalin-1',
+        type: 'multiChoice',
+        prompt: 'What was the outcome of Stalingrad for Germany?',
+        feedbackCorrect: 'The entire German 6th Army was destroyed at Stalingrad.',
+        feedbackWrong: 'Germany\'s 6th Army was encircled and destroyed.',
+        data: {
+          options: ['Complete destruction of 6th Army', 'Strategic withdrawal', 'Minor setback', 'Negotiated peace'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'stalin-2',
+        type: 'orderEvents',
+        prompt: 'Order the events of Stalingrad:',
+        feedbackCorrect: 'Perfect! The encirclement sealed the German fate.',
+        feedbackWrong: 'Germans attacked, Soviets encircled them, then they surrendered.',
+        data: {
+          events: [
+            { id: 'e1', text: 'Germans enter Stalingrad', order: 1 },
+            { id: 'e2', text: 'Urban combat intensifies', order: 2 },
+            { id: 'e3', text: 'Soviet Operation Uranus encircles Germans', order: 3 },
+            { id: 'e4', text: 'German 6th Army surrenders', order: 4 },
+          ],
+        },
+      },
+      {
+        id: 'stalin-3',
+        type: 'mapTap',
+        prompt: 'Where is Stalingrad located?',
+        feedbackCorrect: 'Correct! Stalingrad (now Volgograd) is in Russia.',
+        feedbackWrong: 'Stalingrad is located in southern Russia on the Volga River.',
+        data: {
+          regions: [
+            { id: 'russia', name: 'Russia', lat: 48.71, lng: 44.50 },
+            { id: 'germany', name: 'Germany', lat: 52.52, lng: 13.40 },
+            { id: 'poland', name: 'Poland', lat: 52.22, lng: 21.01 },
+            { id: 'ukraine', name: 'Ukraine', lat: 50.45, lng: 30.52 },
+          ],
+          correctRegionId: 'russia',
+        },
+      },
+      {
+        id: 'stalin-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Stalingrad',
+          narrative: 'The deadliest battle in human history. From August 1942 to February 1943, Soviet and German forces fought building by building in brutal urban combat. The German surrender marked the turning point of WWII in Europe.',
+          battleId: 'stalingrad',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-dday',
+    title: 'The Longest Day',
+    unitId: 'world-war-2',
+    orderIndex: 1,
+    estimatedMinutes: 5,
+    battleId: 'dday',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'dday-1',
+        type: 'multiChoice',
+        prompt: 'How many beaches did the Allies land on during D-Day?',
+        feedbackCorrect: 'Five beaches: Utah, Omaha, Gold, Juno, and Sword.',
+        feedbackWrong: 'The Allies landed on 5 beaches on D-Day.',
+        data: {
+          options: ['5', '3', '7', '4'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'dday-2',
+        type: 'matchPairs',
+        prompt: 'Match the beach to the nation that landed there:',
+        feedbackCorrect: 'Different Allied nations assaulted different beaches.',
+        feedbackWrong: 'Americans landed at Utah and Omaha, British at Gold and Sword.',
+        data: {
+          pairs: [
+            { left: 'Omaha', right: 'USA' },
+            { left: 'Gold', right: 'Britain' },
+            { left: 'Juno', right: 'Canada' },
+          ],
+        },
+      },
+      {
+        id: 'dday-3',
+        type: 'fillBlank',
+        prompt: 'Complete the codename:',
+        feedbackCorrect: 'Operation Overlord was the codename for D-Day.',
+        feedbackWrong: 'D-Day was codenamed Operation Overlord.',
+        data: {
+          sentence: 'D-Day was codenamed Operation _____.',
+          blankWord: 'Overlord',
+          options: ['Overlord', 'Neptune', 'Torch', 'Market'],
+        },
+      },
+      {
+        id: 'dday-4',
+        type: 'timelineSlider',
+        prompt: 'When was D-Day?',
+        feedbackCorrect: 'June 6, 1944 - the longest day.',
+        feedbackWrong: 'D-Day was June 6, 1944.',
+        data: {
+          correctYear: 1944,
+          minYear: 1942,
+          maxYear: 1945,
+          tolerance: 0,
+        },
+      },
+      {
+        id: 'dday-5',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'D-Day: The Normandy Landings',
+          narrative: 'June 6, 1944 - the largest amphibious invasion in history. Over 156,000 Allied troops stormed five beaches in Normandy. Despite heavy casualties at Omaha Beach, the Allies established a foothold that would liberate Western Europe.',
+          battleId: 'dday',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-gettysburg',
+    title: 'The Turning Point',
+    unitId: 'american-conflicts',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'gettysburg',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'getty-1',
+        type: 'multiChoice',
+        prompt: 'What famous speech was given at Gettysburg?',
+        feedbackCorrect: 'Lincoln\'s Gettysburg Address is one of history\'s greatest speeches.',
+        feedbackWrong: 'Lincoln delivered his famous Gettysburg Address there.',
+        data: {
+          options: ['Gettysburg Address', 'Emancipation Speech', 'Union Declaration', 'Freedom Address'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'getty-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their sides:',
+        feedbackCorrect: 'Meade led the Union, Lee led the Confederacy.',
+        feedbackWrong: 'Meade commanded the North, Lee commanded the South.',
+        data: {
+          pairs: [
+            { left: 'George Meade', right: 'Union (North)' },
+            { left: 'Robert E. Lee', right: 'Confederacy (South)' },
+          ],
+        },
+      },
+      {
+        id: 'getty-3',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'Pickett\'s Charge was a disaster, not a success.',
+        feedbackWrong: 'Pickett\'s Charge failed catastrophically.',
+        data: {
+          statements: [
+            { text: 'Over 50,000 casualties in 3 days', isLie: false },
+            { text: 'Lincoln gave a famous speech here', isLie: false },
+            { text: 'Pickett\'s Charge was successful', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'getty-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Gettysburg',
+          narrative: 'July 1-3, 1863 - the bloodiest battle of the American Civil War. Lee\'s gamble to invade the North ended in disaster after Pickett\'s Charge. Lincoln\'s subsequent Gettysburg Address redefined the purpose of the war.',
+          battleId: 'gettysburg',
+        },
+      },
+    ],
+  },
+];
+
+export const getLessonById = (id: string): Lesson | undefined => {
+  return lessons.find(l => l.id === id);
+};
+
+export const getLessonsByUnitId = (unitId: string): Lesson[] => {
+  return lessons.filter(l => l.unitId === unitId).sort((a, b) => a.orderIndex - b.orderIndex);
+};
