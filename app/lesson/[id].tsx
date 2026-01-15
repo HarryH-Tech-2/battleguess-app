@@ -70,6 +70,16 @@ export default function LessonScreen() {
     feedbackSlideAnim.setValue(100);
   }, [feedbackSlideAnim]);
 
+  const [outOfHearts, setOutOfHearts] = useState(false);
+
+  const resetLesson = useCallback(() => {
+    setCurrentStepIndex(0);
+    setCorrectCount(0);
+    resetStepState();
+    setOutOfHearts(false);
+    progressAnim.setValue(0);
+  }, [resetStepState, progressAnim]);
+
   const showFeedback = useCallback((isCorrect: boolean) => {
     setFeedback(isCorrect ? 'correct' : 'wrong');
     
@@ -103,6 +113,10 @@ export default function LessonScreen() {
         Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
       ]).start();
+      
+      if (progress.hearts <= 1) {
+        setOutOfHearts(true);
+      }
     }
 
     Animated.spring(feedbackSlideAnim, {
@@ -111,7 +125,7 @@ export default function LessonScreen() {
       tension: 50,
       friction: 8,
     }).start();
-  }, [loseHeart, shakeAnim, feedbackSlideAnim, mascotAnim, mascotBounceAnim]);
+  }, [loseHeart, shakeAnim, feedbackSlideAnim, mascotAnim, mascotBounceAnim, progress.hearts]);
 
   const checkAnswer = useCallback(() => {
     if (!currentStep) return;
@@ -168,6 +182,11 @@ export default function LessonScreen() {
   const handleContinue = useCallback(() => {
     if (!lesson) return;
 
+    if (outOfHearts) {
+      resetLesson();
+      return;
+    }
+
     if (currentStepIndex < lesson.steps.length - 1) {
       resetStepState();
       setCurrentStepIndex(prev => prev + 1);
@@ -183,7 +202,7 @@ export default function LessonScreen() {
         },
       });
     }
-  }, [lesson, currentStepIndex, correctCount, resetStepState, router]);
+  }, [lesson, currentStepIndex, correctCount, resetStepState, router, outOfHearts, resetLesson]);
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -643,7 +662,9 @@ export default function LessonScreen() {
               </Text>
             </View>
             <Text style={styles.feedbackText}>
-              {feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong}
+              {outOfHearts 
+                ? "You're out of hearts! Tap continue to restart this lesson."
+                : (feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong)}
             </Text>
           </>
         )}
@@ -1037,9 +1058,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 0,
+    paddingBottom: 16,
     borderTopWidth: 3,
     borderTopColor: Colors.cardBorder,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderLeftColor: Colors.cardBorder,
+    borderRightColor: Colors.cardBorder,
   },
   feedbackPanelCorrect: {
     borderTopColor: Colors.success,

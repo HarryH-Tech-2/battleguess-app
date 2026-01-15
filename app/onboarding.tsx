@@ -11,7 +11,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { ChevronRight, Target, Clock, Sparkles } from 'lucide-react-native';
+import { ChevronRight, ChevronLeft, Target, Clock, Sparkles } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { mascots } from '@/mocks/mascots';
 import { Interest, DailyGoal, KnowledgeLevel, Mascot } from '@/types';
@@ -332,18 +332,37 @@ export default function OnboardingScreen() {
 
   const stepIndex = ['welcome', 'interests', 'goal', 'knowledge', 'mascot'].indexOf(step);
 
+  const goBack = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const steps: OnboardingStep[] = ['welcome', 'interests', 'goal', 'knowledge', 'mascot'];
+    const currentIndex = steps.indexOf(step);
+    if (currentIndex > 0) {
+      animateTransition(steps[currentIndex - 1]);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
+      <View style={styles.headerRow}>
+        {step !== 'welcome' ? (
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
+            <ChevronLeft size={28} color={Colors.text} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.backButtonPlaceholder} />
+        )}
+        <View style={styles.progressContainer}>
         {[0, 1, 2, 3, 4].map((i) => (
-          <View
-            key={i}
-            style={[
-              styles.progressDot,
-              i <= stepIndex && styles.progressDotActive,
-            ]}
-          />
-        ))}
+            <View
+              key={i}
+              style={[
+                styles.progressDot,
+                i <= stepIndex && styles.progressDotActive,
+              ]}
+            />
+          ))}
+        </View>
+        <View style={styles.backButtonPlaceholder} />
       </View>
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         {renderStep()}
@@ -357,11 +376,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonPlaceholder: {
+    width: 40,
+  },
   progressContainer: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 16,
   },
   progressDot: {
     width: 8,
@@ -578,6 +612,7 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.text,
     marginBottom: 4,
+    textAlign: 'center',
   },
   mascotNameSelected: {
     color: Colors.primary,
