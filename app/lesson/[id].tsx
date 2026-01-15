@@ -161,8 +161,12 @@ export default function LessonScreen() {
       }
       case 'timelineSlider': {
         const step = currentStep as TimelineSliderStep;
-        const currentSliderValue = sliderValue === null ? Math.round((step.data.minYear + step.data.maxYear) / 2) : sliderValue;
-        isCorrect = Math.abs(currentSliderValue - step.data.correctYear) <= step.data.tolerance;
+        const minYear = Number(step.data.minYear);
+        const maxYear = Number(step.data.maxYear);
+        const correctYear = Number(step.data.correctYear);
+        const tolerance = Number(step.data.tolerance);
+        const currentSliderValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
+        isCorrect = Math.abs(currentSliderValue - correctYear) <= tolerance;
         break;
       }
       case 'twoTruths': {
@@ -450,11 +454,13 @@ export default function LessonScreen() {
   );
 
   const renderTimelineSlider = (step: TimelineSliderStep) => {
-    const range = step.data.maxYear - step.data.minYear;
-    const currentValue = sliderValue === null ? Math.round((step.data.minYear + step.data.maxYear) / 2) : sliderValue;
+    const minYear = Number(step.data.minYear);
+    const maxYear = Number(step.data.maxYear);
+    const range = maxYear - minYear;
+    const currentValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
     
     let displayYear: string;
-    if (step.data.minYear < 0 || step.data.maxYear < 0) {
+    if (minYear < 0 || maxYear < 0) {
       displayYear = currentValue < 0 
         ? `${Math.abs(currentValue)} BC` 
         : `${currentValue} AD`;
@@ -470,7 +476,7 @@ export default function LessonScreen() {
             <View 
               style={[
                 styles.sliderThumb,
-                { left: `${((currentValue - step.data.minYear) / range) * 100}%` }
+                { left: `${((currentValue - minYear) / range) * 100}%` }
               ]} 
             />
           </View>
@@ -480,18 +486,18 @@ export default function LessonScreen() {
               const touchX = e.nativeEvent.locationX;
               const trackWidth = e.nativeEvent.target ? 300 : 300;
               const percent = Math.max(0, Math.min(1, touchX / trackWidth));
-              const year = Math.round(step.data.minYear + percent * range);
-              setSliderValue(Math.max(step.data.minYear, Math.min(step.data.maxYear, year)));
+              const year = Math.round(minYear + percent * range);
+              setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
           />
         </View>
         <View style={styles.sliderLabels}>
           <Text style={styles.sliderLabel}>
-            {step.data.minYear < 0 ? `${Math.abs(step.data.minYear)} BC` : step.data.minYear}
+            {minYear < 0 ? `${Math.abs(minYear)} BC` : minYear}
           </Text>
           <Text style={styles.sliderLabel}>
-            {step.data.maxYear < 0 ? `${Math.abs(step.data.maxYear)} BC` : step.data.maxYear}
+            {maxYear < 0 ? `${Math.abs(maxYear)} BC` : maxYear}
           </Text>
         </View>
       </View>
