@@ -1,5 +1,7 @@
 export type Era = 'ancient' | 'medieval' | 'napoleonic' | 'ww1' | 'ww2' | 'modern';
 
+export type Continent = 'europe' | 'asia' | 'africa' | 'americas' | 'all';
+
 export type Interest = 'Ancient' | 'Medieval' | 'Modern' | 'Random';
 
 export type DailyGoal = 5 | 10 | 15;
@@ -20,6 +22,7 @@ export interface Battle {
   date: string;
   year: number;
   era: Era;
+  continent: Continent;
   region: string;
   conflict: string;
   lat: number;
@@ -45,6 +48,7 @@ export interface Unit {
   title: string;
   description: string;
   themeTag: Era;
+  continent: Continent;
   orderIndex: number;
   lessonIds: string[];
   icon: string;

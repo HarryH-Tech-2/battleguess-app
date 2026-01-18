@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
+  LayoutChangeEvent,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,6 +46,7 @@ export default function LessonScreen() {
   const feedbackSlideAnim = useRef(new Animated.Value(100)).current;
   const mascotAnim = useRef(new Animated.Value(0)).current;
   const mascotBounceAnim = useRef(new Animated.Value(0)).current;
+  const sliderWidthRef = useRef(0);
   
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
 
@@ -468,29 +470,56 @@ export default function LessonScreen() {
       displayYear = currentValue.toString();
     }
 
+    const handleSliderTouch = (locationX: number) => {
+      if (feedback !== 'none') return;
+      const trackWidth = sliderWidthRef.current || 300;
+      const percent = Math.max(0, Math.min(1, locationX / trackWidth));
+      const year = Math.round(minYear + percent * range);
+      setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    };
+
+    const handleSliderMove = (locationX: number) => {
+      if (feedback !== 'none') return;
+      const trackWidth = sliderWidthRef.current || 300;
+      const percent = Math.max(0, Math.min(1, locationX / trackWidth));
+      const newYear = Math.round(minYear + percent * range);
+      
+      if (newYear !== currentValue) {
+        setSliderValue(Math.max(minYear, Math.min(maxYear, newYear)));
+        Haptics.selectionAsync();
+      }
+    };
+
+    const onSliderLayout = (e: LayoutChangeEvent) => {
+      sliderWidthRef.current = e.nativeEvent.layout.width;
+    };
+
+    const fillPercent = ((currentValue - minYear) / range) * 100;
+
     return (
       <View style={styles.timelineContainer}>
-        <Text style={styles.timelineYear}>{displayYear}</Text>
-        <View style={styles.sliderContainer}>
+        <Text style={styles.timelineYear}>
+          {displayYear}
+        </Text>
+        <View 
+          style={styles.sliderContainer} 
+          onLayout={onSliderLayout}
+          onStartShouldSetResponder={() => feedback === 'none'}
+          onMoveShouldSetResponder={() => feedback === 'none'}
+          onResponderGrant={(e) => handleSliderTouch(e.nativeEvent.locationX)}
+          onResponderMove={(e) => handleSliderMove(e.nativeEvent.locationX)}
+          onResponderRelease={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+        >
           <View style={styles.sliderTrack}>
+            <View style={[styles.sliderFill, { width: `${fillPercent}%` }]} />
             <View 
               style={[
                 styles.sliderThumb,
-                { left: `${((currentValue - minYear) / range) * 100}%` }
+                { left: `${fillPercent}%` }
               ]} 
             />
           </View>
-          <TouchableOpacity 
-            style={styles.sliderTouchArea}
-            onPress={(e) => {
-              const touchX = e.nativeEvent.locationX;
-              const trackWidth = e.nativeEvent.target ? 300 : 300;
-              const percent = Math.max(0, Math.min(1, touchX / trackWidth));
-              const year = Math.round(minYear + percent * range);
-              setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          />
         </View>
         <View style={styles.sliderLabels}>
           <Text style={styles.sliderLabel}>
@@ -499,6 +528,9 @@ export default function LessonScreen() {
           <Text style={styles.sliderLabel}>
             {maxYear < 0 ? `${Math.abs(maxYear)} BC` : maxYear}
           </Text>
+        </View>
+        <View style={styles.sliderHint}>
+          <Text style={styles.sliderHintText}>Drag to select the year</Text>
         </View>
       </View>
     );
@@ -983,8 +1015,9 @@ const styles = StyleSheet.create({
   },
   sliderContainer: {
     width: '100%',
-    height: 40,
+    height: 50,
     position: 'relative',
+    justifyContent: 'center',
   },
 
   sliderTrack: {
@@ -992,25 +1025,43 @@ const styles = StyleSheet.create({
     top: 16,
     left: 0,
     right: 0,
-    height: 8,
+    height: 12,
     backgroundColor: Colors.pathLine,
-    borderRadius: 4,
+    borderRadius: 6,
+    overflow: 'hidden',
   },
-  sliderThumb: {
-    position: 'absolute',
-    top: -8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    marginLeft: -12,
-  },
-  sliderTouchArea: {
+  sliderFill: {
     position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
+    height: '100%',
+    backgroundColor: Colors.primary + '40',
+    borderRadius: 6,
+  },
+  sliderThumb: {
+    position: 'absolute',
+    top: -6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    marginLeft: -14,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 3,
+    borderColor: Colors.textInverse,
+  },
+  sliderHint: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  sliderHintText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    fontStyle: 'italic' as const,
   },
   sliderLabels: {
     flexDirection: 'row',

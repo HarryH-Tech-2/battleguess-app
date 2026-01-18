@@ -6,6 +6,7 @@ export const units: Unit[] = [
     title: 'Ancient Beginnings',
     description: 'Where warfare began - Greek and Persian conflicts',
     themeTag: 'ancient',
+    continent: 'europe',
     orderIndex: 0,
     lessonIds: ['lesson-thermopylae', 'lesson-marathon'],
     icon: '🏛️',
@@ -15,6 +16,7 @@ export const units: Unit[] = [
     title: 'Medieval Clashes',
     description: 'Knights, conquests, and the age of chivalry',
     themeTag: 'medieval',
+    continent: 'europe',
     orderIndex: 1,
     lessonIds: ['lesson-hastings', 'lesson-agincourt'],
     icon: '⚔️',
@@ -24,6 +26,7 @@ export const units: Unit[] = [
     title: 'Napoleonic Europe',
     description: 'The rise and fall of Napoleon Bonaparte',
     themeTag: 'napoleonic',
+    continent: 'europe',
     orderIndex: 2,
     lessonIds: ['lesson-austerlitz', 'lesson-waterloo'],
     icon: '👑',
@@ -33,6 +36,7 @@ export const units: Unit[] = [
     title: 'The Great War',
     description: 'World War I and the trenches of Europe',
     themeTag: 'ww1',
+    continent: 'europe',
     orderIndex: 3,
     lessonIds: ['lesson-somme'],
     icon: '💣',
@@ -42,6 +46,7 @@ export const units: Unit[] = [
     title: 'World War II',
     description: 'The largest conflict in human history',
     themeTag: 'ww2',
+    continent: 'europe',
     orderIndex: 4,
     lessonIds: ['lesson-stalingrad', 'lesson-dday'],
     icon: '✈️',
@@ -51,6 +56,7 @@ export const units: Unit[] = [
     title: 'American Conflicts',
     description: 'Battles that shaped the Americas',
     themeTag: 'modern',
+    continent: 'americas',
     orderIndex: 5,
     lessonIds: ['lesson-gettysburg'],
     icon: '🦅',
@@ -59,4 +65,9 @@ export const units: Unit[] = [
 
 export const getUnitById = (id: string): Unit | undefined => {
   return units.find(u => u.id === id);
+};
+
+export const getUnitsByContinent = (continent: string): Unit[] => {
+  if (continent === 'all') return units;
+  return units.filter(u => u.continent === continent);
 };

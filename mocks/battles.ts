@@ -7,6 +7,7 @@ export const battles: Battle[] = [
     date: 'August 480 BC',
     year: -480,
     era: 'ancient',
+    continent: 'europe',
     region: 'Greece',
     conflict: 'Greco-Persian Wars',
     lat: 38.7967,
@@ -36,6 +37,7 @@ export const battles: Battle[] = [
     date: 'September 490 BC',
     year: -490,
     era: 'ancient',
+    continent: 'europe',
     region: 'Greece',
     conflict: 'Greco-Persian Wars',
     lat: 38.1147,
@@ -65,6 +67,7 @@ export const battles: Battle[] = [
     date: 'October 14, 1066',
     year: 1066,
     era: 'medieval',
+    continent: 'europe',
     region: 'England',
     conflict: 'Norman Conquest',
     lat: 50.9147,
@@ -94,6 +97,7 @@ export const battles: Battle[] = [
     date: 'October 25, 1415',
     year: 1415,
     era: 'medieval',
+    continent: 'europe',
     region: 'France',
     conflict: "Hundred Years' War",
     lat: 50.4633,
@@ -123,6 +127,7 @@ export const battles: Battle[] = [
     date: 'June 18, 1815',
     year: 1815,
     era: 'napoleonic',
+    continent: 'europe',
     region: 'Belgium',
     conflict: 'Napoleonic Wars',
     lat: 50.6800,
@@ -152,6 +157,7 @@ export const battles: Battle[] = [
     date: 'December 2, 1805',
     year: 1805,
     era: 'napoleonic',
+    continent: 'europe',
     region: 'Czech Republic',
     conflict: 'Napoleonic Wars',
     lat: 49.1275,
@@ -181,6 +187,7 @@ export const battles: Battle[] = [
     date: 'July 1 - November 18, 1916',
     year: 1916,
     era: 'ww1',
+    continent: 'europe',
     region: 'France',
     conflict: 'World War I',
     lat: 49.9333,
@@ -210,6 +217,7 @@ export const battles: Battle[] = [
     date: 'August 23, 1942 - February 2, 1943',
     year: 1942,
     era: 'ww2',
+    continent: 'europe',
     region: 'Russia',
     conflict: 'World War II',
     lat: 48.7194,
@@ -239,6 +247,7 @@ export const battles: Battle[] = [
     date: 'June 6, 1944',
     year: 1944,
     era: 'ww2',
+    continent: 'europe',
     region: 'France',
     conflict: 'World War II',
     lat: 49.3650,
@@ -268,6 +277,7 @@ export const battles: Battle[] = [
     date: 'July 1-3, 1863',
     year: 1863,
     era: 'modern',
+    continent: 'americas',
     region: 'United States',
     conflict: 'American Civil War',
     lat: 39.8109,
@@ -295,4 +305,9 @@ export const battles: Battle[] = [
 
 export const getBattleById = (id: string): Battle | undefined => {
   return battles.find(b => b.id === id);
+};
+
+export const getBattlesByContinent = (continent: string): Battle[] => {
+  if (continent === 'all') return battles;
+  return battles.filter(b => b.continent === continent);
 };

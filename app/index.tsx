@@ -12,7 +12,7 @@ export default function IndexScreen() {
     if (!isLoading) {
       console.log('[Index] Checking onboarding status:', progress.hasCompletedOnboarding);
       if (progress.hasCompletedOnboarding) {
-        router.replace('/home');
+        router.replace('/(tabs)/(home)/learn');
       } else {
         router.replace('/onboarding');
       }
