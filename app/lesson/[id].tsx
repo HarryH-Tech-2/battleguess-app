@@ -74,23 +74,16 @@ export default function LessonScreen() {
 
   const [outOfHearts, setOutOfHearts] = useState(false);
 
-  const resetLesson = useCallback(() => {
-    setCurrentStepIndex(0);
-    setCorrectCount(0);
-    resetStepState();
-    setOutOfHearts(false);
-    progressAnim.setValue(0);
-  }, [resetStepState, progressAnim]);
-
   const showFeedback = useCallback((isCorrect: boolean) => {
     setFeedback(isCorrect ? 'correct' : 'wrong');
+    
+    mascotAnim.setValue(0);
+    mascotBounceAnim.setValue(0);
     
     if (isCorrect) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setCorrectCount(prev => prev + 1);
       
-      mascotAnim.setValue(0);
-      mascotBounceAnim.setValue(0);
       Animated.parallel([
         Animated.spring(mascotAnim, {
           toValue: 1,
@@ -108,12 +101,24 @@ export default function LessonScreen() {
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       loseHeart();
-      mascotAnim.setValue(0);
-      Animated.sequence([
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+      
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+        ]),
+        Animated.spring(mascotAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 80,
+          friction: 6,
+        }),
+        Animated.sequence([
+          Animated.timing(mascotBounceAnim, { toValue: -8, duration: 100, useNativeDriver: true }),
+          Animated.timing(mascotBounceAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
+        ]),
       ]).start();
       
       if (progress.hearts <= 1) {
@@ -189,7 +194,8 @@ export default function LessonScreen() {
     if (!lesson) return;
 
     if (outOfHearts) {
-      resetLesson();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      router.replace('/home');
       return;
     }
 
@@ -208,7 +214,7 @@ export default function LessonScreen() {
         },
       });
     }
-  }, [lesson, currentStepIndex, correctCount, resetStepState, router, outOfHearts, resetLesson]);
+  }, [lesson, currentStepIndex, correctCount, resetStepState, router, outOfHearts]);
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -569,16 +575,32 @@ export default function LessonScreen() {
     </View>
   );
 
+  const getMapUrl = (lat: number, lng: number) => {
+    return `https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/static/pin-l+FF6B35(${lng},${lat})/${lng},${lat},5,0/360x180@2x?access_token=REDACTED_MAPBOX_TOKEN`;
+  };
+
   const renderStoryCard = (step: StoryCardStep) => (
     <View style={styles.storyContainer}>
       <View style={styles.storyCard}>
         <Text style={styles.storyTitle}>{step.data.title}</Text>
         <Text style={styles.storyNarrative}>{step.data.narrative}</Text>
         {battle && (
-          <View style={styles.storyMeta}>
-            <Text style={styles.storyMetaText}>📍 {battle.region}</Text>
-            <Text style={styles.storyMetaText}>📅 {battle.date}</Text>
-          </View>
+          <>
+            <View style={styles.storyMapContainer}>
+              <Image
+                source={{ uri: getMapUrl(battle.lat, battle.lng) }}
+                style={styles.storyMap}
+                contentFit="cover"
+              />
+              <View style={styles.storyMapPin}>
+                <Text style={styles.storyMapPinIcon}>⚔️</Text>
+              </View>
+            </View>
+            <View style={styles.storyMeta}>
+              <Text style={styles.storyMetaText}>📍 {battle.region}</Text>
+              <Text style={styles.storyMetaText}>📅 {battle.date}</Text>
+            </View>
+          </>
         )}
       </View>
     </View>
@@ -650,7 +672,7 @@ export default function LessonScreen() {
         {renderStep(currentStep)}
       </Animated.View>
 
-      {feedback === 'correct' && mascot && (
+      {feedback !== 'none' && mascot && (
         <Animated.View 
           style={[
             styles.mascotCelebration,
@@ -663,15 +685,17 @@ export default function LessonScreen() {
             }
           ]}
         >
-          <View style={styles.mascotBubble}>
+          <View style={[styles.mascotBubble, feedback === 'wrong' && styles.mascotBubbleWrong]}>
             <Image
               source={{ uri: mascot.avatar }}
               style={styles.mascotAvatarImage}
               contentFit="cover"
             />
           </View>
-          <View style={styles.cheerBubble}>
-            <Text style={styles.cheerText}>Great job!</Text>
+          <View style={[styles.cheerBubble, feedback === 'wrong' && styles.cheerBubbleWrong]}>
+            <Text style={styles.cheerText}>
+              {feedback === 'correct' ? 'Great job!' : outOfHearts ? 'Try again!' : 'Keep going!'}
+            </Text>
           </View>
         </Animated.View>
       )}
@@ -1106,6 +1130,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 20,
   },
+  storyMapContainer: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+    position: 'relative',
+  },
+  storyMap: {
+    width: '100%',
+    height: '100%',
+  },
+  storyMapPin: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -20,
+    marginLeft: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: Colors.textInverse,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  storyMapPinIcon: {
+    fontSize: 18,
+  },
   storyMetaText: {
     fontSize: 14,
     color: Colors.textSecondary,
@@ -1115,13 +1174,11 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 16,
-    borderTopWidth: 3,
-    borderTopColor: Colors.cardBorder,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderLeftColor: Colors.cardBorder,
-    borderRightColor: Colors.cardBorder,
+    paddingBottom: 20,
+    minHeight: 100,
+    borderWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: Colors.cardBorder,
   },
   feedbackPanelCorrect: {
     borderTopColor: Colors.success,
@@ -1167,12 +1224,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: Colors.primary,
-    shadowColor: Colors.primary,
+    borderColor: Colors.success,
+    shadowColor: Colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
+  },
+  mascotBubbleWrong: {
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
   },
   mascotAvatarImage: {
     width: '100%',
@@ -1185,6 +1246,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
     marginTop: 8,
+  },
+  cheerBubbleWrong: {
+    backgroundColor: Colors.primary,
   },
   cheerText: {
     fontSize: 12,
