@@ -870,6 +870,636 @@ export const battles: Battle[] = [
       'Atatürk became founder of modern Turkey',
       'Allied forces evacuated after 8 months'
     ]
+  },
+  {
+    id: 'lepanto',
+    title: 'Battle of Lepanto',
+    date: 'October 7, 1571',
+    year: 1571,
+    era: 'medieval',
+    continent: 'europe',
+    region: 'Greece',
+    conflict: 'Ottoman-Venetian Wars',
+    lat: 38.3833,
+    lng: 21.4333,
+    sides: { aName: 'Holy League', bName: 'Ottoman Empire' },
+    commanders: { a: ['Don John of Austria'], b: ['Ali Pasha'] },
+    outcome: 'Holy League victory',
+    shortSummary: 'The largest naval battle in Western history since antiquity. The Holy League crushed Ottoman naval power, ending the myth of Ottoman invincibility at sea.',
+    whyItMatters: [
+      'Ended Ottoman naval dominance in the Mediterranean',
+      'Last major battle fought primarily with galleys',
+      'Cervantes (Don Quixote author) fought here'
+    ],
+    tags: ['naval', 'ottoman', 'galley', 'mediterranean'],
+    difficulty: 3,
+    facts: [
+      'Over 400 galleys participated',
+      'Miguel de Cervantes lost use of his left hand',
+      'Ottoman fleet lost 200 ships',
+      'Holy League freed 12,000 Christian slaves',
+      'Don John was only 24 years old'
+    ]
+  },
+  {
+    id: 'borodino',
+    title: 'Battle of Borodino',
+    date: 'September 7, 1812',
+    year: 1812,
+    era: 'napoleonic',
+    continent: 'europe',
+    region: 'Russia',
+    conflict: 'Napoleonic Wars',
+    lat: 55.5167,
+    lng: 35.8167,
+    sides: { aName: 'French Empire', bName: 'Russian Empire' },
+    commanders: { a: ['Napoleon Bonaparte'], b: ['Mikhail Kutuzov'] },
+    outcome: 'French pyrrhic victory',
+    shortSummary: 'The bloodiest single day of the Napoleonic Wars. Napoleon won the field but failed to destroy the Russian army, leading to his disastrous retreat from Moscow.',
+    whyItMatters: [
+      'Bloodiest single day of Napoleonic Wars',
+      'Russians preserved their army to fight another day',
+      'Led to Napoleon\'s catastrophic Moscow campaign'
+    ],
+    tags: ['napoleon', 'russia', 'artillery', 'pyrrhic'],
+    difficulty: 4,
+    facts: [
+      'Over 70,000 casualties in one day',
+      'Napoleon captured Moscow a week later',
+      'Kutuzov chose to retreat rather than fight again',
+      'Featured in Tolstoy\'s War and Peace',
+      'Napoleon called it his most terrible battle'
+    ]
+  },
+  {
+    id: 'trafalgar',
+    title: 'Battle of Trafalgar',
+    date: 'October 21, 1805',
+    year: 1805,
+    era: 'napoleonic',
+    continent: 'europe',
+    region: 'Spain',
+    conflict: 'Napoleonic Wars',
+    lat: 36.1833,
+    lng: -6.0333,
+    sides: { aName: 'Royal Navy', bName: 'Franco-Spanish Fleet' },
+    commanders: { a: ['Admiral Horatio Nelson'], b: ['Pierre-Charles Villeneuve'] },
+    outcome: 'British victory',
+    shortSummary: 'Britain\'s greatest naval victory secured control of the seas for a century. Admiral Nelson was killed but became Britain\'s greatest hero.',
+    whyItMatters: [
+      'Established British naval supremacy for 100 years',
+      'Ended Napoleon\'s invasion plans for Britain',
+      'Created the legend of Admiral Nelson'
+    ],
+    tags: ['naval', 'nelson', 'britain', 'ships-of-the-line'],
+    difficulty: 3,
+    facts: [
+      'Nelson signaled "England expects every man to do his duty"',
+      'Nelson was shot by a French sniper',
+      'British lost no ships; French-Spanish lost 22',
+      'Trafalgar Square in London commemorates the battle',
+      'Nelson\'s body was preserved in brandy for the voyage home'
+    ]
+  },
+  {
+    id: 'vienna-1683',
+    title: 'Battle of Vienna',
+    date: 'September 12, 1683',
+    year: 1683,
+    era: 'medieval',
+    continent: 'europe',
+    region: 'Austria',
+    conflict: 'Great Turkish War',
+    lat: 48.2083,
+    lng: 16.3731,
+    sides: { aName: 'Holy Roman Empire & Poland', bName: 'Ottoman Empire' },
+    commanders: { a: ['Jan III Sobieski', 'Charles V of Lorraine'], b: ['Kara Mustafa Pasha'] },
+    outcome: 'Christian coalition victory',
+    shortSummary: 'The largest cavalry charge in history broke the Ottoman siege of Vienna, marking the beginning of the Ottoman Empire\'s decline in Europe.',
+    whyItMatters: [
+      'Marked the end of Ottoman expansion into Europe',
+      'Largest cavalry charge in history',
+      'Beginning of Ottoman decline'
+    ],
+    tags: ['siege', 'cavalry', 'ottoman', 'poland'],
+    difficulty: 3,
+    facts: [
+      '18,000 cavalry in the final charge',
+      'Polish Winged Hussars were decisive',
+      'Kara Mustafa was executed for his failure',
+      'Vienna had been besieged for 2 months',
+      'Coffee houses spread across Europe after captured supplies'
+    ]
+  },
+  {
+    id: 'plassey',
+    title: 'Battle of Plassey',
+    date: 'June 23, 1757',
+    year: 1757,
+    era: 'modern',
+    continent: 'asia',
+    region: 'India',
+    conflict: 'British Conquest of India',
+    lat: 23.8000,
+    lng: 88.2500,
+    sides: { aName: 'British East India Company', bName: 'Nawab of Bengal' },
+    commanders: { a: ['Robert Clive'], b: ['Siraj ud-Daulah'] },
+    outcome: 'British victory',
+    shortSummary: 'A small British force defeated the Nawab through conspiracy and bribery, beginning British colonial rule over the Indian subcontinent.',
+    whyItMatters: [
+      'Beginning of British colonial rule in India',
+      'Established the East India Company as a political power',
+      'Changed the course of Indian history'
+    ],
+    tags: ['colonial', 'india', 'conspiracy', 'company'],
+    difficulty: 3,
+    facts: [
+      'Most of the Nawab\'s army was bribed not to fight',
+      'British had only 3,000 troops vs 50,000',
+      'Mir Jafar betrayed his own ruler',
+      'Battle lasted only a few hours',
+      'Clive became fabulously wealthy'
+    ]
+  },
+  {
+    id: 'singapore',
+    title: 'Fall of Singapore',
+    date: 'February 8-15, 1942',
+    year: 1942,
+    era: 'ww2',
+    continent: 'asia',
+    region: 'Singapore',
+    conflict: 'World War II',
+    lat: 1.3521,
+    lng: 103.8198,
+    sides: { aName: 'Imperial Japanese Army', bName: 'British Commonwealth' },
+    commanders: { a: ['Tomoyuki Yamashita'], b: ['Arthur Percival'] },
+    outcome: 'Japanese victory',
+    shortSummary: 'The largest surrender in British military history. Japan captured the "impregnable fortress" in just one week, shocking the world.',
+    whyItMatters: [
+      'Largest British surrender in history',
+      'Shattered the myth of European colonial invincibility',
+      'Japan\'s greatest land victory of WWII'
+    ],
+    tags: ['ww2', 'surrender', 'colonial', 'pacific'],
+    difficulty: 4,
+    facts: [
+      '80,000 British troops surrendered',
+      'Japanese were outnumbered 3 to 1',
+      'Singapore\'s guns faced the sea, not land',
+      'Churchill called it the worst disaster in British history',
+      'Yamashita was called "The Tiger of Malaya"'
+    ]
+  },
+  {
+    id: 'dien-bien-phu',
+    title: 'Battle of Dien Bien Phu',
+    date: 'March 13 - May 7, 1954',
+    year: 1954,
+    era: 'modern',
+    continent: 'asia',
+    region: 'Vietnam',
+    conflict: 'First Indochina War',
+    lat: 21.3833,
+    lng: 103.0167,
+    sides: { aName: 'Viet Minh', bName: 'French Union' },
+    commanders: { a: ['Võ Nguyên Giáp'], b: ['Christian de Castries'] },
+    outcome: 'Viet Minh victory',
+    shortSummary: 'Vietnamese forces besieged and overwhelmed a French garrison in a remote valley, ending French colonial rule in Indochina.',
+    whyItMatters: [
+      'Ended French colonial rule in Vietnam',
+      'Led to American involvement in Vietnam',
+      'Showed that guerrilla forces could defeat a modern army'
+    ],
+    tags: ['colonial', 'siege', 'vietnam', 'independence'],
+    difficulty: 4,
+    facts: [
+      'Viet Minh dragged artillery through mountains by hand',
+      'French were completely surrounded in a valley',
+      'Battle lasted 57 days',
+      '11,000 French soldiers became prisoners',
+      'Geneva Accords divided Vietnam after the battle'
+    ]
+  },
+  {
+    id: 'changping',
+    title: 'Battle of Changping',
+    date: '260 BC',
+    year: -260,
+    era: 'ancient',
+    continent: 'asia',
+    region: 'China',
+    conflict: 'Warring States Period',
+    lat: 35.6833,
+    lng: 112.8500,
+    sides: { aName: 'State of Qin', bName: 'State of Zhao' },
+    commanders: { a: ['Bai Qi'], b: ['Zhao Kuo'] },
+    outcome: 'Qin victory',
+    shortSummary: 'One of the bloodiest battles in ancient history. Qin forces trapped and massacred 400,000 Zhao soldiers, paving the way for China\'s unification.',
+    whyItMatters: [
+      'One of the bloodiest battles in history',
+      'Paved the way for Qin to unify China',
+      'Bai Qi became known as the "Human Butcher"'
+    ],
+    tags: ['ancient', 'china', 'massacre', 'unification'],
+    difficulty: 4,
+    facts: [
+      'Over 400,000 Zhao soldiers reportedly killed',
+      'Prisoners were buried alive after surrendering',
+      'Battle lasted 5 months',
+      'Zhao never recovered from the loss',
+      'Qin unified China 39 years later'
+    ]
+  },
+  {
+    id: 'omdurman',
+    title: 'Battle of Omdurman',
+    date: 'September 2, 1898',
+    year: 1898,
+    era: 'modern',
+    continent: 'africa',
+    region: 'Sudan',
+    conflict: 'Mahdist War',
+    lat: 15.6167,
+    lng: 32.4833,
+    sides: { aName: 'British-Egyptian Army', bName: 'Mahdist Sudan' },
+    commanders: { a: ['Horatio Kitchener'], b: ['Abdullah al-Taashi'] },
+    outcome: 'British victory',
+    shortSummary: 'Modern weapons devastated the Mahdist army in the last cavalry charge in British history. Winston Churchill participated as a young officer.',
+    whyItMatters: [
+      'Demonstrated the devastating power of modern weapons',
+      'Last significant cavalry charge in British history',
+      'Secured British control over Sudan'
+    ],
+    tags: ['colonial', 'sudan', 'cavalry', 'machine-guns'],
+    difficulty: 3,
+    facts: [
+      'Maxim guns mowed down charging warriors',
+      'British lost 47 dead; Mahdists lost 12,000',
+      'Young Winston Churchill rode in the cavalry charge',
+      'Kitchener avenged General Gordon\'s death',
+      'Led to the Fashoda Incident with France'
+    ]
+  },
+  {
+    id: 'carthage-destruction',
+    title: 'Siege of Carthage',
+    date: '149-146 BC',
+    year: -146,
+    era: 'ancient',
+    continent: 'africa',
+    region: 'Tunisia',
+    conflict: 'Third Punic War',
+    lat: 36.8528,
+    lng: 10.3233,
+    sides: { aName: 'Roman Republic', bName: 'Carthage' },
+    commanders: { a: ['Scipio Aemilianus'], b: ['Hasdrubal the Boetharch'] },
+    outcome: 'Roman victory',
+    shortSummary: 'Rome completely destroyed its ancient rival. The city was razed, inhabitants killed or enslaved, and salt allegedly sown into the earth.',
+    whyItMatters: [
+      'Complete destruction of Rome\'s greatest rival',
+      'Established Roman dominance over the Mediterranean',
+      'Became a symbol of total annihilation'
+    ],
+    tags: ['siege', 'rome', 'carthage', 'destruction'],
+    difficulty: 3,
+    facts: [
+      'Siege lasted 3 years',
+      'Survivors were sold into slavery',
+      'City was burned for 17 days',
+      'Scipio allegedly wept over the ruins',
+      'Legend says Romans salted the earth'
+    ]
+  },
+  {
+    id: 'tobruk',
+    title: 'Siege of Tobruk',
+    date: 'April 10 - December 7, 1941',
+    year: 1941,
+    era: 'ww2',
+    continent: 'africa',
+    region: 'Libya',
+    conflict: 'World War II',
+    lat: 32.0833,
+    lng: 23.9333,
+    sides: { aName: 'Allied Forces (Australia, Britain)', bName: 'Axis (Germany, Italy)' },
+    commanders: { a: ['Leslie Morshead'], b: ['Erwin Rommel'] },
+    outcome: 'Allied defensive victory',
+    shortSummary: 'Australian and British forces held the Libyan port against Rommel\'s Afrika Korps for 241 days, becoming known as the "Rats of Tobruk."',
+    whyItMatters: [
+      'First time German forces were stopped in WWII',
+      'Crucial supply port for the North African campaign',
+      'Boosted Allied morale worldwide'
+    ],
+    tags: ['siege', 'desert', 'australia', 'rommel'],
+    difficulty: 4,
+    facts: [
+      'Defenders were called "Rats of Tobruk"',
+      'Siege lasted 241 days',
+      'Rommel could not bypass the fortress',
+      'Supplied by sea despite constant attacks',
+      'Australian 9th Division held longest'
+    ]
+  },
+  {
+    id: 'saratoga',
+    title: 'Battle of Saratoga',
+    date: 'September 19 - October 7, 1777',
+    year: 1777,
+    era: 'modern',
+    continent: 'americas',
+    region: 'United States',
+    conflict: 'American Revolutionary War',
+    lat: 43.0062,
+    lng: -73.6458,
+    sides: { aName: 'Continental Army', bName: 'British Army' },
+    commanders: { a: ['Horatio Gates', 'Benedict Arnold'], b: ['John Burgoyne'] },
+    outcome: 'American victory',
+    shortSummary: 'The turning point of the American Revolution. British surrender convinced France to ally with America, changing the war\'s outcome.',
+    whyItMatters: [
+      'Turning point of the American Revolution',
+      'Convinced France to enter the war on America\'s side',
+      'First major American victory over a British army'
+    ],
+    tags: ['revolution', 'america', 'france', 'turning-point'],
+    difficulty: 3,
+    facts: [
+      'British General Burgoyne surrendered 6,000 troops',
+      'Benedict Arnold was the hero before his treason',
+      'France recognized American independence after',
+      'Burgoyne\'s plan to split colonies failed',
+      'Also called "Battles of Freeman\'s Farm"'
+    ]
+  },
+  {
+    id: 'chacabuco',
+    title: 'Battle of Chacabuco',
+    date: 'February 12, 1817',
+    year: 1817,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Chile',
+    conflict: 'Chilean War of Independence',
+    lat: -32.8333,
+    lng: -70.6000,
+    sides: { aName: 'Army of the Andes', bName: 'Spanish Royalists' },
+    commanders: { a: ['José de San Martín', 'Bernardo O\'Higgins'], b: ['Rafael Maroto'] },
+    outcome: 'Patriot victory',
+    shortSummary: 'San Martín\'s army crossed the Andes and defeated the Spanish, liberating Chile from colonial rule.',
+    whyItMatters: [
+      'Secured Chilean independence',
+      'One of history\'s great mountain crossings',
+      'San Martín became South America\'s liberator'
+    ],
+    tags: ['independence', 'andes', 'chile', 'liberation'],
+    difficulty: 3,
+    facts: [
+      'San Martín crossed the Andes with 5,000 men',
+      'Crossing took 21 days at 12,000 feet',
+      'O\'Higgins led the main attack despite orders',
+      'Battle lasted only 2 hours',
+      'Chile declared independence days later'
+    ]
+  },
+  {
+    id: 'new-orleans',
+    title: 'Battle of New Orleans',
+    date: 'January 8, 1815',
+    year: 1815,
+    era: 'modern',
+    continent: 'americas',
+    region: 'United States',
+    conflict: 'War of 1812',
+    lat: 29.9417,
+    lng: -89.9600,
+    sides: { aName: 'United States', bName: 'British Empire' },
+    commanders: { a: ['Andrew Jackson'], b: ['Edward Pakenham'] },
+    outcome: 'American victory',
+    shortSummary: 'Andrew Jackson\'s ragtag army crushed a British invasion force, making him a national hero. The battle was fought after peace had already been signed.',
+    whyItMatters: [
+      'Made Andrew Jackson a national hero and future president',
+      'Fought after the peace treaty was signed',
+      'Decisive American victory in the War of 1812'
+    ],
+    tags: ['war-of-1812', 'america', 'jackson', 'ironic'],
+    difficulty: 2,
+    facts: [
+      'Peace treaty was signed 2 weeks before the battle',
+      'British lost 2,000 casualties; Americans lost 71',
+      'Jackson\'s army included pirates, slaves, and militiamen',
+      'General Pakenham was killed leading the attack',
+      'Jackson became the 7th US President'
+    ]
+  },
+  {
+    id: 'boyaca',
+    title: 'Battle of Boyacá',
+    date: 'August 7, 1819',
+    year: 1819,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Colombia',
+    conflict: 'Colombian War of Independence',
+    lat: 5.4500,
+    lng: -73.4167,
+    sides: { aName: 'Gran Colombian Patriots', bName: 'Spanish Royalists' },
+    commanders: { a: ['Simón Bolívar', 'Francisco de Paula Santander'], b: ['José María Barreiro'] },
+    outcome: 'Patriot victory',
+    shortSummary: 'Bolívar\'s decisive victory that secured independence for New Granada (Colombia). The Spanish army was destroyed in just two hours.',
+    whyItMatters: [
+      'Secured Colombian independence',
+      'Established Bolívar as "The Liberator"',
+      'Led to the creation of Gran Colombia'
+    ],
+    tags: ['independence', 'bolivar', 'colombia', 'liberation'],
+    difficulty: 3,
+    facts: [
+      'Battle lasted only 2 hours',
+      'Spanish commander was captured',
+      'Bolívar entered Bogotá 3 days later',
+      'Colombia celebrates August 7 as a holiday',
+      'Only 66 patriots were killed'
+    ]
+  },
+  {
+    id: 'rorkes-drift',
+    title: 'Battle of Rorke\'s Drift',
+    date: 'January 22-23, 1879',
+    year: 1879,
+    era: 'modern',
+    continent: 'africa',
+    region: 'South Africa',
+    conflict: 'Anglo-Zulu War',
+    lat: -28.3500,
+    lng: 30.5333,
+    sides: { aName: 'British Army', bName: 'Zulu Kingdom' },
+    commanders: { a: ['John Chard', 'Gonville Bromhead'], b: ['Prince Dabulamanzi kaMpande'] },
+    outcome: 'British victory',
+    shortSummary: 'About 150 British soldiers held a mission station against 4,000 Zulu warriors for 12 hours, earning 11 Victoria Crosses.',
+    whyItMatters: [
+      'Most Victoria Crosses awarded for a single action',
+      'Restored British morale after Isandlwana disaster',
+      'Became legendary symbol of British courage'
+    ],
+    tags: ['colonial', 'zulu', 'defense', 'heroism'],
+    difficulty: 3,
+    facts: [
+      '150 defenders vs 4,000 Zulu warriors',
+      '11 Victoria Crosses were awarded',
+      'Defense lasted 12 hours through the night',
+      'Same day as Isandlwana massacre nearby',
+      'Defenders built barriers from mealie bags'
+    ]
+  },
+  {
+    id: 'iwo-jima',
+    title: 'Battle of Iwo Jima',
+    date: 'February 19 - March 26, 1945',
+    year: 1945,
+    era: 'ww2',
+    continent: 'asia',
+    region: 'Japan',
+    conflict: 'World War II',
+    lat: 24.7833,
+    lng: 141.3167,
+    sides: { aName: 'United States Marines', bName: 'Imperial Japanese Army' },
+    commanders: { a: ['Holland Smith'], b: ['Tadamichi Kuribayashi'] },
+    outcome: 'American victory',
+    shortSummary: 'Marines captured a volcanic island fortress in some of the bloodiest fighting of WWII. The flag raising became an iconic image.',
+    whyItMatters: [
+      'Iconic flag-raising photograph defined WWII imagery',
+      'Provided vital airfields for bombing Japan',
+      'Demonstrated fierce Japanese resistance'
+    ],
+    tags: ['pacific', 'marines', 'island-hopping', 'ww2'],
+    difficulty: 4,
+    facts: [
+      'Iconic flag raising photographed on Mount Suribachi',
+      'Nearly all 21,000 Japanese defenders killed',
+      '6,800 American Marines killed',
+      'Island was 8 square miles of volcanic rock',
+      '27 Medals of Honor awarded'
+    ]
+  },
+  {
+    id: 'marne',
+    title: 'First Battle of the Marne',
+    date: 'September 5-12, 1914',
+    year: 1914,
+    era: 'ww1',
+    continent: 'europe',
+    region: 'France',
+    conflict: 'World War I',
+    lat: 48.9500,
+    lng: 3.3833,
+    sides: { aName: 'France & Britain', bName: 'German Empire' },
+    commanders: { a: ['Joseph Joffre', 'Joseph Gallieni'], b: ['Helmuth von Moltke'] },
+    outcome: 'Allied victory',
+    shortSummary: 'The "Miracle of the Marne" stopped the German advance on Paris and ended hopes for a quick victory, leading to four years of trench warfare.',
+    whyItMatters: [
+      'Saved Paris and prevented quick German victory',
+      'Led to the stalemate of trench warfare',
+      'Taxis rushed troops from Paris to the front'
+    ],
+    tags: ['ww1', 'france', 'trench', 'turning-point'],
+    difficulty: 4,
+    facts: [
+      'Paris taxis rushed 6,000 troops to the front',
+      'Ended the German Schlieffen Plan',
+      'Over 500,000 total casualties',
+      'Gap opened in German lines',
+      'Both sides dug trenches afterward'
+    ]
+  },
+  {
+    id: 'passchendaele',
+    title: 'Battle of Passchendaele',
+    date: 'July 31 - November 10, 1917',
+    year: 1917,
+    era: 'ww1',
+    continent: 'europe',
+    region: 'Belgium',
+    conflict: 'World War I',
+    lat: 50.9000,
+    lng: 3.0167,
+    sides: { aName: 'British Empire & Allies', bName: 'German Empire' },
+    commanders: { a: ['Douglas Haig'], b: ['Crown Prince Rupprecht'] },
+    outcome: 'British pyrrhic victory',
+    shortSummary: 'Three months of fighting in mud and rain gained five miles at the cost of half a million casualties. The name became synonymous with senseless slaughter.',
+    whyItMatters: [
+      'Symbol of the futility of WWI',
+      'Half a million casualties for 5 miles',
+      'Soldiers drowned in shell-crater mud'
+    ],
+    tags: ['ww1', 'mud', 'attrition', 'belgium'],
+    difficulty: 4,
+    facts: [
+      'Men drowned in mud-filled shell craters',
+      'Constant rain turned battlefield to swamp',
+      'Over 500,000 total casualties',
+      'Gained only 5 miles in 3 months',
+      'Also known as Third Battle of Ypres'
+    ]
+  },
+  {
+    id: 'bulge',
+    title: 'Battle of the Bulge',
+    date: 'December 16, 1944 - January 25, 1945',
+    year: 1944,
+    era: 'ww2',
+    continent: 'europe',
+    region: 'Belgium',
+    conflict: 'World War II',
+    lat: 50.1833,
+    lng: 5.9667,
+    sides: { aName: 'Allied Forces', bName: 'Nazi Germany' },
+    commanders: { a: ['Dwight Eisenhower', 'George Patton'], b: ['Gerd von Rundstedt'] },
+    outcome: 'Allied victory',
+    shortSummary: 'Germany\'s last major offensive in the West. The surprise attack created a "bulge" in Allied lines before being crushed, hastening Germany\'s defeat.',
+    whyItMatters: [
+      'Germany\'s last major offensive of WWII',
+      'Largest battle fought by the US Army',
+      'Depleted Germany\'s last reserves'
+    ],
+    tags: ['ww2', 'winter', 'offensive', 'ardennes'],
+    difficulty: 4,
+    facts: [
+      'Largest battle in US Army history',
+      '19,000 American soldiers killed',
+      'Germans used English-speaking infiltrators',
+      'Siege of Bastogne became legendary',
+      'German Commander McAuliffe replied "Nuts!" to surrender demand'
+    ]
+  },
+  {
+    id: 'buena-vista',
+    title: 'Battle of Buena Vista',
+    date: 'February 22-23, 1847',
+    year: 1847,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Mexico',
+    conflict: 'Mexican-American War',
+    lat: 25.0450,
+    lng: -100.9167,
+    sides: { aName: 'United States', bName: 'Mexico' },
+    commanders: { a: ['Zachary Taylor'], b: ['Antonio López de Santa Anna'] },
+    outcome: 'American victory',
+    shortSummary: 'Outnumbered American forces defeated Santa Anna\'s large army, securing northern Mexico and making Zachary Taylor a national hero.',
+    whyItMatters: [
+      'Secured American control of northern Mexico',
+      'Made Zachary Taylor a future president',
+      'Demonstrated American military strength'
+    ],
+    tags: ['mexican-war', 'america', 'taylor', 'underdog'],
+    difficulty: 3,
+    facts: [
+      'Taylor had 4,500 men vs 15,000 Mexicans',
+      'Santa Anna retreated despite winning the first day',
+      'Taylor became 12th US President',
+      'Jefferson Davis (future Confederate president) fought here',
+      'Famous for "A little more grape, Captain Bragg"'
+    ]
   }
 ];
 
