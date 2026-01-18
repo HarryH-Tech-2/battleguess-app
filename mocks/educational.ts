@@ -20,7 +20,7 @@ The Romans adapted this into their famous legionary system, with flexible cohort
 The introduction of gunpowder revolutionized warfare, leading to new formations like the tercio and eventually the linear tactics of the 18th century. Napoleon's mobile warfare emphasized speed and concentration of force.
 
 World War I brought trench warfare and the first tanks, while World War II saw the development of combined arms tactics and blitzkrieg. Modern warfare continues to evolve with technology, from precision-guided weapons to cyber warfare.`,
-    imageUrl: 'https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800',
+    imageUrl: 'https://r2-pub.rork.com/generated-images/0bdecc0d-eaec-4559-8a98-2dacb5845d57.png',
     readTime: 5,
     category: 'Strategy',
   },
@@ -37,7 +37,7 @@ Hannibal Barca nearly brought Rome to its knees, crossing the Alps with elephant
 Napoleon Bonaparte revolutionized warfare with his corps system and ability to concentrate forces at decisive points. His campaigns at Austerlitz and Jena-Auerstedt are still studied today.
 
 Other notable commanders include Julius Caesar, whose conquest of Gaul expanded Roman power; Genghis Khan, who built the largest contiguous empire in history; and more recent figures like Erwin Rommel and Georgy Zhukov.`,
-    imageUrl: 'https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=800',
+    imageUrl: 'https://r2-pub.rork.com/generated-images/3ec73185-0192-4807-be1b-437be5b48ddf.png',
     readTime: 4,
     category: 'Leaders',
   },
@@ -56,7 +56,7 @@ The machine gun transformed WWI into a defensive stalemate, making traditional c
 Aircraft brought warfare into the third dimension. Bombers could strike deep behind enemy lines, while fighters fought for air superiority.
 
 Nuclear weapons changed warfare entirely, making direct conflict between major powers potentially catastrophic. This led to the Cold War doctrine of mutually assured destruction.`,
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
+    imageUrl: 'https://r2-pub.rork.com/generated-images/02d33d06-858a-41d3-baa2-df38f15fa9b6.png',
     readTime: 4,
     category: 'Technology',
   },
@@ -75,7 +75,7 @@ Waterloo (1815) ended Napoleon's ambitions and ushered in a century of relative 
 Stalingrad (1942-43) marked the turning point of WWII in Europe, breaking the Wehrmacht's offensive power and beginning the Soviet march to Berlin.
 
 Each of these battles represented a fork in history's road, where the outcome determined the rise and fall of empires and the spread of ideas and cultures.`,
-    imageUrl: 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800',
+    imageUrl: 'https://r2-pub.rork.com/generated-images/f9d1e7fa-c4d8-410b-b1f2-a53900c99995.png',
     readTime: 5,
     category: 'History',
   },
