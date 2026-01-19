@@ -11,10 +11,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Star, Flame, Trophy, ArrowRight } from 'lucide-react-native';
+import { Star, Flame, ArrowRight } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { getLessonById } from '@/mocks/lessons';
 import { getBattleById } from '@/mocks/battles';
+import { mascots } from '@/mocks/mascots';
 import Colors from '@/constants/colors';
 
 export default function LessonCompleteScreen() {
@@ -27,6 +28,7 @@ export default function LessonCompleteScreen() {
   
   const router = useRouter();
   const { completeLesson, progress } = useUserProgress();
+  const mascot = mascots.find(m => m.id === progress.selectedMascotId);
   
   const lesson = getLessonById(lessonId || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
@@ -102,7 +104,15 @@ export default function LessonCompleteScreen() {
         <View style={styles.content}>
           <Animated.View style={[styles.trophyContainer, { transform: [{ scale: scaleAnim }] }]}>
             <View style={styles.trophy}>
-              <Trophy size={64} color={Colors.secondary} />
+              {mascot ? (
+                <Image
+                  source={{ uri: mascot.avatar }}
+                  style={styles.mascotCheerImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text style={styles.cheerEmoji}>🎉</Text>
+              )}
             </View>
           </Animated.View>
 
@@ -231,6 +241,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 4,
     borderColor: Colors.secondary,
+    overflow: 'hidden',
+  },
+  mascotCheerImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+  },
+  cheerEmoji: {
+    fontSize: 64,
   },
   starsContainer: {
     flexDirection: 'row',

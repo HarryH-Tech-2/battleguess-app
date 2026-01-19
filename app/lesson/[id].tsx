@@ -1042,6 +1042,7 @@ const styles = StyleSheet.create({
     height: 50,
     position: 'relative',
     justifyContent: 'center',
+    paddingHorizontal: 14,
   },
 
   sliderTrack: {

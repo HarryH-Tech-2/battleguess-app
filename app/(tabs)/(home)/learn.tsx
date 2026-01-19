@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, Lock, Check, ChevronRight, BookOpen, Globe, ChevronDown, X } from 'lucide-react-native';
+import { Flame, Heart, Star, Lock, Check, Globe, ChevronDown, X } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings, Continent } from '@/contexts/SettingsContext';
 import { getUnitsByContinent } from '@/mocks/units';
@@ -89,11 +89,6 @@ export default function LearnScreen() {
     router.push(`/lesson/${nextLesson.id}`);
   };
 
-  const handleReviewPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/review');
-  };
-
   const handleContinentSelect = (continent: Continent) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setContinent(continent);
@@ -150,16 +145,7 @@ export default function LearnScreen() {
         <ChevronDown size={20} color={Colors.textSecondary} />
       </TouchableOpacity>
 
-      {progress.completedLessons.length > 0 && (
-        <TouchableOpacity style={styles.reviewBanner} onPress={handleReviewPress} activeOpacity={0.8}>
-          <BookOpen size={24} color={Colors.secondary} />
-          <View style={styles.reviewTextContainer}>
-            <Text style={styles.reviewTitle}>Daily Review Ready</Text>
-            <Text style={styles.reviewSubtitle}>Practice what you have learned</Text>
-          </View>
-          <ChevronRight size={24} color={Colors.secondary} />
-        </TouchableOpacity>
-      )}
+      
 
       <ScrollView 
         style={styles.scrollView}
