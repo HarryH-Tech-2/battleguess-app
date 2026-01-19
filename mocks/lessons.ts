@@ -1,6 +1,6 @@
 import { Lesson } from '@/types';
 
-export const lessons: Lesson[] = [
+const europeLessons: Lesson[] = [
   {
     id: 'lesson-thermopylae',
     title: 'The 300 Spartans',
@@ -610,10 +610,875 @@ export const lessons: Lesson[] = [
       },
     ],
   },
+];
+
+// Asia Lessons
+const asiaLessons: Lesson[] = [
+  {
+    id: 'lesson-redcliffs',
+    title: 'Fire on the Water',
+    unitId: 'ancient-asia',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'redcliffs',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'red-1',
+        type: 'multiChoice',
+        prompt: 'The Battle of Red Cliffs was fought during which period?',
+        feedbackCorrect: 'Red Cliffs was fought in 208 AD during the Three Kingdoms period.',
+        feedbackWrong: 'This battle occurred during China\'s Three Kingdoms period.',
+        data: {
+          options: ['Three Kingdoms', 'Han Dynasty', 'Tang Dynasty', 'Qin Dynasty'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'red-2',
+        type: 'twoTruths',
+        prompt: 'Find the FALSE statement about Red Cliffs:',
+        feedbackCorrect: 'Cao Cao lost the battle, he did not win it.',
+        feedbackWrong: 'Cao Cao\'s forces were defeated by the allied southern forces.',
+        data: {
+          statements: [
+            { text: 'Fire ships were used to destroy Cao Cao\'s fleet', isLie: false },
+            { text: 'The battle was fought on the Yangtze River', isLie: false },
+            { text: 'Cao Cao won a decisive victory', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'red-3',
+        type: 'mapTap',
+        prompt: 'Where did the Battle of Red Cliffs take place?',
+        feedbackCorrect: 'Correct! Red Cliffs is on the Yangtze River in central China.',
+        feedbackWrong: 'The battle was fought on the Yangtze River in China.',
+        data: {
+          regions: [
+            { id: 'china', name: 'China', lat: 30.37, lng: 113.90 },
+            { id: 'japan', name: 'Japan', lat: 35.68, lng: 139.69 },
+            { id: 'korea', name: 'Korea', lat: 37.56, lng: 126.97 },
+            { id: 'vietnam', name: 'Vietnam', lat: 21.02, lng: 105.85 },
+          ],
+          correctRegionId: 'china',
+        },
+      },
+      {
+        id: 'red-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Red Cliffs',
+          narrative: 'In 208 AD, the warlord Cao Cao sailed south with a massive fleet to conquer all of China. The allied forces of Liu Bei and Sun Quan used fire ships to destroy his navy, ensuring China would remain divided into three kingdoms for decades.',
+          battleId: 'redcliffs',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-gaugamela',
+    title: 'Alexander\'s Greatest Victory',
+    unitId: 'ancient-asia',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'gaugamela',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'gaug-1',
+        type: 'multiChoice',
+        prompt: 'Who did Alexander the Great defeat at Gaugamela?',
+        feedbackCorrect: 'Alexander defeated the Persian King Darius III at Gaugamela.',
+        feedbackWrong: 'Darius III was the Persian king defeated by Alexander.',
+        data: {
+          options: ['Darius III', 'Xerxes', 'Cyrus', 'Artaxerxes'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'gaug-2',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Gaugamela fought?',
+        feedbackCorrect: 'Correct! Gaugamela was fought in 331 BC.',
+        feedbackWrong: 'The battle took place in 331 BC.',
+        data: {
+          correctYear: -331,
+          minYear: -400,
+          maxYear: -200,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'gaug-3',
+        type: 'orderEvents',
+        prompt: 'Order Alexander\'s campaign events:',
+        feedbackCorrect: 'Alexander conquered the Persian Empire systematically.',
+        feedbackWrong: 'Alexander moved from Granicus to Issus to Gaugamela.',
+        data: {
+          events: [
+            { id: 'e1', text: 'Victory at Granicus', order: 1 },
+            { id: 'e2', text: 'Victory at Issus', order: 2 },
+            { id: 'e3', text: 'Conquest of Egypt', order: 3 },
+            { id: 'e4', text: 'Victory at Gaugamela', order: 4 },
+          ],
+        },
+      },
+      {
+        id: 'gaug-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Gaugamela',
+          narrative: 'On October 1, 331 BC, Alexander\'s 47,000 men faced a Persian army of over 100,000. His brilliant cavalry charge broke through to Darius himself, causing the Persian king to flee. This victory ended the Achaemenid Empire.',
+          battleId: 'gaugamela',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-kalka',
+    title: 'The Mongol Storm',
+    unitId: 'mongol-conquests',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'kalka',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'kalka-1',
+        type: 'multiChoice',
+        prompt: 'Who commanded the Mongol forces at the Kalka River?',
+        feedbackCorrect: 'Subutai and Jebe led the Mongol reconnaissance force.',
+        feedbackWrong: 'The great generals Subutai and Jebe commanded the Mongols.',
+        data: {
+          options: ['Subutai and Jebe', 'Genghis Khan', 'Ogedei Khan', 'Kublai Khan'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'kalka-2',
+        type: 'twoTruths',
+        prompt: 'Which statement about Kalka River is FALSE?',
+        feedbackCorrect: 'The Mongols were outnumbered, not the other way around.',
+        feedbackWrong: 'The Mongols won despite being outnumbered.',
+        data: {
+          statements: [
+            { text: 'Russian princes were defeated', isLie: false },
+            { text: 'It was a Mongol scouting expedition', isLie: false },
+            { text: 'The Mongols outnumbered their enemies', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'kalka-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Kalka River?',
+        feedbackCorrect: 'The battle was fought in 1223.',
+        feedbackWrong: 'Kalka River was fought in 1223.',
+        data: {
+          correctYear: 1223,
+          minYear: 1150,
+          maxYear: 1300,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'kalka-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Kalka River',
+          narrative: 'In 1223, a Mongol scouting force of 20,000 crushed a combined Russian-Cuman army of 80,000. The Mongol feigned retreat drew the enemy into a devastating ambush. This was Europe\'s first taste of Mongol warfare.',
+          battleId: 'kalka',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-baghdad',
+    title: 'Fall of the Caliphate',
+    unitId: 'mongol-conquests',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'baghdad',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'bagh-1',
+        type: 'multiChoice',
+        prompt: 'Which Mongol leader destroyed Baghdad?',
+        feedbackCorrect: 'Hulagu Khan, grandson of Genghis, sacked Baghdad.',
+        feedbackWrong: 'Hulagu Khan led the Mongol destruction of Baghdad.',
+        data: {
+          options: ['Hulagu Khan', 'Genghis Khan', 'Kublai Khan', 'Batu Khan'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'bagh-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'The Abbasid Caliphate ended with Baghdad\'s fall.',
+        feedbackWrong: 'Baghdad was the capital of the Abbasid Caliphate.',
+        data: {
+          sentence: 'The fall of Baghdad ended the _____ Caliphate.',
+          blankWord: 'Abbasid',
+          options: ['Abbasid', 'Umayyad', 'Fatimid', 'Ottoman'],
+        },
+      },
+      {
+        id: 'bagh-3',
+        type: 'timelineSlider',
+        prompt: 'When did the Mongols sack Baghdad?',
+        feedbackCorrect: 'Baghdad fell in 1258.',
+        feedbackWrong: 'The siege of Baghdad was in 1258.',
+        data: {
+          correctYear: 1258,
+          minYear: 1200,
+          maxYear: 1350,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'bagh-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Siege of Baghdad',
+          narrative: 'In 1258, Hulagu Khan\'s Mongol army sacked Baghdad, the jewel of Islamic civilization. The caliph was executed, the legendary libraries burned, and over a million people killed. It marked the end of Islam\'s Golden Age.',
+          battleId: 'baghdad',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-sekigahara',
+    title: 'Birth of the Shogunate',
+    unitId: 'samurai-era',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'sekigahara',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'seki-1',
+        type: 'multiChoice',
+        prompt: 'Who won the Battle of Sekigahara?',
+        feedbackCorrect: 'Tokugawa Ieyasu\'s victory led to 260 years of Tokugawa rule.',
+        feedbackWrong: 'Tokugawa Ieyasu won and became shogun.',
+        data: {
+          options: ['Tokugawa Ieyasu', 'Ishida Mitsunari', 'Toyotomi Hideyoshi', 'Oda Nobunaga'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'seki-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'The battle lasted only 6 hours, not several days.',
+        feedbackWrong: 'Sekigahara was decided in a single day.',
+        data: {
+          statements: [
+            { text: 'Over 160,000 samurai fought', isLie: false },
+            { text: 'Betrayals decided the outcome', isLie: false },
+            { text: 'The battle lasted several days', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'seki-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Sekigahara?',
+        feedbackCorrect: 'Sekigahara was fought on October 21, 1600.',
+        feedbackWrong: 'The battle occurred in 1600.',
+        data: {
+          correctYear: 1600,
+          minYear: 1500,
+          maxYear: 1700,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'seki-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Sekigahara',
+          narrative: 'October 21, 1600 - the battle that unified Japan. Tokugawa Ieyasu\'s Eastern Army defeated the Western coalition when key generals defected mid-battle. This victory established the Tokugawa Shogunate, bringing 260 years of peace.',
+          battleId: 'sekigahara',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-tsushima',
+    title: 'Japan\'s Naval Triumph',
+    unitId: 'samurai-era',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'tsushima',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'tsush-1',
+        type: 'multiChoice',
+        prompt: 'Which fleet did Japan destroy at Tsushima?',
+        feedbackCorrect: 'Japan annihilated the Russian Baltic Fleet.',
+        feedbackWrong: 'The Russian fleet was destroyed at Tsushima.',
+        data: {
+          options: ['Russian', 'Chinese', 'British', 'French'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'tsush-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their navies:',
+        feedbackCorrect: 'Togo led Japan, Rozhestvensky led Russia.',
+        feedbackWrong: 'Admiral Togo commanded the Japanese fleet.',
+        data: {
+          pairs: [
+            { left: 'Togo', right: 'Japan' },
+            { left: 'Rozhestvensky', right: 'Russia' },
+          ],
+        },
+      },
+      {
+        id: 'tsush-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Tsushima?',
+        feedbackCorrect: 'Tsushima was fought in 1905.',
+        feedbackWrong: 'The battle occurred in 1905.',
+        data: {
+          correctYear: 1905,
+          minYear: 1850,
+          maxYear: 1920,
+          tolerance: 5,
+        },
+      },
+      {
+        id: 'tsush-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Tsushima',
+          narrative: 'May 27-28, 1905 - Admiral Togo\'s fleet destroyed the Russian Baltic Fleet, which had sailed 18,000 miles to reach the battle. Japan sank 21 ships while losing only 3 torpedo boats, shocking the world.',
+          battleId: 'tsushima',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-midway',
+    title: 'Turning the Tide',
+    unitId: 'pacific-theater',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'midway',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'mid-1',
+        type: 'multiChoice',
+        prompt: 'How many Japanese carriers were sunk at Midway?',
+        feedbackCorrect: 'Four Japanese carriers were sunk in the battle.',
+        feedbackWrong: 'Japan lost 4 carriers at Midway.',
+        data: {
+          options: ['4', '2', '3', '6'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'mid-2',
+        type: 'twoTruths',
+        prompt: 'Which statement about Midway is FALSE?',
+        feedbackCorrect: 'American codebreakers knew Japanese plans.',
+        feedbackWrong: 'The US knew the attack was coming thanks to codebreaking.',
+        data: {
+          statements: [
+            { text: 'US codebreakers predicted the attack', isLie: false },
+            { text: 'The battle lasted 3 days', isLie: false },
+            { text: 'Japan achieved surprise', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'mid-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Midway?',
+        feedbackCorrect: 'Midway was fought in June 1942.',
+        feedbackWrong: 'The battle occurred in 1942.',
+        data: {
+          correctYear: 1942,
+          minYear: 1940,
+          maxYear: 1945,
+          tolerance: 0,
+        },
+      },
+      {
+        id: 'mid-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Midway',
+          narrative: 'June 4-7, 1942 - American dive bombers caught Japanese carriers at their most vulnerable, destroying four in minutes. This devastating blow ended Japan\'s Pacific offensive and turned the tide of the war.',
+          battleId: 'midway',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-iwo-jima',
+    title: 'Raising the Flag',
+    unitId: 'pacific-theater',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'iwojima',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'iwo-1',
+        type: 'multiChoice',
+        prompt: 'What made Iwo Jima strategically important?',
+        feedbackCorrect: 'Iwo Jima\'s airfields could support B-29 bomber operations.',
+        feedbackWrong: 'The island provided airfields for attacking Japan.',
+        data: {
+          options: ['Airfields for bombers', 'Naval base', 'Oil reserves', 'Radar station'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'iwo-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'The iconic photo shows Marines raising the flag on Mount Suribachi.',
+        feedbackWrong: 'The famous flag raising was on Mount Suribachi.',
+        data: {
+          sentence: 'The iconic flag raising photo was taken on Mount _____.',
+          blankWord: 'Suribachi',
+          options: ['Suribachi', 'Fuji', 'Olympus', 'Vesuvius'],
+        },
+      },
+      {
+        id: 'iwo-3',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'The battle lasted 36 days, not two weeks.',
+        feedbackWrong: 'Iwo Jima was a brutal 36-day battle.',
+        data: {
+          statements: [
+            { text: 'Nearly all Japanese defenders died', isLie: false },
+            { text: 'Marines used flamethrowers against bunkers', isLie: false },
+            { text: 'The battle lasted only two weeks', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'iwo-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Iwo Jima',
+          narrative: 'February-March 1945 - Marines fought for 36 days to capture this volcanic island. The iconic flag raising on Mount Suribachi became a symbol of American determination. Of 21,000 Japanese defenders, only 216 survived.',
+          battleId: 'iwojima',
+        },
+      },
+    ],
+  },
+];
+
+// Africa Lessons
+const africaLessons: Lesson[] = [
+  {
+    id: 'lesson-cannae',
+    title: 'Hannibal\'s Masterpiece',
+    unitId: 'ancient-africa',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'cannae',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'can-1',
+        type: 'multiChoice',
+        prompt: 'What tactical maneuver did Hannibal use at Cannae?',
+        feedbackCorrect: 'The double envelopment at Cannae is still studied today.',
+        feedbackWrong: 'Hannibal\'s double envelopment trapped the Roman army.',
+        data: {
+          options: ['Double envelopment', 'Cavalry charge', 'Naval blockade', 'Siege warfare'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'can-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'Rome lost 50,000-70,000 men, a catastrophic defeat.',
+        feedbackWrong: 'Cannae was one of Rome\'s worst defeats.',
+        data: {
+          statements: [
+            { text: 'Over 50,000 Romans died', isLie: false },
+            { text: 'Hannibal used his cavalry brilliantly', isLie: false },
+            { text: 'Rome won this battle', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'can-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Cannae?',
+        feedbackCorrect: 'Cannae was fought in 216 BC.',
+        feedbackWrong: 'The battle occurred in 216 BC.',
+        data: {
+          correctYear: -216,
+          minYear: -300,
+          maxYear: -100,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'can-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Cannae',
+          narrative: 'August 2, 216 BC - Hannibal\'s Carthaginian army surrounded and annihilated a Roman force of 80,000. The double envelopment killed up to 70,000 Romans in a single day, making it one of history\'s deadliest battles.',
+          battleId: 'cannae',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-zama',
+    title: 'Rome\'s Revenge',
+    unitId: 'ancient-africa',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'zama',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'zama-1',
+        type: 'multiChoice',
+        prompt: 'Who led Rome to victory at Zama?',
+        feedbackCorrect: 'Scipio Africanus earned his name by defeating Hannibal.',
+        feedbackWrong: 'Scipio Africanus defeated Hannibal at Zama.',
+        data: {
+          options: ['Scipio Africanus', 'Julius Caesar', 'Pompey', 'Marius'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'zama-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their sides:',
+        feedbackCorrect: 'Scipio led Rome, Hannibal led Carthage.',
+        feedbackWrong: 'Scipio commanded Rome, Hannibal commanded Carthage.',
+        data: {
+          pairs: [
+            { left: 'Scipio', right: 'Rome' },
+            { left: 'Hannibal', right: 'Carthage' },
+          ],
+        },
+      },
+      {
+        id: 'zama-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Zama?',
+        feedbackCorrect: 'Zama was fought in 202 BC.',
+        feedbackWrong: 'The battle occurred in 202 BC.',
+        data: {
+          correctYear: -202,
+          minYear: -300,
+          maxYear: -100,
+          tolerance: 10,
+        },
+      },
+      {
+        id: 'zama-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Zama',
+          narrative: 'October 19, 202 BC - Scipio finally defeated the legendary Hannibal on African soil. Using tactics learned from his enemy, Scipio neutralized Hannibal\'s elephants and routed his army, ending the Second Punic War.',
+          battleId: 'zama',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-isandlwana',
+    title: 'Zulu Victory',
+    unitId: 'colonial-resistance',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'isandlwana',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'isan-1',
+        type: 'multiChoice',
+        prompt: 'Who won the Battle of Isandlwana?',
+        feedbackCorrect: 'The Zulu Kingdom achieved a stunning victory over the British.',
+        feedbackWrong: 'The Zulus won this battle against the British.',
+        data: {
+          options: ['Zulu Kingdom', 'British Empire', 'Boers', 'Portuguese'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'isan-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'The British had modern rifles but were overwhelmed.',
+        feedbackWrong: 'The Zulus won despite facing modern weapons.',
+        data: {
+          statements: [
+            { text: '1,300 British soldiers were killed', isLie: false },
+            { text: 'The Zulus used the "horns of the buffalo" formation', isLie: false },
+            { text: 'The British won easily', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'isan-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Isandlwana?',
+        feedbackCorrect: 'Isandlwana was fought in January 1879.',
+        feedbackWrong: 'The battle occurred in 1879.',
+        data: {
+          correctYear: 1879,
+          minYear: 1850,
+          maxYear: 1920,
+          tolerance: 5,
+        },
+      },
+      {
+        id: 'isan-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Isandlwana',
+          narrative: 'January 22, 1879 - 20,000 Zulu warriors overwhelmed 1,800 British troops in one of the worst defeats in British colonial history. The Zulus\'  "horns of the buffalo" envelopment tactics proved devastating.',
+          battleId: 'isandlwana',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-adwa',
+    title: 'African Victory',
+    unitId: 'colonial-resistance',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'adwa',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'adwa-1',
+        type: 'multiChoice',
+        prompt: 'Which African nation defeated Italy at Adwa?',
+        feedbackCorrect: 'Ethiopia\'s victory preserved its independence.',
+        feedbackWrong: 'Ethiopia defeated the Italian invasion.',
+        data: {
+          options: ['Ethiopia', 'Egypt', 'Sudan', 'Morocco'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'adwa-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'Emperor Menelik II led Ethiopia to victory.',
+        feedbackWrong: 'Menelik II was the Ethiopian emperor.',
+        data: {
+          sentence: 'Emperor _____ led Ethiopia to victory at Adwa.',
+          blankWord: 'Menelik II',
+          options: ['Menelik II', 'Haile Selassie', 'Tewodros II', 'Yohannes IV'],
+        },
+      },
+      {
+        id: 'adwa-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Adwa?',
+        feedbackCorrect: 'Adwa was fought in 1896.',
+        feedbackWrong: 'The battle occurred in 1896.',
+        data: {
+          correctYear: 1896,
+          minYear: 1850,
+          maxYear: 1920,
+          tolerance: 5,
+        },
+      },
+      {
+        id: 'adwa-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Adwa',
+          narrative: 'March 1, 1896 - Emperor Menelik II\'s 100,000 Ethiopian troops crushed an Italian force of 17,000. This stunning victory made Ethiopia the only African nation to successfully resist European colonization.',
+          battleId: 'adwa',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-el-alamein',
+    title: 'Desert Turning Point',
+    unitId: 'north-africa-ww2',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'el-alamein',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'alam-1',
+        type: 'multiChoice',
+        prompt: 'Who commanded the British at El Alamein?',
+        feedbackCorrect: 'Montgomery led the Eighth Army to victory.',
+        feedbackWrong: 'Bernard Montgomery commanded the British forces.',
+        data: {
+          options: ['Montgomery', 'Patton', 'Eisenhower', 'Alexander'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'alam-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their sides:',
+        feedbackCorrect: 'Montgomery led Britain, Rommel led Germany.',
+        feedbackWrong: 'Montgomery vs Rommel - the Desert War\'s key rivalry.',
+        data: {
+          pairs: [
+            { left: 'Montgomery', right: 'Britain' },
+            { left: 'Rommel', right: 'Germany' },
+          ],
+        },
+      },
+      {
+        id: 'alam-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Second Battle of El Alamein?',
+        feedbackCorrect: 'The battle was fought in October-November 1942.',
+        feedbackWrong: 'El Alamein was in 1942.',
+        data: {
+          correctYear: 1942,
+          minYear: 1940,
+          maxYear: 1945,
+          tolerance: 0,
+        },
+      },
+      {
+        id: 'alam-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of El Alamein',
+          narrative: 'October-November 1942 - Montgomery\'s Eighth Army broke Rommel\'s Afrika Korps in the Egyptian desert. Churchill said: "Before Alamein we never had a victory. After Alamein we never had a defeat."',
+          battleId: 'el-alamein',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-tobruk',
+    title: 'Siege in the Desert',
+    unitId: 'north-africa-ww2',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'tobruk',
+    xpReward: 30,
+    steps: [
+      {
+        id: 'tob-1',
+        type: 'multiChoice',
+        prompt: 'Who were the "Rats of Tobruk"?',
+        feedbackCorrect: 'Australian troops defended Tobruk for 241 days.',
+        feedbackWrong: 'The Australian defenders earned this nickname.',
+        data: {
+          options: ['Australian defenders', 'German attackers', 'Italian troops', 'British navy'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'tob-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'Tobruk was besieged, not captured quickly.',
+        feedbackWrong: 'The siege of Tobruk lasted for months.',
+        data: {
+          statements: [
+            { text: 'The siege lasted 241 days', isLie: false },
+            { text: 'Rommel tried to capture the port', isLie: false },
+            { text: 'The city fell within a week', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'tob-3',
+        type: 'mapTap',
+        prompt: 'Where is Tobruk located?',
+        feedbackCorrect: 'Correct! Tobruk is in Libya.',
+        feedbackWrong: 'Tobruk is a port city in Libya.',
+        data: {
+          regions: [
+            { id: 'libya', name: 'Libya', lat: 32.08, lng: 23.95 },
+            { id: 'egypt', name: 'Egypt', lat: 26.82, lng: 30.80 },
+            { id: 'tunisia', name: 'Tunisia', lat: 36.80, lng: 10.18 },
+            { id: 'algeria', name: 'Algeria', lat: 36.73, lng: 3.08 },
+          ],
+          correctRegionId: 'libya',
+        },
+      },
+      {
+        id: 'tob-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Siege of Tobruk',
+          narrative: 'April-December 1941 - Australian, British, and Polish troops held Tobruk against Rommel\'s Afrika Korps for 241 days. The "Rats of Tobruk" became symbols of Allied resistance in the desert war.',
+          battleId: 'tobruk',
+        },
+      },
+    ],
+  },
+];
+
+// Americas Lessons
+const americasLessons: Lesson[] = [
   {
     id: 'lesson-gettysburg',
     title: 'The Turning Point',
-    unitId: 'american-conflicts',
+    unitId: 'american-civil-war',
     orderIndex: 0,
     estimatedMinutes: 4,
     battleId: 'gettysburg',
@@ -671,12 +1536,323 @@ export const lessons: Lesson[] = [
       },
     ],
   },
+  {
+    id: 'lesson-yorktown',
+    title: 'Birth of a Nation',
+    unitId: 'american-revolution',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'yorktown',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'york-1',
+        type: 'multiChoice',
+        prompt: 'Who surrendered at Yorktown?',
+        feedbackCorrect: 'Cornwallis\'s surrender effectively ended the war.',
+        feedbackWrong: 'British General Cornwallis surrendered at Yorktown.',
+        data: {
+          options: ['Cornwallis', 'Washington', 'Clinton', 'Howe'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'york-2',
+        type: 'matchPairs',
+        prompt: 'Match the commanders to their nations:',
+        feedbackCorrect: 'Washington and Rochambeau allied against Britain.',
+        feedbackWrong: 'America and France fought together at Yorktown.',
+        data: {
+          pairs: [
+            { left: 'Washington', right: 'America' },
+            { left: 'Rochambeau', right: 'France' },
+            { left: 'Cornwallis', right: 'Britain' },
+          ],
+        },
+      },
+      {
+        id: 'york-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Siege of Yorktown?',
+        feedbackCorrect: 'Yorktown was in 1781.',
+        feedbackWrong: 'The siege occurred in 1781.',
+        data: {
+          correctYear: 1781,
+          minYear: 1770,
+          maxYear: 1800,
+          tolerance: 3,
+        },
+      },
+      {
+        id: 'york-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Siege of Yorktown',
+          narrative: 'October 1781 - Washington and Rochambeau trapped Cornwallis at Yorktown while the French navy blocked escape by sea. The British surrender marked the last major battle of the American Revolution.',
+          battleId: 'yorktown',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-saratoga',
+    title: 'The Turning Point',
+    unitId: 'american-revolution',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'saratoga',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'sara-1',
+        type: 'multiChoice',
+        prompt: 'Why was Saratoga a turning point?',
+        feedbackCorrect: 'Saratoga convinced France to ally with America.',
+        feedbackWrong: 'The victory brought France into the war.',
+        data: {
+          options: ['France joined the war', 'War ended', 'Washington captured', 'Britain surrendered'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'sara-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'General Burgoyne surrendered his entire army.',
+        feedbackWrong: 'Burgoyne commanded the British at Saratoga.',
+        data: {
+          sentence: 'British General _____ surrendered at Saratoga.',
+          blankWord: 'Burgoyne',
+          options: ['Burgoyne', 'Cornwallis', 'Howe', 'Clinton'],
+        },
+      },
+      {
+        id: 'sara-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Saratoga?',
+        feedbackCorrect: 'Saratoga was fought in 1777.',
+        feedbackWrong: 'The battle occurred in 1777.',
+        data: {
+          correctYear: 1777,
+          minYear: 1770,
+          maxYear: 1790,
+          tolerance: 2,
+        },
+      },
+      {
+        id: 'sara-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Saratoga',
+          narrative: 'September-October 1777 - American forces surrounded and captured an entire British army. This stunning victory convinced France to recognize American independence and enter the war.',
+          battleId: 'saratoga',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-antietam',
+    title: 'America\'s Bloodiest Day',
+    unitId: 'american-civil-war',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'antietam',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'anti-1',
+        type: 'multiChoice',
+        prompt: 'What proclamation followed Antietam?',
+        feedbackCorrect: 'Lincoln issued the Emancipation Proclamation after Antietam.',
+        feedbackWrong: 'The Emancipation Proclamation followed this battle.',
+        data: {
+          options: ['Emancipation Proclamation', 'Declaration of War', 'Peace Treaty', 'Constitution'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'anti-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'It was tactically a draw, but a strategic Union victory.',
+        feedbackWrong: 'Antietam was the bloodiest single day in American military history.',
+        data: {
+          statements: [
+            { text: '23,000 casualties in one day', isLie: false },
+            { text: 'Lee invaded the North', isLie: false },
+            { text: 'The Confederacy won decisively', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'anti-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Antietam?',
+        feedbackCorrect: 'Antietam was fought on September 17, 1862.',
+        feedbackWrong: 'The battle occurred in 1862.',
+        data: {
+          correctYear: 1862,
+          minYear: 1860,
+          maxYear: 1866,
+          tolerance: 1,
+        },
+      },
+      {
+        id: 'anti-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Antietam',
+          narrative: 'September 17, 1862 - The bloodiest single day in American history, with 23,000 casualties. McClellan stopped Lee\'s invasion, giving Lincoln the victory he needed to issue the Emancipation Proclamation.',
+          battleId: 'antietam',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-ayacucho',
+    title: 'Liberation of South America',
+    unitId: 'latin-american-wars',
+    orderIndex: 0,
+    estimatedMinutes: 4,
+    battleId: 'ayacucho',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'aya-1',
+        type: 'multiChoice',
+        prompt: 'Which empire did Ayacucho help end in South America?',
+        feedbackCorrect: 'Ayacucho ended Spanish colonial rule in South America.',
+        feedbackWrong: 'This battle ended Spanish control of South America.',
+        data: {
+          options: ['Spanish', 'Portuguese', 'British', 'French'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'aya-2',
+        type: 'fillBlank',
+        prompt: 'Complete the sentence:',
+        feedbackCorrect: 'Antonio José de Sucre led the independence forces.',
+        feedbackWrong: 'Sucre commanded at Ayacucho.',
+        data: {
+          sentence: 'General _____ led the independence forces at Ayacucho.',
+          blankWord: 'Sucre',
+          options: ['Sucre', 'Bolivar', 'San Martin', 'O\'Higgins'],
+        },
+      },
+      {
+        id: 'aya-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of Ayacucho?',
+        feedbackCorrect: 'Ayacucho was fought in 1824.',
+        feedbackWrong: 'The battle occurred in 1824.',
+        data: {
+          correctYear: 1824,
+          minYear: 1800,
+          maxYear: 1850,
+          tolerance: 5,
+        },
+      },
+      {
+        id: 'aya-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of Ayacucho',
+          narrative: 'December 9, 1824 - In the Peruvian highlands, Sucre\'s army crushed the last major Spanish force in South America. This victory secured independence for Peru and ended 300 years of Spanish rule.',
+          battleId: 'ayacucho',
+        },
+      },
+    ],
+  },
+  {
+    id: 'lesson-alamo',
+    title: 'Remember the Alamo',
+    unitId: 'latin-american-wars',
+    orderIndex: 1,
+    estimatedMinutes: 4,
+    battleId: 'alamo',
+    xpReward: 25,
+    steps: [
+      {
+        id: 'ala-1',
+        type: 'multiChoice',
+        prompt: 'What were the Texans fighting for at the Alamo?',
+        feedbackCorrect: 'The defenders fought for Texas independence from Mexico.',
+        feedbackWrong: 'The Alamo was part of the Texas Revolution.',
+        data: {
+          options: ['Independence from Mexico', 'Independence from Spain', 'Independence from Britain', 'Independence from France'],
+          correctIndex: 0,
+        },
+      },
+      {
+        id: 'ala-2',
+        type: 'twoTruths',
+        prompt: 'Which statement is FALSE?',
+        feedbackCorrect: 'All the Alamo defenders were killed.',
+        feedbackWrong: 'The Mexican army killed all defenders.',
+        data: {
+          statements: [
+            { text: 'Davy Crockett was among the defenders', isLie: false },
+            { text: 'The siege lasted 13 days', isLie: false },
+            { text: 'Most defenders escaped', isLie: true },
+          ],
+        },
+      },
+      {
+        id: 'ala-3',
+        type: 'timelineSlider',
+        prompt: 'When was the Battle of the Alamo?',
+        feedbackCorrect: 'The Alamo fell in 1836.',
+        feedbackWrong: 'The battle occurred in 1836.',
+        data: {
+          correctYear: 1836,
+          minYear: 1820,
+          maxYear: 1860,
+          tolerance: 3,
+        },
+      },
+      {
+        id: 'ala-4',
+        type: 'storyCard',
+        prompt: '',
+        feedbackCorrect: '',
+        feedbackWrong: '',
+        data: {
+          title: 'Battle of the Alamo',
+          narrative: 'February-March 1836 - Around 200 Texan defenders held an old mission against Santa Anna\'s Mexican army for 13 days. Though all defenders died, "Remember the Alamo!" became the rallying cry that won Texas independence.',
+          battleId: 'alamo',
+        },
+      },
+    ],
+  },
 ];
 
+// Combine all lessons
+const allLessons: Lesson[] = [
+  ...europeLessons,
+  ...asiaLessons,
+  ...africaLessons,
+  ...americasLessons,
+];
+
+export { allLessons as lessons, asiaLessons, africaLessons, americasLessons };
+
 export const getLessonById = (id: string): Lesson | undefined => {
-  return lessons.find(l => l.id === id);
+  return allLessons.find(l => l.id === id);
 };
 
 export const getLessonsByUnitId = (unitId: string): Lesson[] => {
-  return lessons.filter(l => l.unitId === unitId).sort((a, b) => a.orderIndex - b.orderIndex);
+  return allLessons.filter(l => l.unitId === unitId).sort((a, b) => a.orderIndex - b.orderIndex);
 };

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -29,6 +29,72 @@ import { DailyGoal } from '@/types';
 import Colors from '@/constants/colors';
 
 const DAILY_GOAL_OPTIONS: DailyGoal[] = [5, 10, 15];
+
+const FormattedContent = ({ content }: { content: string }) => {
+  const elements = useMemo(() => {
+    const lines = content.split('\n');
+    const result: { type: 'heading' | 'paragraph' | 'bullet'; text: string }[] = [];
+    let currentParagraph = '';
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      
+      if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+        if (currentParagraph) {
+          result.push({ type: 'paragraph', text: currentParagraph.trim() });
+          currentParagraph = '';
+        }
+        result.push({ type: 'heading', text: trimmedLine.replace(/\*\*/g, '') });
+      } else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) {
+        if (currentParagraph) {
+          result.push({ type: 'paragraph', text: currentParagraph.trim() });
+          currentParagraph = '';
+        }
+        result.push({ type: 'bullet', text: trimmedLine.substring(2) });
+      } else if (trimmedLine === '') {
+        if (currentParagraph) {
+          result.push({ type: 'paragraph', text: currentParagraph.trim() });
+          currentParagraph = '';
+        }
+      } else {
+        currentParagraph += (currentParagraph ? ' ' : '') + trimmedLine;
+      }
+    });
+
+    if (currentParagraph) {
+      result.push({ type: 'paragraph', text: currentParagraph.trim() });
+    }
+
+    return result;
+  }, [content]);
+
+  return (
+    <View>
+      {elements.map((element, index) => {
+        if (element.type === 'heading') {
+          return (
+            <Text key={index} style={styles.articleHeading}>
+              {element.text}
+            </Text>
+          );
+        } else if (element.type === 'bullet') {
+          return (
+            <View key={index} style={styles.bulletContainer}>
+              <Text style={styles.bulletPoint}>•</Text>
+              <Text style={styles.bulletText}>{element.text}</Text>
+            </View>
+          );
+        } else {
+          return (
+            <Text key={index} style={styles.articleParagraph}>
+              {element.text}
+            </Text>
+          );
+        }
+      })}
+    </View>
+  );
+};
 
 export default function PlayerProfileScreen() {
   const { progress, updateProgress } = useUserProgress();
@@ -234,7 +300,7 @@ export default function PlayerProfileScreen() {
                     </View>
                   </View>
                   <Text style={styles.articleModalHeading}>{selectedArticle.title}</Text>
-                  <Text style={styles.articleModalBody}>{selectedArticle.content}</Text>
+                  <FormattedContent content={selectedArticle.content} />
                 </View>
               </>
             )}
@@ -549,6 +615,36 @@ const styles = StyleSheet.create({
     lineHeight: 34,
   },
   articleModalBody: {
+    fontSize: 16,
+    color: Colors.text,
+    lineHeight: 26,
+  },
+  articleHeading: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  articleParagraph: {
+    fontSize: 16,
+    color: Colors.text,
+    lineHeight: 26,
+    marginBottom: 16,
+  },
+  bulletContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    paddingLeft: 8,
+  },
+  bulletPoint: {
+    fontSize: 16,
+    color: Colors.primary,
+    marginRight: 8,
+    lineHeight: 26,
+  },
+  bulletText: {
+    flex: 1,
     fontSize: 16,
     color: Colors.text,
     lineHeight: 26,
