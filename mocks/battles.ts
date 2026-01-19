@@ -1500,6 +1500,516 @@ export const battles: Battle[] = [
       'Jefferson Davis (future Confederate president) fought here',
       'Famous for "A little more grape, Captain Bragg"'
     ]
+  },
+  {
+    id: 'talas',
+    title: 'Battle of Talas',
+    date: 'July 751',
+    year: 751,
+    era: 'medieval',
+    continent: 'asia',
+    region: 'Kazakhstan',
+    conflict: 'Arab-Tang Conflict',
+    lat: 42.5167,
+    lng: 72.2333,
+    sides: { aName: 'Abbasid Caliphate', bName: 'Tang Dynasty China' },
+    commanders: { a: ['Ziyad ibn Salih'], b: ['Gao Xianzhi'] },
+    outcome: 'Abbasid victory',
+    shortSummary: 'Arab forces defeated the Chinese Tang Dynasty, halting Chinese expansion westward and spreading papermaking to the Islamic world.',
+    whyItMatters: [
+      'Stopped Chinese expansion into Central Asia',
+      'Spread papermaking technology to the West',
+      'Defined the boundary between Islamic and Chinese spheres'
+    ],
+    tags: ['tang', 'arab', 'silk-road', 'technology'],
+    difficulty: 3,
+    facts: [
+      'Chinese prisoners taught Arabs papermaking',
+      'Karluk Turks switched sides mid-battle',
+      'Paper reached Europe centuries later via this route',
+      'Only major battle between Arab and Chinese forces',
+      'Both empires soon faced internal problems'
+    ]
+  },
+  {
+    id: 'constantinople-1453',
+    title: 'Fall of Constantinople',
+    date: 'May 29, 1453',
+    year: 1453,
+    era: 'medieval',
+    continent: 'asia',
+    region: 'Turkey',
+    conflict: 'Ottoman Conquest',
+    lat: 41.0082,
+    lng: 28.9784,
+    sides: { aName: 'Ottoman Empire', bName: 'Byzantine Empire' },
+    commanders: { a: ['Mehmed II'], b: ['Constantine XI'] },
+    outcome: 'Ottoman victory',
+    shortSummary: 'The Ottomans conquered the Byzantine capital using massive cannons, ending the Roman Empire after 1,500 years and reshaping world history.',
+    whyItMatters: [
+      'Ended the Byzantine/Eastern Roman Empire',
+      'Established Ottoman control of East-West trade routes',
+      'Spurred European exploration for new trade routes'
+    ],
+    tags: ['ottoman', 'byzantine', 'siege', 'cannons'],
+    difficulty: 4,
+    facts: [
+      'Mehmed was only 21 years old',
+      'Massive cannons breached the legendary walls',
+      'Constantine XI died fighting on the walls',
+      'Ottoman ships were dragged overland into the harbor',
+      'Hagia Sophia was converted to a mosque'
+    ]
+  },
+  {
+    id: 'nagashino',
+    title: 'Battle of Nagashino',
+    date: 'June 29, 1575',
+    year: 1575,
+    era: 'medieval',
+    continent: 'asia',
+    region: 'Japan',
+    conflict: 'Sengoku Period Wars',
+    lat: 34.9333,
+    lng: 137.5667,
+    sides: { aName: 'Oda-Tokugawa Alliance', bName: 'Takeda Clan' },
+    commanders: { a: ['Oda Nobunaga', 'Tokugawa Ieyasu'], b: ['Takeda Katsuyori'] },
+    outcome: 'Oda-Tokugawa victory',
+    shortSummary: 'Oda Nobunaga used massed firearms behind wooden palisades to devastate the famous Takeda cavalry, revolutionizing Japanese warfare.',
+    whyItMatters: [
+      'First major use of firearms in Japanese warfare',
+      'Ended the dominance of cavalry charges',
+      'Advanced Oda Nobunaga\'s unification of Japan'
+    ],
+    tags: ['firearms', 'samurai', 'cavalry', 'japan'],
+    difficulty: 3,
+    facts: [
+      '3,000 arquebusiers fired in rotating volleys',
+      'Takeda cavalry was destroyed',
+      'Wooden palisades protected the gunners',
+      'Changed Japanese military tactics forever',
+      'Nobunaga had studied European firearms'
+    ]
+  },
+  {
+    id: 'myeongnyang',
+    title: 'Battle of Myeongnyang',
+    date: 'October 26, 1597',
+    year: 1597,
+    era: 'medieval',
+    continent: 'asia',
+    region: 'Korea',
+    conflict: 'Japanese Invasions of Korea',
+    lat: 34.5667,
+    lng: 126.3083,
+    sides: { aName: 'Joseon Korea', bName: 'Toyotomi Japan' },
+    commanders: { a: ['Admiral Yi Sun-sin'], b: ['Todo Takatora'] },
+    outcome: 'Korean victory',
+    shortSummary: 'Admiral Yi Sun-sin with just 13 ships defeated a Japanese fleet of 333 ships using the narrow strait\'s currents to his advantage.',
+    whyItMatters: [
+      'One of history\'s greatest naval victories',
+      'Prevented Japanese conquest of Korea',
+      'Admiral Yi is considered one of history\'s greatest admirals'
+    ],
+    tags: ['naval', 'korea', 'japan', 'underdog'],
+    difficulty: 4,
+    facts: [
+      '13 Korean ships vs 333 Japanese ships',
+      'Yi used the strait\'s treacherous currents',
+      '31 Japanese ships sunk, none Korean',
+      'Yi had been stripped of rank but reinstated',
+      'Turtle ships were not used in this battle'
+    ]
+  },
+  {
+    id: 'kohima',
+    title: 'Battle of Kohima',
+    date: 'April 4 - June 22, 1944',
+    year: 1944,
+    era: 'ww2',
+    continent: 'asia',
+    region: 'India',
+    conflict: 'World War II',
+    lat: 25.6667,
+    lng: 94.1000,
+    sides: { aName: 'British-Indian Forces', bName: 'Imperial Japan' },
+    commanders: { a: ['Montagu Stopford'], b: ['Kotoku Sato'] },
+    outcome: 'British-Indian victory',
+    shortSummary: 'British and Indian forces stopped the Japanese invasion of India in brutal fighting around a tennis court, turning the tide in Burma.',
+    whyItMatters: [
+      'Stopped Japanese invasion of India',
+      'Turning point of the Burma Campaign',
+      'Voted Britain\'s greatest battle in 2013'
+    ],
+    tags: ['ww2', 'burma', 'india', 'turning-point'],
+    difficulty: 4,
+    facts: [
+      'Fierce fighting around the DC\'s tennis court',
+      'Japanese supply lines completely failed',
+      'Both sides suffered from disease and starvation',
+      'Called the "Stalingrad of the East"',
+      'Led to the largest defeat in Japanese history'
+    ]
+  },
+  {
+    id: 'bach-dang',
+    title: 'Battle of Bạch Đằng',
+    date: '938 AD',
+    year: 938,
+    era: 'medieval',
+    continent: 'asia',
+    region: 'Vietnam',
+    conflict: 'Vietnamese Independence War',
+    lat: 20.8500,
+    lng: 106.7500,
+    sides: { aName: 'Vietnamese Forces', bName: 'Southern Han China' },
+    commanders: { a: ['Ngô Quyền'], b: ['Liu Hongcao'] },
+    outcome: 'Vietnamese victory',
+    shortSummary: 'Vietnamese forces used iron-tipped stakes hidden underwater to destroy the Chinese fleet, ending 1,000 years of Chinese rule.',
+    whyItMatters: [
+      'Ended 1,000 years of Chinese domination',
+      'Established Vietnamese independence',
+      'Brilliant use of tides as a weapon'
+    ],
+    tags: ['naval', 'vietnam', 'china', 'independence'],
+    difficulty: 3,
+    facts: [
+      'Iron-tipped stakes were hidden at high tide',
+      'Chinese fleet was trapped at low tide',
+      'Liu Hongcao was killed in battle',
+      'Vietnam remained independent for centuries',
+      'Tactic was used again in later invasions'
+    ]
+  },
+  {
+    id: 'panipat-third',
+    title: 'Third Battle of Panipat',
+    date: 'January 14, 1761',
+    year: 1761,
+    era: 'modern',
+    continent: 'asia',
+    region: 'India',
+    conflict: 'Maratha-Durrani War',
+    lat: 29.3909,
+    lng: 76.9635,
+    sides: { aName: 'Durrani Empire', bName: 'Maratha Empire' },
+    commanders: { a: ['Ahmad Shah Durrani'], b: ['Sadashivrao Bhau'] },
+    outcome: 'Durrani victory',
+    shortSummary: 'One of the largest and bloodiest 18th century battles, the Afghan victory devastated the Marathas and changed Indian history.',
+    whyItMatters: [
+      'One of the bloodiest battles in 18th century',
+      'Ended Maratha expansion northward',
+      'Paved the way for British dominance in India'
+    ],
+    tags: ['maratha', 'afghan', 'india', 'massive'],
+    difficulty: 4,
+    facts: [
+      'Over 100,000 combatants on each side',
+      'Up to 70,000 killed in one day',
+      'Maratha leader Bhau was killed',
+      'Afghan artillery proved decisive',
+      'Weakened India before British expansion'
+    ]
+  },
+  {
+    id: 'pyramids',
+    title: 'Battle of the Pyramids',
+    date: 'July 21, 1798',
+    year: 1798,
+    era: 'napoleonic',
+    continent: 'africa',
+    region: 'Egypt',
+    conflict: 'French Campaign in Egypt',
+    lat: 29.9765,
+    lng: 31.1313,
+    sides: { aName: 'French Republic', bName: 'Mamluk Egypt' },
+    commanders: { a: ['Napoleon Bonaparte'], b: ['Murad Bey'] },
+    outcome: 'French victory',
+    shortSummary: 'Napoleon\'s army defeated the Mamluk cavalry using infantry squares, conquering Egypt and beginning modern Egyptology.',
+    whyItMatters: [
+      'Demonstrated the power of modern infantry tactics',
+      'French occupation sparked modern Egyptology',
+      'Discovery of the Rosetta Stone'
+    ],
+    tags: ['napoleon', 'egypt', 'cavalry', 'squares'],
+    difficulty: 3,
+    facts: [
+      'Napoleon said "Soldiers, 40 centuries look down upon you"',
+      'French infantry squares defeated Mamluk cavalry',
+      'French lost only 300 men vs 6,000 Mamluks',
+      'Led to discovery of the Rosetta Stone',
+      'Britain later destroyed the French fleet'
+    ]
+  },
+  {
+    id: 'khartoum',
+    title: 'Siege of Khartoum',
+    date: 'March 13, 1884 - January 26, 1885',
+    year: 1885,
+    era: 'modern',
+    continent: 'africa',
+    region: 'Sudan',
+    conflict: 'Mahdist War',
+    lat: 15.5007,
+    lng: 32.5599,
+    sides: { aName: 'Mahdist Sudan', bName: 'Egyptian-British Forces' },
+    commanders: { a: ['Muhammad Ahmad (The Mahdi)'], b: ['General Charles Gordon'] },
+    outcome: 'Mahdist victory',
+    shortSummary: 'Mahdist forces captured Khartoum and killed General "Chinese" Gordon, shocking Victorian Britain and creating a legendary martyr.',
+    whyItMatters: [
+      'Created the legend of General Gordon',
+      'Shocked Victorian Britain',
+      'Led to eventual British reconquest of Sudan'
+    ],
+    tags: ['colonial', 'siege', 'sudan', 'martyrdom'],
+    difficulty: 3,
+    facts: [
+      'Gordon was killed two days before relief arrived',
+      'Siege lasted 317 days',
+      'Gordon became a Victorian hero and martyr',
+      'Led to the Omdurman campaign 13 years later',
+      'The Mahdi died months after the victory'
+    ]
+  },
+  {
+    id: 'tangier',
+    title: 'Battle of Alcácer Quibir',
+    date: 'August 4, 1578',
+    year: 1578,
+    era: 'medieval',
+    continent: 'africa',
+    region: 'Morocco',
+    conflict: 'Portuguese-Moroccan War',
+    lat: 35.0000,
+    lng: -5.9333,
+    sides: { aName: 'Saadian Morocco', bName: 'Kingdom of Portugal' },
+    commanders: { a: ['Ahmad al-Mansur'], b: ['King Sebastian I'] },
+    outcome: 'Moroccan victory',
+    shortSummary: 'Three kings died in this battle as Morocco crushed Portuguese ambitions in North Africa, leading to the end of Portuguese independence.',
+    whyItMatters: [
+      'Three kings died - "Battle of the Three Kings"',
+      'Ended Portuguese expansion in Africa',
+      'Led to Spanish annexation of Portugal'
+    ],
+    tags: ['portugal', 'morocco', 'kings', 'crusade'],
+    difficulty: 3,
+    facts: [
+      'All three kings died in battle',
+      'Sebastian\'s body was never confirmed found',
+      'Portugal was annexed by Spain two years later',
+      'Morocco\'s golden age followed',
+      'Sebastian became a messianic figure in Portugal'
+    ]
+  },
+  {
+    id: 'kairouan',
+    title: 'Battle of Kairouan',
+    date: '683 AD',
+    year: 683,
+    era: 'medieval',
+    continent: 'africa',
+    region: 'Tunisia',
+    conflict: 'Arab Conquest of North Africa',
+    lat: 35.6781,
+    lng: 10.0963,
+    sides: { aName: 'Berber Forces', bName: 'Umayyad Caliphate' },
+    commanders: { a: ['Kusaila'], b: ['Uqba ibn Nafi'] },
+    outcome: 'Berber victory',
+    shortSummary: 'Berber forces ambushed and killed the Arab conqueror Uqba ibn Nafi, temporarily halting the Arab conquest of North Africa.',
+    whyItMatters: [
+      'Temporarily stopped Arab expansion in Africa',
+      'Showed Berber military capability',
+      'Arab conquest eventually succeeded'
+    ],
+    tags: ['berber', 'arab', 'conquest', 'ambush'],
+    difficulty: 3,
+    facts: [
+      'Uqba had reached the Atlantic Ocean',
+      'Kusaila was a Christian Berber chief',
+      'Arabs returned to conquer within decades',
+      'Uqba is revered as a martyr in Islam',
+      'Kairouan became a holy city'
+    ]
+  },
+  {
+    id: 'tenochtitlan',
+    title: 'Fall of Tenochtitlan',
+    date: 'May 26 - August 13, 1521',
+    year: 1521,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Mexico',
+    conflict: 'Spanish Conquest of the Aztec Empire',
+    lat: 19.4326,
+    lng: -99.1332,
+    sides: { aName: 'Spanish-Tlaxcalan Alliance', bName: 'Aztec Empire' },
+    commanders: { a: ['Hernán Cortés'], b: ['Cuauhtémoc'] },
+    outcome: 'Spanish victory',
+    shortSummary: 'Cortés and his indigenous allies conquered the Aztec capital after a brutal siege, ending one of history\'s great civilizations.',
+    whyItMatters: [
+      'Ended the Aztec Empire',
+      'Beginning of Spanish Mexico',
+      'One of history\'s most dramatic conquests'
+    ],
+    tags: ['conquest', 'aztec', 'spain', 'siege'],
+    difficulty: 4,
+    facts: [
+      'Smallpox killed more Aztecs than Spanish weapons',
+      'Cortés built ships to attack the island city',
+      'Indigenous allies provided most of the soldiers',
+      'City was largely destroyed in the siege',
+      'Mexico City was built on the ruins'
+    ]
+  },
+  {
+    id: 'cajamarca',
+    title: 'Battle of Cajamarca',
+    date: 'November 16, 1532',
+    year: 1532,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Peru',
+    conflict: 'Spanish Conquest of the Inca Empire',
+    lat: -7.1617,
+    lng: -78.5127,
+    sides: { aName: 'Spanish Conquistadors', bName: 'Inca Empire' },
+    commanders: { a: ['Francisco Pizarro'], b: ['Atahualpa'] },
+    outcome: 'Spanish victory',
+    shortSummary: 'Pizarro captured the Inca emperor Atahualpa in a surprise attack, beginning the fall of the mighty Inca Empire.',
+    whyItMatters: [
+      'Led to the fall of the Inca Empire',
+      'One of history\'s most audacious ambushes',
+      'Changed South American history forever'
+    ],
+    tags: ['conquest', 'inca', 'spain', 'ambush'],
+    difficulty: 3,
+    facts: [
+      '168 Spanish captured the Inca emperor',
+      'Atahualpa filled a room with gold as ransom',
+      'The Spanish executed Atahualpa anyway',
+      'Inca army of 80,000 fled in panic',
+      'Horses and guns terrified the Incas'
+    ]
+  },
+  {
+    id: 'san-juan-hill',
+    title: 'Battle of San Juan Hill',
+    date: 'July 1, 1898',
+    year: 1898,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Cuba',
+    conflict: 'Spanish-American War',
+    lat: 20.0167,
+    lng: -75.8333,
+    sides: { aName: 'United States', bName: 'Kingdom of Spain' },
+    commanders: { a: ['William Shafter', 'Theodore Roosevelt'], b: ['Arsenio Linares'] },
+    outcome: 'American victory',
+    shortSummary: 'American forces including Roosevelt\'s Rough Riders stormed Spanish positions outside Santiago, making Teddy Roosevelt a national hero.',
+    whyItMatters: [
+      'Made Theodore Roosevelt a national hero',
+      'Led to American victory in Cuba',
+      'Established USA as an imperial power'
+    ],
+    tags: ['spanish-american', 'roosevelt', 'cuba', 'cavalry'],
+    difficulty: 2,
+    facts: [
+      'Roosevelt led the Rough Riders up Kettle Hill',
+      'Buffalo Soldiers played a crucial role',
+      'Spanish were outnumbered but fortified',
+      'Roosevelt called it his "crowded hour"',
+      'He became president 3 years later'
+    ]
+  },
+  {
+    id: 'falklands',
+    title: 'Falklands War',
+    date: 'April 2 - June 14, 1982',
+    year: 1982,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Falkland Islands',
+    conflict: 'Falklands War',
+    lat: -51.7963,
+    lng: -59.5236,
+    sides: { aName: 'United Kingdom', bName: 'Argentina' },
+    commanders: { a: ['Margaret Thatcher', 'John Woodward'], b: ['Leopoldo Galtieri'] },
+    outcome: 'British victory',
+    shortSummary: 'Britain recaptured the Falkland Islands from Argentina in a short but intense modern war 8,000 miles from home.',
+    whyItMatters: [
+      'Demonstrated power projection capabilities',
+      'Boosted Margaret Thatcher\'s government',
+      'Led to fall of Argentine military junta'
+    ],
+    tags: ['modern', 'naval', 'air-war', 'britain'],
+    difficulty: 3,
+    facts: [
+      'Britain sailed 8,000 miles to fight',
+      'Exocet missiles sank British ships',
+      'Argentina lost the cruiser Belgrano',
+      '649 Argentines and 255 British died',
+      'Led to return of democracy in Argentina'
+    ]
+  },
+  {
+    id: 'chapultepec',
+    title: 'Battle of Chapultepec',
+    date: 'September 12-13, 1847',
+    year: 1847,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Mexico',
+    conflict: 'Mexican-American War',
+    lat: 19.4204,
+    lng: -99.1818,
+    sides: { aName: 'United States', bName: 'Mexico' },
+    commanders: { a: ['Winfield Scott'], b: ['Nicolás Bravo'] },
+    outcome: 'American victory',
+    shortSummary: 'American forces stormed Chapultepec Castle, where young Mexican cadets died defending it, becoming the legendary "Niños Héroes."',
+    whyItMatters: [
+      'Led to capture of Mexico City',
+      'Created Mexican national heroes - Niños Héroes',
+      'Ended the Mexican-American War'
+    ],
+    tags: ['mexican-war', 'heroes', 'siege', 'america'],
+    difficulty: 3,
+    facts: [
+      'Six teenage cadets died defending the castle',
+      'They are honored as Niños Héroes in Mexico',
+      'Marines reference this in their hymn',
+      'Mexico City fell the next day',
+      'U.S. gained California and the Southwest'
+    ]
+  },
+  {
+    id: 'carabobo',
+    title: 'Battle of Carabobo',
+    date: 'June 24, 1821',
+    year: 1821,
+    era: 'modern',
+    continent: 'americas',
+    region: 'Venezuela',
+    conflict: 'Venezuelan War of Independence',
+    lat: 10.2167,
+    lng: -68.0167,
+    sides: { aName: 'Gran Colombian Patriots', bName: 'Spanish Royalists' },
+    commanders: { a: ['Simón Bolívar', 'José Antonio Páez'], b: ['Miguel de la Torre'] },
+    outcome: 'Patriot victory',
+    shortSummary: 'Bolívar\'s decisive victory secured Venezuelan independence and opened the path to liberating the rest of northern South America.',
+    whyItMatters: [
+      'Secured Venezuelan independence',
+      'Key step in South American liberation',
+      'Demonstrated Bolívar\'s military genius'
+    ],
+    tags: ['independence', 'bolivar', 'venezuela', 'liberation'],
+    difficulty: 3,
+    facts: [
+      'Battle lasted less than an hour',
+      'British Legion played a crucial role',
+      'Spanish lost 3,000 men',
+      'Venezuela celebrates this as Independence Day',
+      'Bolívar went on to liberate more nations'
+    ]
   }
 ];
 
