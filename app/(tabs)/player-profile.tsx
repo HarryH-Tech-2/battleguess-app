@@ -18,7 +18,6 @@ import {
   BookOpen, 
   ChevronRight,
   X,
-  Clock,
   Check,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -142,6 +141,7 @@ export default function PlayerProfileScreen() {
           )}
           <Text style={styles.mascotName}>{mascot?.name || 'Choose a Guide'}</Text>
           <Text style={styles.mascotDescription}>{mascot?.description || ''}</Text>
+          {mascot?.dates && <Text style={styles.mascotDates}>{mascot.dates}</Text>}
         </View>
 
         <View style={styles.statsGrid}>
@@ -208,10 +208,6 @@ export default function PlayerProfileScreen() {
                 <View style={styles.articleMeta}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{article.category}</Text>
-                  </View>
-                  <View style={styles.readTime}>
-                    <Clock size={12} color={Colors.textSecondary} />
-                    <Text style={styles.readTimeText}>{article.readTime} min</Text>
                   </View>
                 </View>
                 <Text style={styles.articleTitle}>{article.title}</Text>
@@ -294,10 +290,6 @@ export default function PlayerProfileScreen() {
                     <View style={styles.categoryBadge}>
                       <Text style={styles.categoryText}>{selectedArticle.category}</Text>
                     </View>
-                    <View style={styles.readTime}>
-                      <Clock size={14} color={Colors.textSecondary} />
-                      <Text style={styles.readTimeText}>{selectedArticle.readTime} min read</Text>
-                    </View>
                   </View>
                   <Text style={styles.articleModalHeading}>{selectedArticle.title}</Text>
                   <FormattedContent content={selectedArticle.content} />
@@ -364,6 +356,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  mascotDates: {
+    fontSize: 13,
+    color: Colors.primary,
+    textAlign: 'center',
+    marginTop: 6,
+    fontWeight: '500' as const,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -483,15 +482,7 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.primary,
   },
-  readTime: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  readTimeText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
+  
   articleTitle: {
     fontSize: 18,
     fontWeight: '600' as const,

@@ -14,6 +14,7 @@ export interface Mascot {
   avatar: string;
   description: string;
   gender: 'male' | 'female';
+  dates: string;
 }
 
 export interface Battle {
