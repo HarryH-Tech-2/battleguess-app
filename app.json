@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "BattleGuess: History Quiz",
-    "slug": "battleguess-history-quiz",
+    "name": "BattleGuess",
+    "slug": "battleguess",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.battleguess_history_quiz",
+      "package": "app.rork.battleguess",
       "permissions": [
         "android.permission.VIBRATE"
       ]
@@ -42,6 +42,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": "https://rork.com/"
+      },
+      "eas": {
+        "projectId": "ffe5f6cf-d58f-437f-be85-718ec553dcf8"
+      }
+    },
+    "owner": "harryhh"
   }
 }
