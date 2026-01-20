@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.battleguess",
+      "package": "app.rork.battleguess.quiz",
       "permissions": [
         "android.permission.VIBRATE"
       ]
