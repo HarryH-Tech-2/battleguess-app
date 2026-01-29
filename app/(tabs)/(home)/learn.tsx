@@ -32,10 +32,9 @@ const CONTINENTS: { id: Continent; name: string; icon: string }[] = [
 
 export default function LearnScreen() {
   const router = useRouter();
-  const { progress, isLessonCompleted, getDailyGoalProgress } = useUserProgress();
+  const { progress, isLessonCompleted } = useUserProgress();
   const { settings, setContinent } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const dailyProgress = getDailyGoalProgress();
   const [showContinentModal, setShowContinentModal] = useState(false);
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
@@ -117,16 +116,6 @@ export default function LearnScreen() {
             ) : (
               <View style={styles.profilePlaceholder} />
             )}
-          </View>
-        </View>
-        
-        <View style={styles.dailyGoalContainer}>
-          <View style={styles.dailyGoalHeader}>
-            <Text style={styles.dailyGoalTitle}>Daily Goal</Text>
-            <Text style={styles.dailyGoalPercent}>{Math.round(dailyProgress * 100)}%</Text>
-          </View>
-          <View style={styles.dailyGoalBar}>
-            <View style={[styles.dailyGoalFill, { width: `${dailyProgress * 100}%` }]} />
           </View>
         </View>
       </View>
@@ -314,37 +303,6 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: Colors.pathLine,
     borderRadius: 20,
-  },
-  dailyGoalContainer: {
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: 12,
-    padding: 12,
-  },
-  dailyGoalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  dailyGoalTitle: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.textSecondary,
-  },
-  dailyGoalPercent: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-    color: Colors.primary,
-  },
-  dailyGoalBar: {
-    height: 8,
-    backgroundColor: Colors.pathLine,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  dailyGoalFill: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
-    borderRadius: 4,
   },
   continentSelector: {
     flexDirection: 'row',

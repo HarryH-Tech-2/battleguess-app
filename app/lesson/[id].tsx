@@ -575,10 +575,6 @@ export default function LessonScreen() {
     </View>
   );
 
-  const getMapUrl = (lat: number, lng: number) => {
-    return `https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/static/pin-l+FF6B35(${lng},${lat})/${lng},${lat},5,0/360x180@2x?access_token=REDACTED_MAPBOX_TOKEN`;
-  };
-
   const renderStoryCard = (step: StoryCardStep) => (
     <View style={styles.storyContainer}>
       <View style={styles.storyCard}>
@@ -586,14 +582,9 @@ export default function LessonScreen() {
         <Text style={styles.storyNarrative}>{step.data.narrative}</Text>
         {battle && (
           <>
-            <View style={styles.storyMapContainer}>
-              <Image
-                source={{ uri: getMapUrl(battle.lat, battle.lng) }}
-                style={styles.storyMap}
-                contentFit="cover"
-              />
-              <View style={styles.storyMapPin}>
-                <Text style={styles.storyMapPinIcon}>⚔️</Text>
+            <View style={styles.storyIconContainer}>
+              <View style={styles.storyIconCircle}>
+                <Text style={styles.storyIconText}>⚔️</Text>
               </View>
             </View>
             <View style={styles.storyMeta}>
@@ -877,6 +868,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
+    paddingHorizontal: 8,
   },
   regionButtonSelected: {
     borderColor: Colors.primary,
@@ -1048,12 +1040,12 @@ const styles = StyleSheet.create({
   sliderTrack: {
     position: 'absolute',
     top: 16,
-    left: 0,
-    right: 0,
+    left: 14,
+    right: 14,
     height: 12,
     backgroundColor: Colors.pathLine,
     borderRadius: 6,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   sliderFill: {
     position: 'absolute',
@@ -1131,27 +1123,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 20,
   },
-  storyMapContainer: {
-    width: '100%',
-    height: 140,
-    borderRadius: 12,
-    overflow: 'hidden',
+  storyIconContainer: {
+    alignItems: 'center',
     marginBottom: 16,
-    position: 'relative',
   },
-  storyMap: {
-    width: '100%',
-    height: '100%',
-  },
-  storyMapPin: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -20,
-    marginLeft: -20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  storyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1163,8 +1142,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  storyMapPinIcon: {
-    fontSize: 18,
+  storyIconText: {
+    fontSize: 24,
   },
   storyMetaText: {
     fontSize: 14,
