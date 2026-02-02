@@ -2,10 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useColorScheme } from 'react-native';
+import { lightColors, darkColors, ColorScheme } from '@/constants/colors';
 
 const SETTINGS_KEY = 'battleguess_settings';
 
 export type Continent = 'europe' | 'asia' | 'africa' | 'americas' | 'all';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface AppSettings {
   vibrationEnabled: boolean;
@@ -13,6 +16,7 @@ export interface AppSettings {
   reducedMotion: boolean;
   largerText: boolean;
   selectedContinent: Continent;
+  themeMode: ThemeMode;
 }
 
 const defaultSettings: AppSettings = {
@@ -21,11 +25,13 @@ const defaultSettings: AppSettings = {
   reducedMotion: false,
   largerText: false,
   selectedContinent: 'all',
+  themeMode: 'system',
 };
 
 export const [SettingsProvider, useSettings] = createContextHook(() => {
   const queryClient = useQueryClient();
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
+  const systemColorScheme = useColorScheme();
 
   const settingsQuery = useQuery({
     queryKey: ['appSettings'],
@@ -90,6 +96,16 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     updateSettings({ selectedContinent: continent });
   }, [updateSettings]);
 
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    updateSettings({ themeMode: mode });
+  }, [updateSettings]);
+
+  // Determine the actual theme based on settings and system preference
+  const isDarkMode = settings.themeMode === 'dark' ||
+    (settings.themeMode === 'system' && systemColorScheme === 'dark');
+
+  const colors: ColorScheme = isDarkMode ? darkColors : lightColors;
+
   return {
     settings,
     isLoading: settingsQuery.isLoading,
@@ -99,5 +115,8 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     toggleReducedMotion,
     toggleLargerText,
     setContinent,
+    setThemeMode,
+    isDarkMode,
+    colors,
   };
 });

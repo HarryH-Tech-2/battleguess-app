@@ -4,22 +4,24 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { UserProgressProvider } from "@/contexts/UserProgressContext";
-import { SettingsProvider } from "@/contexts/SettingsContext";
-import Colors from "@/constants/colors";
+import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
+import { lightColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const { colors } = useSettings();
+
   return (
     <Stack
       screenOptions={{
         headerBackTitle: "Back",
-        headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: Colors.textInverse,
+        headerStyle: { backgroundColor: colors.primary },
+        headerTintColor: colors.textInverse,
         headerTitleStyle: { fontWeight: "600" as const },
-        contentStyle: { backgroundColor: Colors.background },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -29,6 +31,8 @@ function RootLayoutNav() {
       <Stack.Screen name="lesson-complete" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="review" options={{ title: "Daily Review" }} />
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
+      <Stack.Screen name="privacy-policy" options={{ title: "Privacy Policy" }} />
+      <Stack.Screen name="terms-of-service" options={{ title: "Terms of Service" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

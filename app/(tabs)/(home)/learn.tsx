@@ -18,7 +18,6 @@ import { useSettings, Continent } from '@/contexts/SettingsContext';
 import { getUnitsByContinent } from '@/mocks/units';
 import { getLessonsByUnitId } from '@/mocks/lessons';
 import { mascots } from '@/mocks/mascots';
-import Colors from '@/constants/colors';
 
 const NODE_SIZE = 70;
 
@@ -33,7 +32,7 @@ const CONTINENTS: { id: Continent; name: string; icon: string }[] = [
 export default function LearnScreen() {
   const router = useRouter();
   const { progress, isLessonCompleted } = useUserProgress();
-  const { settings, setContinent } = useSettings();
+  const { settings, setContinent, colors } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [showContinentModal, setShowContinentModal] = useState(false);
 
@@ -94,20 +93,22 @@ export default function LearnScreen() {
     setShowContinentModal(false);
   };
 
+  const styles = createStyles(colors);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Flame size={20} color={Colors.streak} />
+            <Flame size={20} color={colors.streak} />
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
           </View>
           <View style={styles.statItem}>
-            <Heart size={20} color={Colors.hearts} fill={Colors.hearts} />
+            <Heart size={20} color={colors.hearts} fill={colors.hearts} />
             <Text style={styles.statValue}>{progress.hearts}</Text>
           </View>
           <View style={styles.statItem}>
-            <Star size={20} color={Colors.xp} fill={Colors.xp} />
+            <Star size={20} color={colors.xp} fill={colors.xp} />
             <Text style={styles.statValue}>{progress.totalXp}</Text>
           </View>
           <View style={styles.profileButton}>
@@ -120,23 +121,21 @@ export default function LearnScreen() {
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={styles.continentSelector} 
+      <TouchableOpacity
+        style={styles.continentSelector}
         onPress={() => setShowContinentModal(true)}
         activeOpacity={0.8}
       >
         <View style={styles.continentLeft}>
-          <Globe size={20} color={Colors.primary} />
+          <Globe size={20} color={colors.primary} />
           <Text style={styles.continentText}>
             {selectedContinentData?.icon} {selectedContinentData?.name}
           </Text>
         </View>
-        <ChevronDown size={20} color={Colors.textSecondary} />
+        <ChevronDown size={20} color={colors.textSecondary} />
       </TouchableOpacity>
 
-      
-
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.pathContainer}
         showsVerticalScrollIndicator={false}
@@ -176,14 +175,14 @@ export default function LearnScreen() {
                       activeOpacity={0.7}
                     >
                       {!unlocked ? (
-                        <Lock size={28} color={Colors.textLight} />
+                        <Lock size={28} color={colors.textLight} />
                       ) : isComplete ? (
-                        <Check size={32} color={Colors.textInverse} strokeWidth={3} />
+                        <Check size={32} color={colors.textInverse} strokeWidth={3} />
                       ) : (
                         <Text style={styles.nodeIcon}>{unit.icon}</Text>
                       )}
                     </TouchableOpacity>
-                    
+
                     <View style={styles.nodeInfo}>
                       <Text style={[
                         styles.nodeTitle,
@@ -196,7 +195,7 @@ export default function LearnScreen() {
                       </Text>
                     </View>
                   </Animated.View>
-                  
+
                   {index < filteredUnits.length - 1 && (
                     <View style={[
                       styles.pathLine,
@@ -221,11 +220,11 @@ export default function LearnScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Region</Text>
               <TouchableOpacity onPress={() => setShowContinentModal(false)}>
-                <X size={24} color={Colors.textSecondary} />
+                <X size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSubtitle}>Choose which battles you want to learn about</Text>
-            
+
             {CONTINENTS.map((continent) => (
               <TouchableOpacity
                 key={continent.id}
@@ -245,7 +244,7 @@ export default function LearnScreen() {
                   </Text>
                 </View>
                 {settings.selectedContinent === continent.id && (
-                  <Check size={20} color={Colors.primary} />
+                  <Check size={20} color={colors.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -256,17 +255,17 @@ export default function LearnScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
   statsRow: {
     flexDirection: 'row',
@@ -282,14 +281,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   profileButton: {
     marginLeft: 'auto',
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -301,20 +300,20 @@ const styles = StyleSheet.create({
   profilePlaceholder: {
     width: 40,
     height: 40,
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     borderRadius: 20,
   },
   continentSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     marginHorizontal: 20,
     marginTop: 16,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   continentLeft: {
     flexDirection: 'row',
@@ -324,31 +323,7 @@ const styles = StyleSheet.create({
   continentText: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  reviewBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary + '15',
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.secondary + '30',
-    gap: 12,
-  },
-  reviewTextContainer: {
-    flex: 1,
-  },
-  reviewTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  reviewSubtitle: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.text,
   },
   scrollView: {
     flex: 1,
@@ -368,12 +343,12 @@ const styles = StyleSheet.create({
   pathLine: {
     width: 4,
     height: 32,
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     borderRadius: 2,
     marginVertical: 8,
   },
   pathLineComplete: {
-    backgroundColor: Colors.pathNodeComplete,
+    backgroundColor: colors.pathNodeComplete,
   },
   nodeWrapper: {
     alignItems: 'center',
@@ -383,26 +358,26 @@ const styles = StyleSheet.create({
     width: NODE_SIZE,
     height: NODE_SIZE,
     borderRadius: NODE_SIZE / 2,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
   nodeLocked: {
-    backgroundColor: Colors.pathNodeLocked,
+    backgroundColor: colors.pathNodeLocked,
     shadowOpacity: 0,
   },
   nodeComplete: {
-    backgroundColor: Colors.pathNodeComplete,
-    shadowColor: Colors.pathNodeComplete,
+    backgroundColor: colors.pathNodeComplete,
+    shadowColor: colors.pathNodeComplete,
   },
   nodeCurrent: {
     borderWidth: 4,
-    borderColor: Colors.secondary,
+    borderColor: colors.secondary,
   },
   nodeIcon: {
     fontSize: 28,
@@ -414,15 +389,15 @@ const styles = StyleSheet.create({
   nodeTitle: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   nodeTitleLocked: {
-    color: Colors.textLight,
+    color: colors.textLight,
   },
   nodeProgress: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   emptyState: {
     alignItems: 'center',
@@ -436,12 +411,12 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -452,7 +427,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 20,
     padding: 20,
     width: '100%',
@@ -467,11 +442,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   modalSubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 20,
   },
   continentOption: {
@@ -480,13 +455,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderRadius: 12,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     marginBottom: 10,
   },
   continentOptionSelected: {
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: colors.primary + '15',
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
   },
   continentOptionLeft: {
     flexDirection: 'row',
@@ -499,10 +474,10 @@ const styles = StyleSheet.create({
   continentOptionText: {
     fontSize: 16,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   continentOptionTextSelected: {
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600' as const,
   },
 });

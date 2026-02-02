@@ -1,14 +1,16 @@
 import { Stack } from 'expo-router';
-import Colors from '@/constants/colors';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function HomeLayout() {
+  const { colors } = useSettings();
+
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primary },
-        headerTintColor: Colors.textInverse,
+        headerStyle: { backgroundColor: colors.primary },
+        headerTintColor: colors.textInverse,
         headerTitleStyle: { fontWeight: '600' as const },
-        contentStyle: { backgroundColor: Colors.background },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen
