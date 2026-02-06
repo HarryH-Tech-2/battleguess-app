@@ -22,6 +22,21 @@ import { mascots } from '@/mocks/mascots';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NODE_SIZE = 70;
+const PARTICLE_COUNT = 12;
+
+// Generate particle configurations
+const generateParticles = () => {
+  return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+    id: i,
+    startX: Math.random() * 100,
+    startY: Math.random() * 100,
+    size: 3 + Math.random() * 5,
+    duration: 2000 + Math.random() * 2000,
+    delay: Math.random() * 2000,
+  }));
+};
+
+const particles = generateParticles();
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -32,8 +47,17 @@ export default function HomeScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const bannerGlowAnim = useRef(new Animated.Value(0)).current;
   const swordRotateAnim = useRef(new Animated.Value(0)).current;
-  const sparkleAnim = useRef(new Animated.Value(0)).current;
   const bannerScaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Particle animations
+  const particleAnims = useRef(
+    particles.map(() => ({
+      opacity: new Animated.Value(0),
+      translateY: new Animated.Value(0),
+      translateX: new Animated.Value(0),
+      scale: new Animated.Value(0),
+    }))
+  ).current;
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
   const styles = createStyles(colors);
@@ -87,22 +111,64 @@ export default function HomeScreen() {
       ])
     ).start();
 
-    // Sparkle animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(sparkleAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sparkleAnim, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [pulseAnim, bannerGlowAnim, swordRotateAnim, sparkleAnim]);
+    // Particle animations - floating upward with fade
+    particleAnims.forEach((anim, index) => {
+      const particle = particles[index];
+      const startParticleAnimation = () => {
+        // Reset values
+        anim.opacity.setValue(0);
+        anim.translateY.setValue(0);
+        anim.translateX.setValue(0);
+        anim.scale.setValue(0);
+
+        Animated.sequence([
+          Animated.delay(particle.delay),
+          Animated.parallel([
+            // Fade in then out
+            Animated.sequence([
+              Animated.timing(anim.opacity, {
+                toValue: 0.8,
+                duration: particle.duration * 0.3,
+                useNativeDriver: true,
+              }),
+              Animated.timing(anim.opacity, {
+                toValue: 0,
+                duration: particle.duration * 0.7,
+                useNativeDriver: true,
+              }),
+            ]),
+            // Float upward
+            Animated.timing(anim.translateY, {
+              toValue: -60 - Math.random() * 40,
+              duration: particle.duration,
+              useNativeDriver: true,
+            }),
+            // Slight horizontal drift
+            Animated.timing(anim.translateX, {
+              toValue: (Math.random() - 0.5) * 30,
+              duration: particle.duration,
+              useNativeDriver: true,
+            }),
+            // Scale up then down
+            Animated.sequence([
+              Animated.timing(anim.scale, {
+                toValue: 1,
+                duration: particle.duration * 0.2,
+                useNativeDriver: true,
+              }),
+              Animated.timing(anim.scale, {
+                toValue: 0.5,
+                duration: particle.duration * 0.8,
+                useNativeDriver: true,
+              }),
+            ]),
+          ]),
+        ]).start(() => startParticleAnimation());
+      };
+
+      startParticleAnimation();
+    });
+  }, [pulseAnim, bannerGlowAnim, swordRotateAnim, particleAnims]);
 
   const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
@@ -210,46 +276,28 @@ export default function HomeScreen() {
               ]}
             />
 
-            {/* Sparkle effects */}
-            <Animated.View
-              style={[
-                styles.sparkle,
-                styles.sparkle1,
-                {
-                  opacity: sparkleAnim,
-                  transform: [{ scale: sparkleAnim }],
-                },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.sparkle,
-                styles.sparkle2,
-                {
-                  opacity: sparkleAnim.interpolate({
-                    inputRange: [0, 0.5, 1],
-                    outputRange: [1, 0, 1],
-                  }),
-                  transform: [{ scale: sparkleAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0.5],
-                  })}],
-                },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.sparkle,
-                styles.sparkle3,
-                {
-                  opacity: sparkleAnim,
-                  transform: [{ scale: sparkleAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1],
-                  })}],
-                },
-              ]}
-            />
+            {/* Floating particles */}
+            {particles.map((particle, index) => (
+              <Animated.View
+                key={particle.id}
+                style={[
+                  styles.particle,
+                  {
+                    left: `${particle.startX}%`,
+                    top: `${particle.startY}%`,
+                    width: particle.size,
+                    height: particle.size,
+                    borderRadius: particle.size / 2,
+                    opacity: particleAnims[index].opacity,
+                    transform: [
+                      { translateY: particleAnims[index].translateY },
+                      { translateX: particleAnims[index].translateX },
+                      { scale: particleAnims[index].scale },
+                    ],
+                  },
+                ]}
+              />
+            ))}
 
             <View style={styles.bannerContent}>
               <View style={styles.bannerLeft}>
@@ -390,35 +438,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: 20,
     overflow: 'hidden',
     position: 'relative',
+    minHeight: 140,
   },
   bannerGlow: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: '#FFD700',
     borderRadius: 20,
   },
-  sparkle: {
+  particle: {
     position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: '#FFD700',
-  },
-  sparkle1: {
-    top: 15,
-    right: 30,
-  },
-  sparkle2: {
-    top: 40,
-    right: 60,
-  },
-  sparkle3: {
-    bottom: 20,
-    left: 40,
   },
   bannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    zIndex: 10,
   },
   bannerLeft: {
     flex: 1,
