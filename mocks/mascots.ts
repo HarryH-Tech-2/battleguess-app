@@ -1,5 +1,6 @@
 import { Mascot } from '@/types';
 
+// 4 famous military figures for avatar selection
 export const mascots: Mascot[] = [
   {
     id: 'caesar',
@@ -32,37 +33,5 @@ export const mascots: Mascot[] = [
     description: 'French heroine who led armies to victory in the Hundred Years War',
     gender: 'female',
     dates: '1412 – 1431',
-  },
-  {
-    id: 'alexander',
-    name: 'Alexander the Great',
-    avatar: 'https://api.dicebear.com/7.x/personas/png?seed=alexander&backgroundColor=b6e3f4',
-    description: 'Macedonian king who built one of history\'s largest empires',
-    gender: 'male',
-    dates: '356 BC – 323 BC',
-  },
-  {
-    id: 'cleopatra',
-    name: 'Cleopatra VII',
-    avatar: 'https://api.dicebear.com/7.x/personas/png?seed=cleopatra&backgroundColor=ffd5dc',
-    description: 'Last pharaoh of Egypt and skilled diplomat',
-    gender: 'female',
-    dates: '69 BC – 30 BC',
-  },
-  {
-    id: 'genghis',
-    name: 'Genghis Khan',
-    avatar: 'https://api.dicebear.com/7.x/personas/png?seed=genghis&backgroundColor=d1d4f9',
-    description: 'Founder of the Mongol Empire, greatest conqueror',
-    gender: 'male',
-    dates: '1162 – 1227',
-  },
-  {
-    id: 'boudica',
-    name: 'Boudica',
-    avatar: 'https://api.dicebear.com/7.x/personas/png?seed=boudica&backgroundColor=ffdfbf',
-    description: 'Celtic queen who led uprising against Roman Britain',
-    gender: 'female',
-    dates: '30 AD – 61 AD',
   },
 ];

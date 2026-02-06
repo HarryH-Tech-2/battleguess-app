@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,54 +6,95 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
-  Modal,
   Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, Lock, Check, Globe, ChevronDown, X } from 'lucide-react-native';
+import { Flame, Heart, Star, Lock, Check } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
-import { useSettings, Continent } from '@/contexts/SettingsContext';
-import { getUnitsByContinent } from '@/mocks/units';
+import { useSettings } from '@/contexts/SettingsContext';
+import { units } from '@/mocks/units';
 import { getLessonsByUnitId } from '@/mocks/lessons';
 import { mascots } from '@/mocks/mascots';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NODE_SIZE = 70;
-const BRANCH_OFFSET = 80; // How far nodes branch left/right
+const BRANCH_OFFSET = 70;
 
-const CONTINENTS: { id: Continent; name: string; icon: string }[] = [
-  { id: 'all', name: 'All Regions', icon: '🌍' },
-  { id: 'europe', name: 'Europe', icon: '🏰' },
-  { id: 'asia', name: 'Asia', icon: '🏯' },
-  { id: 'africa', name: 'Africa', icon: '🌴' },
-  { id: 'americas', name: 'Americas', icon: '🗽' },
-];
+// Get continent color/icon for visual distinction
+const getContinentStyle = (continent: string) => {
+  switch (continent) {
+    case 'europe':
+      return { color: '#4A90D9', icon: '🏰' };
+    case 'asia':
+      return { color: '#E85D75', icon: '🏯' };
+    case 'africa':
+      return { color: '#F5A623', icon: '🌴' };
+    case 'americas':
+      return { color: '#7B68EE', icon: '🗽' };
+    default:
+      return { color: '#4A90D9', icon: '🌍' };
+  }
+};
 
-// Generate a branching pattern for nodes
-const getBranchPosition = (index: number): 'left' | 'center' | 'right' => {
-  const patterns = [
-    ['center', 'left', 'right', 'center', 'right', 'left'],
-    ['center', 'right', 'left', 'center', 'left', 'right'],
-    ['left', 'center', 'right', 'left', 'center', 'right'],
+// Generate a branching pattern based on continent changes
+const getBranchPosition = (index: number, continent: string, prevContinent: string | null): 'left' | 'center' | 'right' => {
+  // When continent changes, branch in a different direction
+  if (prevContinent && continent !== prevContinent) {
+    const continentOrder = ['europe', 'asia', 'africa', 'americas'];
+    const currentIdx = continentOrder.indexOf(continent);
+    if (currentIdx % 2 === 0) return 'left';
+    return 'right';
+  }
+
+  // Within same continent, create a winding path
+  const patterns: ('left' | 'center' | 'right')[][] = [
+    ['center', 'left', 'center', 'right', 'center', 'left'],
+    ['center', 'right', 'center', 'left', 'center', 'right'],
   ];
   const patternIndex = Math.floor(index / 6) % patterns.length;
   const positionIndex = index % 6;
-  return patterns[patternIndex][positionIndex] as 'left' | 'center' | 'right';
+  return patterns[patternIndex][positionIndex];
+};
+
+// Sort units to create an interesting path across continents
+const getSortedUnits = () => {
+  const continentOrder = ['europe', 'asia', 'europe', 'africa', 'americas', 'asia', 'europe', 'africa', 'americas'];
+  const usedUnits = new Set<string>();
+  const sortedUnits: typeof units = [];
+
+  continentOrder.forEach(continent => {
+    const continentUnits = units
+      .filter(u => u.continent === continent && !usedUnits.has(u.id))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
+    if (continentUnits.length > 0) {
+      const unit = continentUnits[0];
+      sortedUnits.push(unit);
+      usedUnits.add(unit.id);
+    }
+  });
+
+  // Add remaining units
+  units.forEach(unit => {
+    if (!usedUnits.has(unit.id)) {
+      sortedUnits.push(unit);
+    }
+  });
+
+  return sortedUnits;
 };
 
 export default function LearnScreen() {
   const router = useRouter();
   const { progress, isLessonCompleted } = useUserProgress();
-  const { settings, setContinent, colors } = useSettings();
+  const { colors } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const [showContinentModal, setShowContinentModal] = useState(false);
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
-  const filteredUnits = getUnitsByContinent(settings.selectedContinent);
-  const selectedContinentData = CONTINENTS.find(c => c.id === settings.selectedContinent);
+  const sortedUnits = getSortedUnits();
 
   useEffect(() => {
     Animated.loop(
@@ -74,12 +115,12 @@ export default function LearnScreen() {
 
   const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
-    const prevUnit = filteredUnits[unitIndex - 1];
+    const prevUnit = sortedUnits[unitIndex - 1];
     if (!prevUnit) return true;
     const prevLessons = getLessonsByUnitId(prevUnit.id);
     const completedCount = prevLessons.filter(l => isLessonCompleted(l.id)).length;
     return completedCount >= Math.min(2, prevLessons.length);
-  }, [isLessonCompleted, filteredUnits]);
+  }, [isLessonCompleted, sortedUnits]);
 
   const getNextLesson = useCallback((unitId: string) => {
     const unitLessons = getLessonsByUnitId(unitId);
@@ -102,12 +143,6 @@ export default function LearnScreen() {
     if (nextLesson) {
       router.push(`/lesson/${nextLesson.id}`);
     }
-  };
-
-  const handleContinentSelect = (continent: Continent) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setContinent(continent);
-    setShowContinentModal(false);
   };
 
   const styles = createStyles(colors);
@@ -149,173 +184,137 @@ export default function LearnScreen() {
         </View>
       </View>
 
-      <TouchableOpacity
-        style={styles.continentSelector}
-        onPress={() => setShowContinentModal(true)}
-        activeOpacity={0.8}
-      >
-        <View style={styles.continentLeft}>
-          <Globe size={20} color={colors.primary} />
-          <Text style={styles.continentText}>
-            {selectedContinentData?.icon} {selectedContinentData?.name}
-          </Text>
-        </View>
-        <ChevronDown size={20} color={colors.textSecondary} />
-      </TouchableOpacity>
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.pathContainer}
         showsVerticalScrollIndicator={false}
       >
-        {filteredUnits.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateIcon}>🗺️</Text>
-            <Text style={styles.emptyStateTitle}>No battles yet</Text>
-            <Text style={styles.emptyStateText}>
-              Battles from this region are coming soon!
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.path}>
-            {filteredUnits.map((unit, index) => {
-              const unlocked = isUnitUnlocked(index);
-              const unitProgress = getUnitProgress(unit.id);
-              const isComplete = unitProgress.completed === unitProgress.total && unitProgress.total > 0;
-              const isCurrent = unlocked && !isComplete;
-              const branchPosition = getBranchPosition(index);
-              const horizontalOffset = getNodeHorizontalPosition(branchPosition);
-              const prevPosition = index > 0 ? getBranchPosition(index - 1) : 'center';
-              const prevOffset = getNodeHorizontalPosition(prevPosition);
+        <View style={styles.path}>
+          {sortedUnits.map((unit, index) => {
+            const unlocked = isUnitUnlocked(index);
+            const unitProgress = getUnitProgress(unit.id);
+            const isComplete = unitProgress.completed === unitProgress.total && unitProgress.total > 0;
+            const isCurrent = unlocked && !isComplete;
+            const prevContinent = index > 0 ? sortedUnits[index - 1].continent : null;
+            const branchPosition = getBranchPosition(index, unit.continent, prevContinent);
+            const horizontalOffset = getNodeHorizontalPosition(branchPosition);
+            const prevPosition = index > 0 ? getBranchPosition(index - 1, sortedUnits[index - 1].continent, index > 1 ? sortedUnits[index - 2].continent : null) : 'center';
+            const prevOffset = getNodeHorizontalPosition(prevPosition);
+            const continentStyle = getContinentStyle(unit.continent);
+            const isContinentChange = prevContinent && unit.continent !== prevContinent;
 
-              return (
-                <View key={unit.id} style={styles.nodeContainer}>
-                  {/* Branching path line */}
-                  {index > 0 && (
-                    <View style={styles.pathLineContainer}>
-                      {/* Vertical line from previous node */}
-                      <View
-                        style={[
-                          styles.pathLineVertical,
-                          unlocked && styles.pathLineComplete,
-                          { left: SCREEN_WIDTH / 2 - 2 + prevOffset },
-                        ]}
-                      />
-                      {/* Diagonal/horizontal connector if positions differ */}
-                      {prevOffset !== horizontalOffset && (
-                        <View
-                          style={[
-                            styles.pathLineDiagonal,
-                            unlocked && styles.pathLineComplete,
-                            {
-                              left: Math.min(SCREEN_WIDTH / 2 + prevOffset, SCREEN_WIDTH / 2 + horizontalOffset),
-                              width: Math.abs(horizontalOffset - prevOffset) + 4,
-                              top: 16,
-                            },
-                          ]}
-                        />
-                      )}
-                      {/* Vertical line to current node */}
+            return (
+              <View key={unit.id} style={styles.nodeContainer}>
+                {/* Branching path connectors */}
+                {index > 0 && (
+                  <View style={styles.pathLineContainer}>
+                    {/* SVG-like curved path using multiple lines */}
+                    {prevOffset === horizontalOffset ? (
+                      // Straight vertical line
                       <View
                         style={[
                           styles.pathLineVertical,
                           unlocked && styles.pathLineComplete,
                           {
-                            left: SCREEN_WIDTH / 2 - 2 + horizontalOffset,
-                            top: 20,
-                            height: 12,
+                            left: SCREEN_WIDTH / 2 - 2 + prevOffset,
+                            height: 40,
                           },
                         ]}
                       />
-                    </View>
-                  )}
-
-                  <Animated.View
-                    style={[
-                      styles.nodeWrapper,
-                      { transform: [{ scale: isCurrent ? pulseAnim : 1 }, { translateX: horizontalOffset }] },
-                    ]}
-                  >
-                    <TouchableOpacity
-                      style={[
-                        styles.node,
-                        !unlocked && styles.nodeLocked,
-                        isComplete && styles.nodeComplete,
-                        isCurrent && styles.nodeCurrent,
-                      ]}
-                      onPress={() => handleNodePress(unit.id, index)}
-                      activeOpacity={0.7}
-                    >
-                      {!unlocked ? (
-                        <Lock size={28} color={colors.textLight} />
-                      ) : isComplete ? (
-                        <Check size={32} color={colors.textInverse} strokeWidth={3} />
-                      ) : (
-                        <Text style={styles.nodeIcon}>{unit.icon}</Text>
-                      )}
-                    </TouchableOpacity>
-
-                    <View style={styles.nodeInfo}>
-                      <Text style={[
-                        styles.nodeTitle,
-                        !unlocked && styles.nodeTitleLocked,
-                      ]} numberOfLines={1}>
-                        {unit.title}
-                      </Text>
-                      <Text style={styles.nodeProgress}>
-                        {unitProgress.completed}/{unitProgress.total} lessons
-                      </Text>
-                    </View>
-                  </Animated.View>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </ScrollView>
-
-      <Modal
-        visible={showContinentModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowContinentModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Region</Text>
-              <TouchableOpacity onPress={() => setShowContinentModal(false)}>
-                <X size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalSubtitle}>Choose which battles you want to learn about</Text>
-
-            {CONTINENTS.map((continent) => (
-              <TouchableOpacity
-                key={continent.id}
-                style={[
-                  styles.continentOption,
-                  settings.selectedContinent === continent.id && styles.continentOptionSelected,
-                ]}
-                onPress={() => handleContinentSelect(continent.id)}
-              >
-                <View style={styles.continentOptionLeft}>
-                  <Text style={styles.continentOptionIcon}>{continent.icon}</Text>
-                  <Text style={[
-                    styles.continentOptionText,
-                    settings.selectedContinent === continent.id && styles.continentOptionTextSelected,
-                  ]}>
-                    {continent.name}
-                  </Text>
-                </View>
-                {settings.selectedContinent === continent.id && (
-                  <Check size={20} color={colors.primary} />
+                    ) : (
+                      // Curved path using diagonal segments
+                      <>
+                        {/* Top vertical segment */}
+                        <View
+                          style={[
+                            styles.pathLineVertical,
+                            unlocked && styles.pathLineComplete,
+                            {
+                              left: SCREEN_WIDTH / 2 - 2 + prevOffset,
+                              height: 12,
+                              top: 0,
+                            },
+                          ]}
+                        />
+                        {/* Horizontal connector */}
+                        <View
+                          style={[
+                            styles.pathLineHorizontal,
+                            unlocked && styles.pathLineComplete,
+                            isContinentChange && { backgroundColor: continentStyle.color },
+                            {
+                              left: Math.min(SCREEN_WIDTH / 2 + prevOffset, SCREEN_WIDTH / 2 + horizontalOffset) - 2,
+                              width: Math.abs(horizontalOffset - prevOffset) + 4,
+                              top: 12,
+                            },
+                          ]}
+                        />
+                        {/* Bottom vertical segment */}
+                        <View
+                          style={[
+                            styles.pathLineVertical,
+                            unlocked && styles.pathLineComplete,
+                            {
+                              left: SCREEN_WIDTH / 2 - 2 + horizontalOffset,
+                              height: 24,
+                              top: 16,
+                            },
+                          ]}
+                        />
+                      </>
+                    )}
+                  </View>
                 )}
-              </TouchableOpacity>
-            ))}
-          </View>
+
+                {/* Continent change indicator */}
+                {isContinentChange && (
+                  <View style={[styles.continentBadge, { backgroundColor: continentStyle.color }]}>
+                    <Text style={styles.continentBadgeText}>{continentStyle.icon}</Text>
+                  </View>
+                )}
+
+                <Animated.View
+                  style={[
+                    styles.nodeWrapper,
+                    { transform: [{ scale: isCurrent ? pulseAnim : 1 }, { translateX: horizontalOffset }] },
+                  ]}
+                >
+                  <TouchableOpacity
+                    style={[
+                      styles.node,
+                      !unlocked && styles.nodeLocked,
+                      isComplete && styles.nodeComplete,
+                      isCurrent && styles.nodeCurrent,
+                    ]}
+                    onPress={() => handleNodePress(unit.id, index)}
+                    activeOpacity={0.7}
+                  >
+                    {!unlocked ? (
+                      <Lock size={28} color={colors.textLight} />
+                    ) : isComplete ? (
+                      <Check size={32} color={colors.textInverse} strokeWidth={3} />
+                    ) : (
+                      <Text style={styles.nodeIcon}>{unit.icon}</Text>
+                    )}
+                  </TouchableOpacity>
+
+                  <View style={styles.nodeInfo}>
+                    <Text style={[
+                      styles.nodeTitle,
+                      !unlocked && styles.nodeTitleLocked,
+                    ]} numberOfLines={1}>
+                      {unit.title}
+                    </Text>
+                    <Text style={styles.nodeProgress}>
+                      {unitProgress.completed}/{unitProgress.total} lessons
+                    </Text>
+                  </View>
+                </Animated.View>
+              </View>
+            );
+          })}
         </View>
-      </Modal>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -367,28 +366,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.pathLine,
     borderRadius: 20,
   },
-  continentSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.card,
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  continentLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  continentText: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.text,
-  },
   scrollView: {
     flex: 1,
   },
@@ -404,23 +381,22 @@ const createStyles = (colors: any) => StyleSheet.create({
   nodeContainer: {
     alignItems: 'center',
     width: '100%',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   pathLineContainer: {
     position: 'absolute',
-    top: -24,
+    top: -20,
     left: 0,
     right: 0,
-    height: 32,
+    height: 40,
   },
   pathLineVertical: {
     position: 'absolute',
     width: 4,
-    height: 16,
     backgroundColor: colors.pathLine,
     borderRadius: 2,
   },
-  pathLineDiagonal: {
+  pathLineHorizontal: {
     position: 'absolute',
     height: 4,
     backgroundColor: colors.pathLine,
@@ -428,6 +404,25 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   pathLineComplete: {
     backgroundColor: colors.pathNodeComplete,
+  },
+  continentBadge: {
+    position: 'absolute',
+    top: -30,
+    left: SCREEN_WIDTH / 2 - 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  continentBadgeText: {
+    fontSize: 16,
   },
   nodeWrapper: {
     alignItems: 'center',
@@ -477,86 +472,5 @@ const createStyles = (colors: any) => StyleSheet.create({
   nodeProgress: {
     fontSize: 12,
     color: colors.textSecondary,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyStateIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: colors.text,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 20,
-    width: '100%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: colors.text,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 20,
-  },
-  continentOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: colors.backgroundDark,
-    marginBottom: 10,
-  },
-  continentOptionSelected: {
-    backgroundColor: colors.primary + '15',
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  continentOptionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  continentOptionIcon: {
-    fontSize: 24,
-  },
-  continentOptionText: {
-    fontSize: 16,
-    fontWeight: '500' as const,
-    color: colors.text,
-  },
-  continentOptionTextSelected: {
-    color: colors.primary,
-    fontWeight: '600' as const,
   },
 });

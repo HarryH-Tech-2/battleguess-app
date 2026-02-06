@@ -25,17 +25,19 @@ const { width } = Dimensions.get('window');
 
 type FeedbackState = 'none' | 'correct' | 'wrong';
 
-// Generate a battle image URL using a placeholder service with the battle name
-const getBattleImageUrl = (battleTitle: string) => {
-  // Using a themed placeholder that works well for battles
-  const encodedTitle = encodeURIComponent(battleTitle);
-  return `https://api.dicebear.com/7.x/shapes/png?seed=${encodedTitle}&backgroundColor=1C1917,292524&size=200`;
+const QUIZ_STARTING_HEARTS = 3;
+
+// Generate a battle image URL using picsum for varied imagery
+const getBattleImageUrl = (battleTitle: string, battleId: string) => {
+  // Use picsum.photos with a seed based on battle ID for consistent but varied images
+  const seed = battleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return `https://picsum.photos/seed/${seed}/400/300`;
 };
 
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { loseHeart, progress } = useUserProgress();
+  const { progress } = useUserProgress();
   const { colors } = useSettings();
 
   const lesson = getLessonById(id || '');
@@ -49,6 +51,8 @@ export default function LessonScreen() {
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [sliderValue, setSliderValue] = useState<number | null>(null);
+  // Per-quiz hearts - start with 3 for each quiz
+  const [quizHearts, setQuizHearts] = useState(QUIZ_STARTING_HEARTS);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -111,7 +115,8 @@ export default function LessonScreen() {
       ]).start();
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      loseHeart();
+      // Lose a quiz heart (per-quiz, not global)
+      setQuizHearts(prev => prev - 1);
 
       Animated.parallel([
         Animated.sequence([
@@ -132,7 +137,7 @@ export default function LessonScreen() {
         ]),
       ]).start();
 
-      if (progress.hearts <= 1) {
+      if (quizHearts <= 1) {
         setOutOfHearts(true);
       }
     }
@@ -143,7 +148,7 @@ export default function LessonScreen() {
       tension: 50,
       friction: 8,
     }).start();
-  }, [loseHeart, shakeAnim, feedbackSlideAnim, mascotAnim, mascotBounceAnim, progress.hearts]);
+  }, [shakeAnim, feedbackSlideAnim, mascotAnim, mascotBounceAnim, quizHearts]);
 
   const checkAnswer = useCallback(() => {
     if (!currentStep) return;
@@ -257,7 +262,7 @@ export default function LessonScreen() {
     return (
       <View style={styles.battleImageContainer}>
         <Image
-          source={{ uri: getBattleImageUrl(battle.title) }}
+          source={{ uri: getBattleImageUrl(battle.title, battle.id) }}
           style={styles.battleImage}
           contentFit="cover"
         />
@@ -678,7 +683,7 @@ export default function LessonScreen() {
         </View>
         <View style={styles.heartsContainer}>
           <Text style={styles.heartsIcon}>❤️</Text>
-          <Text style={styles.heartsText}>{progress.hearts}</Text>
+          <Text style={styles.heartsText}>{quizHearts}</Text>
         </View>
       </View>
 
