@@ -101,10 +101,11 @@ export default function LearnScreen() {
 
   const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
+    // Must complete ALL lessons in the previous unit to unlock the next one
     const prevUnit = filteredUnits[unitIndex - 1];
     const prevLessons = getLessonsByUnitId(prevUnit.id);
     const completedCount = prevLessons.filter(l => isLessonCompleted(l.id)).length;
-    return completedCount >= Math.min(1, prevLessons.length);
+    return completedCount >= prevLessons.length;
   }, [isLessonCompleted, filteredUnits]);
 
   const getNextLesson = useCallback((unitId: string) => {
