@@ -16,8 +16,7 @@ export default function HomeLayout() {
       <Stack.Screen
         name="learn"
         options={{
-          title: 'Home',
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack>

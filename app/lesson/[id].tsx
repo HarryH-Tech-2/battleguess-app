@@ -8,6 +8,7 @@ import {
   Dimensions,
   LayoutChangeEvent,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,9 +28,74 @@ type FeedbackState = 'none' | 'correct' | 'wrong';
 
 const QUIZ_STARTING_HEARTS = 3;
 
-// Generate a battle image URL using picsum for varied imagery
-const getBattleImageUrl = (battleTitle: string, battleId: string) => {
-  // Use picsum.photos with a seed based on battle ID for consistent but varied images
+// Gemini API configuration
+const GEMINI_API_KEY = 'REDACTED_GEMINI_KEY';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent';
+
+// Cache for generated images
+const imageCache: Map<string, string> = new Map();
+
+// Generate a battle image using Gemini API
+const generateBattleImage = async (battleTitle: string, battleId: string): Promise<string | null> => {
+  // Check cache first
+  const cacheKey = `battle-${battleId}`;
+  if (imageCache.has(cacheKey)) {
+    return imageCache.get(cacheKey)!;
+  }
+
+  try {
+    const prompt = `Create a dramatic, historically-inspired illustration of the ${battleTitle}. Style: Epic historical painting style, dramatic lighting, no text or labels. Focus on the battle scene with soldiers, weapons, and landscape appropriate to the era. Make it visually striking and educational.`;
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"]
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Gemini API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Extract image from response
+    const candidates = data.candidates;
+    if (candidates && candidates[0]?.content?.parts) {
+      for (const part of candidates[0].content.parts) {
+        if (part.inlineData?.mimeType?.startsWith('image/')) {
+          const base64Image = part.inlineData.data;
+          const mimeType = part.inlineData.mimeType;
+          const imageUrl = `data:${mimeType};base64,${base64Image}`;
+
+          // Cache the result
+          imageCache.set(cacheKey, imageUrl);
+
+          return imageUrl;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error generating battle image:', error);
+    return null;
+  }
+};
+
+// Fallback image URL using picsum.photos
+const getFallbackImageUrl = (battleId: string): string => {
   const seed = battleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return `https://picsum.photos/seed/${seed}/400/300`;
 };
@@ -54,6 +120,10 @@ export default function LessonScreen() {
   // Per-quiz hearts - start with 3 for each quiz
   const [quizHearts, setQuizHearts] = useState(QUIZ_STARTING_HEARTS);
 
+  // Battle image state
+  const [battleImageUrl, setBattleImageUrl] = useState<string | null>(null);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+
   const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const feedbackSlideAnim = useRef(new Animated.Value(100)).current;
@@ -74,6 +144,28 @@ export default function LessonScreen() {
       }).start();
     }
   }, [currentStepIndex, lesson, progressAnim]);
+
+  // Generate battle image using Gemini API
+  useEffect(() => {
+    if (battle && !battleImageUrl && !isLoadingImage) {
+      setIsLoadingImage(true);
+      generateBattleImage(battle.title, battle.id)
+        .then((url) => {
+          if (url) {
+            setBattleImageUrl(url);
+          } else {
+            // Use fallback if generation fails
+            setBattleImageUrl(getFallbackImageUrl(battle.id));
+          }
+        })
+        .catch(() => {
+          setBattleImageUrl(getFallbackImageUrl(battle.id));
+        })
+        .finally(() => {
+          setIsLoadingImage(false);
+        });
+    }
+  }, [battle, battleImageUrl, isLoadingImage]);
 
   const currentStep = lesson?.steps[currentStepIndex];
 
@@ -211,7 +303,7 @@ export default function LessonScreen() {
 
     if (outOfHearts) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      router.replace('/home');
+      router.replace('/(tabs)/(home)/learn');
       return;
     }
 
@@ -261,11 +353,18 @@ export default function LessonScreen() {
     if (!battle) return null;
     return (
       <View style={styles.battleImageContainer}>
-        <Image
-          source={{ uri: getBattleImageUrl(battle.title, battle.id) }}
-          style={styles.battleImage}
-          contentFit="cover"
-        />
+        {isLoadingImage ? (
+          <View style={styles.battleImageLoading}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={styles.battleImageLoadingText}>Generating image...</Text>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: battleImageUrl || getFallbackImageUrl(battle.id) }}
+            style={styles.battleImage}
+            contentFit="cover"
+          />
+        )}
         <Text style={styles.battleImageCaption}>{battle.title}</Text>
       </View>
     );
@@ -904,9 +1003,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.cardBorder,
   },
   battleImage: {
-    width: 120,
+    width: 160,
     height: 120,
     borderRadius: 12,
+  },
+  battleImageLoading: {
+    width: 160,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: colors.pathLine,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  battleImageLoadingText: {
+    fontSize: 11,
+    color: colors.textSecondary,
   },
   battleImageCaption: {
     marginTop: 8,

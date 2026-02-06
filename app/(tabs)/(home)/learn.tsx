@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Star, Lock, Check, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Flame, Star, Lock, Check } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { units } from '@/mocks/units';
@@ -20,62 +21,101 @@ import { getLessonsByUnitId } from '@/mocks/lessons';
 import { mascots } from '@/mocks/mascots';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const NODE_SIZE = 70;
-const BRANCH_WIDTH = 100;
+const NODE_SIZE = 72;
+const PATH_WIDTH = SCREEN_WIDTH - 40;
+const CENTER_X = PATH_WIDTH / 2;
+const HORIZONTAL_OFFSET = 80;
+const VERTICAL_SPACING = 100;
 
-// Continent configuration
-const continents = [
-  { id: 'europe', name: 'Europe', color: '#4A90D9' },
-  { id: 'asia', name: 'Asia', color: '#E85D75' },
-  { id: 'africa', name: 'Africa', color: '#F5A623' },
-  { id: 'americas', name: 'Americas', color: '#7B68EE' },
-];
+// Orange color palette (Duolingo-inspired but warmer)
+const THEME_COLORS = {
+  primary: '#FF9500',
+  primaryDark: '#E68600',
+  success: '#58CC02',
+  successDark: '#4CAF00',
+  locked: '#E5E5E5',
+  lockedBorder: '#AFAFAF',
+  current: '#FFC800',
+  pathLine: '#E5E5E5',
+  pathLineComplete: '#58CC02',
+};
+
+// Get winding path position (alternates left-center-right like Duolingo)
+const getNodePosition = (index: number): 'left' | 'center' | 'right' => {
+  // Pattern: center, right, center, left, center, right, center, left...
+  const pattern: ('left' | 'center' | 'right')[] = ['center', 'right', 'center', 'left'];
+  return pattern[index % pattern.length];
+};
+
+const getHorizontalOffset = (position: 'left' | 'center' | 'right'): number => {
+  switch (position) {
+    case 'left': return -HORIZONTAL_OFFSET;
+    case 'right': return HORIZONTAL_OFFSET;
+    default: return 0;
+  }
+};
 
 export default function LearnScreen() {
   const router = useRouter();
   const { progress, isLessonCompleted } = useUserProgress();
   const { colors } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const [expandedContinent, setExpandedContinent] = useState<string | null>('europe');
+  const bounceAnim = useRef(new Animated.Value(0)).current;
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
 
+  // Flatten all units for the winding path
+  const allUnits = useMemo(() => {
+    return units.sort((a, b) => {
+      // Sort by continent then by orderIndex
+      const continentOrder = ['europe', 'asia', 'africa', 'americas'];
+      const continentDiff = continentOrder.indexOf(a.continent) - continentOrder.indexOf(b.continent);
+      if (continentDiff !== 0) return continentDiff;
+      return a.orderIndex - b.orderIndex;
+    });
+  }, []);
+
   useEffect(() => {
+    // Pulse animation for current node
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 1000,
+          toValue: 1.08,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1000,
+          duration: 800,
           useNativeDriver: true,
         }),
       ])
     ).start();
-  }, [pulseAnim]);
 
-  // Get units for a specific continent
-  const getUnitsForContinent = useCallback((continentId: string) => {
-    return units
-      .filter(u => u.continent === continentId)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
-  }, []);
+    // Bounce animation for mascot
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(bounceAnim, {
+          toValue: -8,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bounceAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim, bounceAnim]);
 
-  // Check if unit is unlocked (first unit of each continent is always unlocked)
-  const isUnitUnlocked = useCallback((unit: typeof units[0], continentUnits: typeof units) => {
-    const unitIndex = continentUnits.findIndex(u => u.id === unit.id);
+  const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
-
-    const prevUnit = continentUnits[unitIndex - 1];
-    if (!prevUnit) return true;
-
+    const prevUnit = allUnits[unitIndex - 1];
     const prevLessons = getLessonsByUnitId(prevUnit.id);
     const completedCount = prevLessons.filter(l => isLessonCompleted(l.id)).length;
-    return completedCount >= Math.min(2, prevLessons.length);
-  }, [isLessonCompleted]);
+    return completedCount >= Math.min(1, prevLessons.length);
+  }, [isLessonCompleted, allUnits]);
 
   const getNextLesson = useCallback((unitId: string) => {
     const unitLessons = getLessonsByUnitId(unitId);
@@ -88,185 +128,183 @@ export default function LearnScreen() {
     return { completed, total: unitLessons.length };
   }, [isLessonCompleted]);
 
-  // Get continent progress
-  const getContinentProgress = useCallback((continentId: string) => {
-    const continentUnits = getUnitsForContinent(continentId);
-    let totalLessons = 0;
-    let completedLessons = 0;
+  // Find current unit index (first incomplete unlocked unit)
+  const currentUnitIndex = useMemo(() => {
+    for (let i = 0; i < allUnits.length; i++) {
+      if (!isUnitUnlocked(i)) continue;
+      const progress = getUnitProgress(allUnits[i].id);
+      if (progress.completed < progress.total) return i;
+    }
+    return 0;
+  }, [allUnits, isUnitUnlocked, getUnitProgress]);
 
-    continentUnits.forEach(unit => {
-      const unitLessons = getLessonsByUnitId(unit.id);
-      totalLessons += unitLessons.length;
-      completedLessons += unitLessons.filter(l => isLessonCompleted(l.id)).length;
-    });
-
-    return { completed: completedLessons, total: totalLessons };
-  }, [getUnitsForContinent, isLessonCompleted]);
-
-  const handleNodePress = (unit: typeof units[0], continentUnits: typeof units) => {
-    if (!isUnitUnlocked(unit, continentUnits)) {
+  const handleNodePress = (unitId: string, unitIndex: number) => {
+    if (!isUnitUnlocked(unitIndex)) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const nextLesson = getNextLesson(unit.id);
+    const nextLesson = getNextLesson(unitId);
     if (nextLesson) {
       router.push(`/lesson/${nextLesson.id}`);
     }
   };
 
-  const handleContinentPress = (continentId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setExpandedContinent(expandedContinent === continentId ? null : continentId);
+  const styles = createStyles(colors);
+
+  // Generate SVG path for the winding line
+  const generatePath = () => {
+    let pathD = '';
+    const nodePositions: { x: number; y: number }[] = [];
+
+    allUnits.forEach((_, index) => {
+      const position = getNodePosition(index);
+      const x = CENTER_X + getHorizontalOffset(position);
+      const y = 60 + index * VERTICAL_SPACING;
+      nodePositions.push({ x, y });
+    });
+
+    // Draw curved paths between nodes
+    for (let i = 0; i < nodePositions.length - 1; i++) {
+      const current = nodePositions[i];
+      const next = nodePositions[i + 1];
+      const midY = (current.y + next.y) / 2;
+
+      if (i === 0) {
+        pathD += `M ${current.x} ${current.y + NODE_SIZE / 2}`;
+      }
+
+      // Create S-curve between nodes
+      pathD += ` C ${current.x} ${midY}, ${next.x} ${midY}, ${next.x} ${next.y - NODE_SIZE / 2}`;
+    }
+
+    return pathD;
   };
 
-  const styles = createStyles(colors);
+  const pathD = generatePath();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Flame size={20} color={colors.streak} />
+            <Flame size={22} color={THEME_COLORS.primary} />
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
           </View>
           <View style={styles.statItem}>
-            <Star size={20} color={colors.xp} fill={colors.xp} />
+            <Star size={22} color={THEME_COLORS.current} fill={THEME_COLORS.current} />
             <Text style={styles.statValue}>{progress.totalXp}</Text>
           </View>
-          <View style={styles.profileButton}>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push('/profile')}
+          >
             {mascot ? (
               <Image source={{ uri: mascot.avatar }} style={styles.profileImage} />
             ) : (
               <View style={styles.profilePlaceholder} />
             )}
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.pathContainer}
+        contentContainerStyle={[
+          styles.pathContainer,
+          { minHeight: allUnits.length * VERTICAL_SPACING + 200 }
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Main branching path */}
-        <View style={styles.branchingPath}>
-          {continents.map((continent, continentIndex) => {
-            const continentUnits = getUnitsForContinent(continent.id);
-            const continentProgress = getContinentProgress(continent.id);
-            const isExpanded = expandedContinent === continent.id;
-            const isComplete = continentProgress.completed === continentProgress.total && continentProgress.total > 0;
+        {/* SVG Path background */}
+        <View style={styles.pathSvgContainer}>
+          <Svg width={PATH_WIDTH} height={allUnits.length * VERTICAL_SPACING + 100}>
+            {/* Background path */}
+            <Path
+              d={pathD}
+              stroke={THEME_COLORS.pathLine}
+              strokeWidth={8}
+              fill="none"
+              strokeLinecap="round"
+            />
+          </Svg>
+        </View>
+
+        {/* Nodes */}
+        <View style={styles.nodesContainer}>
+          {allUnits.map((unit, index) => {
+            const unlocked = isUnitUnlocked(index);
+            const unitProgress = getUnitProgress(unit.id);
+            const isComplete = unitProgress.completed === unitProgress.total && unitProgress.total > 0;
+            const isCurrent = index === currentUnitIndex;
+            const position = getNodePosition(index);
+            const horizontalOffset = getHorizontalOffset(position);
 
             return (
-              <View key={continent.id} style={styles.continentSection}>
-                {/* Connector line from previous continent */}
-                {continentIndex > 0 && (
-                  <View style={styles.continentConnector}>
-                    <View style={[styles.connectorLine, { backgroundColor: colors.pathLine }]} />
-                  </View>
-                )}
-
-                {/* Continent header button */}
-                <TouchableOpacity
+              <View
+                key={unit.id}
+                style={[
+                  styles.nodeRow,
+                  { height: VERTICAL_SPACING }
+                ]}
+              >
+                <Animated.View
                   style={[
-                    styles.continentHeader,
-                    { borderColor: continent.color },
-                    isExpanded && { backgroundColor: continent.color + '15' },
+                    styles.nodeWrapper,
+                    {
+                      transform: [
+                        { translateX: horizontalOffset },
+                        { scale: isCurrent ? pulseAnim : 1 },
+                      ],
+                    },
                   ]}
-                  onPress={() => handleContinentPress(continent.id)}
-                  activeOpacity={0.7}
                 >
-                  <View style={[styles.continentDot, { backgroundColor: continent.color }]} />
-                  <View style={styles.continentInfo}>
-                    <Text style={[styles.continentName, { color: continent.color }]}>
-                      {continent.name}
-                    </Text>
-                    <Text style={styles.continentProgressText}>
-                      {continentProgress.completed}/{continentProgress.total} lessons
-                    </Text>
-                  </View>
-                  <View style={styles.continentExpandIcon}>
-                    {isExpanded ? (
-                      <ChevronUp size={20} color={continent.color} />
-                    ) : (
-                      <ChevronDown size={20} color={continent.color} />
-                    )}
-                  </View>
-                  {isComplete && (
-                    <View style={[styles.completeBadge, { backgroundColor: colors.success }]}>
-                      <Check size={12} color="#FFFFFF" strokeWidth={3} />
+                  {/* START label for current node */}
+                  {isCurrent && (
+                    <View style={styles.startLabelContainer}>
+                      <View style={styles.startLabel}>
+                        <Text style={styles.startLabelText}>START</Text>
+                      </View>
+                      <View style={styles.startLabelArrow} />
                     </View>
                   )}
-                </TouchableOpacity>
 
-                {/* Expanded units path */}
-                {isExpanded && (
-                  <View style={styles.unitsContainer}>
-                    {continentUnits.map((unit, index) => {
-                      const unlocked = isUnitUnlocked(unit, continentUnits);
-                      const unitProgress = getUnitProgress(unit.id);
-                      const isUnitComplete = unitProgress.completed === unitProgress.total && unitProgress.total > 0;
-                      const isCurrent = unlocked && !isUnitComplete;
+                  <TouchableOpacity
+                    style={[
+                      styles.node,
+                      !unlocked && styles.nodeLocked,
+                      isComplete && styles.nodeComplete,
+                      isCurrent && styles.nodeCurrent,
+                    ]}
+                    onPress={() => handleNodePress(unit.id, index)}
+                    activeOpacity={0.7}
+                  >
+                    {!unlocked ? (
+                      <Lock size={28} color={THEME_COLORS.lockedBorder} />
+                    ) : isComplete ? (
+                      <Check size={32} color="#FFFFFF" strokeWidth={3} />
+                    ) : (
+                      <Text style={styles.nodeIcon}>{unit.icon}</Text>
+                    )}
+                  </TouchableOpacity>
 
-                      return (
-                        <View key={unit.id} style={styles.unitRow}>
-                          {/* Vertical connector */}
-                          <View style={styles.unitConnectorContainer}>
-                            <View
-                              style={[
-                                styles.unitConnectorLine,
-                                { backgroundColor: unlocked ? continent.color : colors.pathLine },
-                              ]}
-                            />
-                          </View>
-
-                          {/* Unit node */}
-                          <Animated.View
-                            style={[
-                              styles.unitNodeWrapper,
-                              { transform: [{ scale: isCurrent ? pulseAnim : 1 }] },
-                            ]}
-                          >
-                            <TouchableOpacity
-                              style={[
-                                styles.unitNode,
-                                { borderColor: continent.color },
-                                !unlocked && styles.unitNodeLocked,
-                                isUnitComplete && { backgroundColor: continent.color },
-                                isCurrent && { backgroundColor: continent.color + '30' },
-                              ]}
-                              onPress={() => handleNodePress(unit, continentUnits)}
-                              activeOpacity={0.7}
-                            >
-                              {!unlocked ? (
-                                <Lock size={24} color={colors.textLight} />
-                              ) : isUnitComplete ? (
-                                <Check size={26} color="#FFFFFF" strokeWidth={3} />
-                              ) : (
-                                <Text style={styles.unitIcon}>{unit.icon}</Text>
-                              )}
-                            </TouchableOpacity>
-
-                            <View style={styles.unitInfo}>
-                              <Text
-                                style={[
-                                  styles.unitTitle,
-                                  !unlocked && styles.unitTitleLocked,
-                                ]}
-                                numberOfLines={2}
-                              >
-                                {unit.title}
-                              </Text>
-                              <Text style={styles.unitProgressText}>
-                                {unitProgress.completed}/{unitProgress.total}
-                              </Text>
-                            </View>
-                          </Animated.View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                )}
+                  {/* Mascot appears next to current node */}
+                  {isCurrent && mascot && (
+                    <Animated.View
+                      style={[
+                        styles.mascotContainer,
+                        position === 'right' ? styles.mascotLeft : styles.mascotRight,
+                        { transform: [{ translateY: bounceAnim }] }
+                      ]}
+                    >
+                      <Image
+                        source={{ uri: mascot.avatar }}
+                        style={styles.mascotImage}
+                      />
+                    </Animated.View>
+                  )}
+                </Animated.View>
               </View>
             );
           })}
@@ -279,19 +317,19 @@ export default function LearnScreen() {
 const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FFFFFF',
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: colors.card,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: colors.cardBorder,
+    borderBottomColor: '#F0F0F0',
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: 24,
   },
   statItem: {
     flexDirection: 'row',
@@ -301,155 +339,134 @@ const createStyles = (colors: any) => StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: colors.text,
+    color: '#4B4B4B',
   },
   profileButton: {
     marginLeft: 'auto',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.backgroundDark,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F5F5F5',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: THEME_COLORS.primary,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
   },
   profilePlaceholder: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.pathLine,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 22,
   },
   scrollView: {
     flex: 1,
   },
   pathContainer: {
-    paddingVertical: 24,
+    paddingTop: 20,
     paddingHorizontal: 20,
+    alignItems: 'center',
   },
-  branchingPath: {
+  pathSvgContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+  },
+  nodesContainer: {
+    width: PATH_WIDTH,
+    alignItems: 'center',
+  },
+  nodeRow: {
     width: '100%',
-  },
-  continentSection: {
-    marginBottom: 8,
-  },
-  continentConnector: {
-    height: 24,
     alignItems: 'center',
-    marginBottom: 8,
+    justifyContent: 'flex-start',
+    paddingTop: 20,
   },
-  connectorLine: {
-    width: 3,
-    height: '100%',
-    borderRadius: 2,
-  },
-  continentHeader: {
-    flexDirection: 'row',
+  nodeWrapper: {
     alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 2,
-    padding: 16,
     position: 'relative',
   },
-  continentDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  continentInfo: {
-    flex: 1,
-  },
-  continentName: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-  },
-  continentProgressText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  continentExpandIcon: {
-    marginLeft: 8,
-  },
-  completeBadge: {
+  startLabelContainer: {
     position: 'absolute',
-    top: -6,
-    right: -6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    justifyContent: 'center',
+    top: -45,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.card,
   },
-  unitsContainer: {
-    marginLeft: 24,
-    marginTop: 4,
+  startLabel: {
+    backgroundColor: THEME_COLORS.success,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  unitRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    minHeight: 90,
+  startLabelText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800' as const,
+    letterSpacing: 1,
   },
-  unitConnectorContainer: {
-    width: 24,
-    alignItems: 'center',
-    paddingTop: 0,
-    height: '100%',
+  startLabelArrow: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: THEME_COLORS.success,
+    marginTop: -1,
   },
-  unitConnectorLine: {
-    width: 3,
-    height: '100%',
-    borderRadius: 2,
-  },
-  unitNodeWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    paddingVertical: 8,
-  },
-  unitNode: {
+  node: {
     width: NODE_SIZE,
     height: NODE_SIZE,
     borderRadius: NODE_SIZE / 2,
-    backgroundColor: colors.card,
-    borderWidth: 3,
+    backgroundColor: THEME_COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: THEME_COLORS.primaryDark,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 0,
+    elevation: 6,
+    borderBottomWidth: 6,
+    borderBottomColor: THEME_COLORS.primaryDark,
   },
-  unitNodeLocked: {
-    backgroundColor: colors.pathNodeLocked,
-    borderColor: colors.pathLine,
+  nodeLocked: {
+    backgroundColor: THEME_COLORS.locked,
+    borderBottomColor: THEME_COLORS.lockedBorder,
+    shadowColor: THEME_COLORS.lockedBorder,
   },
-  unitIcon: {
-    fontSize: 26,
+  nodeComplete: {
+    backgroundColor: THEME_COLORS.success,
+    borderBottomColor: THEME_COLORS.successDark,
+    shadowColor: THEME_COLORS.successDark,
   },
-  unitInfo: {
-    marginLeft: 16,
-    flex: 1,
+  nodeCurrent: {
+    backgroundColor: THEME_COLORS.success,
+    borderBottomColor: THEME_COLORS.successDark,
+    shadowColor: THEME_COLORS.successDark,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    borderBottomWidth: 6,
   },
-  unitTitle: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: colors.text,
+  nodeIcon: {
+    fontSize: 30,
   },
-  unitTitleLocked: {
-    color: colors.textLight,
+  mascotContainer: {
+    position: 'absolute',
+    top: -10,
   },
-  unitProgressText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 2,
+  mascotLeft: {
+    left: -70,
+  },
+  mascotRight: {
+    right: -70,
+  },
+  mascotImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
 });

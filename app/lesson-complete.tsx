@@ -91,7 +91,7 @@ export default function LessonCompleteScreen() {
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace('/home');
+    router.replace('/(tabs)/(home)/learn');
   };
 
   const getMapUrl = (lat: number, lng: number) => {
