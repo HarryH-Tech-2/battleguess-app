@@ -8,7 +8,6 @@ import {
   Dimensions,
   LayoutChangeEvent,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,73 +27,31 @@ type FeedbackState = 'none' | 'correct' | 'wrong';
 
 const QUIZ_STARTING_HEARTS = 3;
 
-// Gemini API configuration
-const GEMINI_API_KEY = 'REDACTED_GEMINI_KEY';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent';
-
-// Cache for generated images
-const imageCache: Map<string, string> = new Map();
-
-// Generate a battle image using Gemini API
-const generateBattleImage = async (battleTitle: string, battleId: string): Promise<string | null> => {
-  // Check cache first
-  const cacheKey = `battle-${battleId}`;
-  if (imageCache.has(cacheKey)) {
-    return imageCache.get(cacheKey)!;
-  }
-
-  try {
-    const prompt = `Create a dramatic, historically-inspired illustration of the ${battleTitle}. Style: Epic historical painting style, dramatic lighting, no text or labels. Focus on the battle scene with soldiers, weapons, and landscape appropriate to the era. Make it visually striking and educational.`;
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          responseModalities: ["TEXT", "IMAGE"]
-        }
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('Gemini API error:', response.status);
-      return null;
-    }
-
-    const data = await response.json();
-
-    // Extract image from response
-    const candidates = data.candidates;
-    if (candidates && candidates[0]?.content?.parts) {
-      for (const part of candidates[0].content.parts) {
-        if (part.inlineData?.mimeType?.startsWith('image/')) {
-          const base64Image = part.inlineData.data;
-          const mimeType = part.inlineData.mimeType;
-          const imageUrl = `data:${mimeType};base64,${base64Image}`;
-
-          // Cache the result
-          imageCache.set(cacheKey, imageUrl);
-
-          return imageUrl;
-        }
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error generating battle image:', error);
-    return null;
-  }
+// Battle placeholder images using Unsplash/Pexels style URLs
+// These provide thematic historical images for each battle until custom images are generated
+const battleImageUrls: Record<string, string> = {
+  'thermopylae': 'https://images.unsplash.com/photo-1564399263809-d8c0f8988aed?w=400&h=300&fit=crop', // Greek temple
+  'marathon': 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&h=300&fit=crop', // Running/athletics
+  'hastings': 'https://images.unsplash.com/photo-1590845947698-8924d7409b56?w=400&h=300&fit=crop', // Medieval castle
+  'agincourt': 'https://images.unsplash.com/photo-1584717489969-dda7c459ec2b?w=400&h=300&fit=crop', // Medieval armor
+  'waterloo': 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=400&h=300&fit=crop', // Battlefield
+  'austerlitz': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop', // Napoleon era
+  'stalingrad': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=300&fit=crop', // WWII
+  'dday': 'https://images.unsplash.com/photo-1562016600-ece13e8ba570?w=400&h=300&fit=crop', // Beach/Normandy
+  'gettysburg': 'https://images.unsplash.com/photo-1569672455082-ef7eedf21d9c?w=400&h=300&fit=crop', // Civil War cannon
+  'sekigahara': 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop', // Japanese samurai
+  'somme': 'https://images.unsplash.com/photo-1516410529446-2c777cb7366d?w=400&h=300&fit=crop', // WWI trenches
+  'cannae': 'https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?w=400&h=300&fit=crop', // Roman
+  'zama': 'https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?w=400&h=300&fit=crop', // Roman
+  'midway': 'https://images.unsplash.com/photo-1517232115160-ff93364542dd?w=400&h=300&fit=crop', // Aircraft carrier
+  'iwo-jima': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop', // Pacific island
 };
 
-// Fallback image URL using picsum.photos
+const getBattleImageUrl = (battleId: string): string => {
+  return battleImageUrls[battleId] || getFallbackImageUrl(battleId);
+};
+
+// Fallback image URL using picsum.photos for battles without local images
 const getFallbackImageUrl = (battleId: string): string => {
   const seed = battleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return `https://picsum.photos/seed/${seed}/400/300`;
@@ -120,9 +77,8 @@ export default function LessonScreen() {
   // Per-quiz hearts - start with 3 for each quiz
   const [quizHearts, setQuizHearts] = useState(QUIZ_STARTING_HEARTS);
 
-  // Battle image state
-  const [battleImageUrl, setBattleImageUrl] = useState<string | null>(null);
-  const [isLoadingImage, setIsLoadingImage] = useState(false);
+  // Battle image URL
+  const battleImageUrl = battle ? getBattleImageUrl(battle.id) : null;
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -145,27 +101,6 @@ export default function LessonScreen() {
     }
   }, [currentStepIndex, lesson, progressAnim]);
 
-  // Generate battle image using Gemini API
-  useEffect(() => {
-    if (battle && !battleImageUrl && !isLoadingImage) {
-      setIsLoadingImage(true);
-      generateBattleImage(battle.title, battle.id)
-        .then((url) => {
-          if (url) {
-            setBattleImageUrl(url);
-          } else {
-            // Use fallback if generation fails
-            setBattleImageUrl(getFallbackImageUrl(battle.id));
-          }
-        })
-        .catch(() => {
-          setBattleImageUrl(getFallbackImageUrl(battle.id));
-        })
-        .finally(() => {
-          setIsLoadingImage(false);
-        });
-    }
-  }, [battle, battleImageUrl, isLoadingImage]);
 
   const currentStep = lesson?.steps[currentStepIndex];
 
@@ -350,22 +285,15 @@ export default function LessonScreen() {
   }, [currentStep, selectedAnswer, orderedItems, matchedPairs]);
 
   const renderBattleImage = () => {
-    if (!battle) return null;
+    if (!battle || !battleImageUrl) return null;
+
     return (
       <View style={styles.battleImageContainer}>
-        {isLoadingImage ? (
-          <View style={styles.battleImageLoading}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={styles.battleImageLoadingText}>Generating image...</Text>
-          </View>
-        ) : (
-          <Image
-            source={{ uri: battleImageUrl || getFallbackImageUrl(battle.id) }}
-            style={styles.battleImage}
-            contentFit="cover"
-          />
-        )}
-        <Text style={styles.battleImageCaption}>{battle.title}</Text>
+        <Image
+          source={{ uri: battleImageUrl }}
+          style={styles.battleImage}
+          contentFit="cover"
+        />
       </View>
     );
   };
@@ -1006,26 +934,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: 160,
     height: 120,
     borderRadius: 12,
-  },
-  battleImageLoading: {
-    width: 160,
-    height: 120,
-    borderRadius: 12,
-    backgroundColor: colors.pathLine,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  battleImageLoadingText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-  },
-  battleImageCaption: {
-    marginTop: 8,
-    fontSize: 12,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    fontStyle: 'italic' as const,
   },
   mapContainer: {
     flex: 1,
