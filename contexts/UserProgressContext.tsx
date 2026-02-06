@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { UserProgress, DailyGoal, Interest, KnowledgeLevel, LessonAttempt } from '@/types';
 
 const STORAGE_KEY = 'battleguess_progress';
-const HEARTS_REFILL_HOURS = 4;
+const HEARTS_REFILL_HOURS = 3; // Hearts refill every 3 hours after hitting 0
 const MAX_HEARTS = 5;
 
 const defaultProgress: UserProgress = {

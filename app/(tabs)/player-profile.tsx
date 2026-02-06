@@ -1,35 +1,28 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  Animated,
+import { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { 
-  Target, 
-  Trophy, 
-  Flame, 
-  Star, 
-  BookOpen, 
-  ChevronRight,
+import {
+  Trophy,
+  Flame,
+  Star,
+  BookOpen,
   X,
-  Check,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { mascots } from '@/mocks/mascots';
 import { educationalArticles, EducationalArticle } from '@/mocks/educational';
-import { DailyGoal } from '@/types';
-import Colors from '@/constants/colors';
 
-const DAILY_GOAL_OPTIONS: DailyGoal[] = [5, 10, 15];
-
-const FormattedContent = ({ content }: { content: string }) => {
+const FormattedContent = ({ content, colors }: { content: string; colors: any }) => {
   const elements = useMemo(() => {
     const lines = content.split('\n');
     const result: { type: 'heading' | 'paragraph' | 'bullet'; text: string }[] = [];
@@ -37,7 +30,7 @@ const FormattedContent = ({ content }: { content: string }) => {
 
     lines.forEach((line) => {
       const trimmedLine = line.trim();
-      
+
       if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
         if (currentParagraph) {
           result.push({ type: 'paragraph', text: currentParagraph.trim() });
@@ -66,6 +59,8 @@ const FormattedContent = ({ content }: { content: string }) => {
 
     return result;
   }, [content]);
+
+  const styles = createFormattedStyles(colors);
 
   return (
     <View>
@@ -96,35 +91,17 @@ const FormattedContent = ({ content }: { content: string }) => {
 };
 
 export default function PlayerProfileScreen() {
-  const { progress, updateProgress } = useUserProgress();
-  const [showGoalModal, setShowGoalModal] = useState(false);
+  const { progress } = useUserProgress();
+  const { colors } = useSettings();
   const [selectedArticle, setSelectedArticle] = useState<EducationalArticle | null>(null);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
-
-  const handleGoalPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setShowGoalModal(true);
-  };
-
-  const handleSelectGoal = (goal: DailyGoal) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    updateProgress({ dailyGoal: goal });
-    setShowGoalModal(false);
-  };
+  const styles = createStyles(colors);
 
   const handleArticlePress = useCallback((article: EducationalArticle) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedArticle(article);
   }, []);
-
-  const animatePress = useCallback(() => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.95, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
-    ]).start();
-  }, [scaleAnim]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -146,52 +123,33 @@ export default function PlayerProfileScreen() {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: Colors.streak + '20' }]}>
-              <Flame size={24} color={Colors.streak} />
+            <View style={[styles.statIconContainer, { backgroundColor: colors.streak + '20' }]}>
+              <Flame size={24} color={colors.streak} />
             </View>
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
             <Text style={styles.statLabel}>Day Streak</Text>
           </View>
-          
+
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: Colors.xp + '20' }]}>
-              <Star size={24} color={Colors.xp} />
+            <View style={[styles.statIconContainer, { backgroundColor: colors.xp + '20' }]}>
+              <Star size={24} color={colors.xp} />
             </View>
             <Text style={styles.statValue}>{progress.totalXp}</Text>
             <Text style={styles.statLabel}>Total XP</Text>
           </View>
-          
+
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: Colors.success + '20' }]}>
-              <Trophy size={24} color={Colors.success} />
+            <View style={[styles.statIconContainer, { backgroundColor: colors.success + '20' }]}>
+              <Trophy size={24} color={colors.success} />
             </View>
             <Text style={styles.statValue}>{progress.completedLessons.length}</Text>
             <Text style={styles.statLabel}>Lessons</Text>
           </View>
         </View>
 
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <TouchableOpacity 
-            style={styles.goalCard} 
-            onPress={() => { animatePress(); handleGoalPress(); }}
-            activeOpacity={0.9}
-          >
-            <View style={styles.goalLeft}>
-              <View style={[styles.goalIconContainer, { backgroundColor: Colors.primary + '20' }]}>
-                <Target size={24} color={Colors.primary} />
-              </View>
-              <View>
-                <Text style={styles.goalTitle}>Daily Goal</Text>
-                <Text style={styles.goalValue}>{progress.dailyGoal} minutes per day</Text>
-              </View>
-            </View>
-            <ChevronRight size={24} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </Animated.View>
-
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <BookOpen size={20} color={Colors.primary} />
+            <BookOpen size={20} color={colors.primary} />
             <Text style={styles.sectionTitle}>Learn More</Text>
           </View>
           <Text style={styles.sectionSubtitle}>Educational articles about military history</Text>
@@ -221,49 +179,6 @@ export default function PlayerProfileScreen() {
       </ScrollView>
 
       <Modal
-        visible={showGoalModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowGoalModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Set Daily Goal</Text>
-              <TouchableOpacity onPress={() => setShowGoalModal(false)}>
-                <X size={24} color={Colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalSubtitle}>How much time do you want to learn each day?</Text>
-            
-            {DAILY_GOAL_OPTIONS.map((goal) => (
-              <TouchableOpacity
-                key={goal}
-                style={[
-                  styles.goalOption,
-                  progress.dailyGoal === goal && styles.goalOptionSelected,
-                ]}
-                onPress={() => handleSelectGoal(goal)}
-              >
-                <View style={styles.goalOptionLeft}>
-                  <Target size={20} color={progress.dailyGoal === goal ? Colors.primary : Colors.textSecondary} />
-                  <Text style={[
-                    styles.goalOptionText,
-                    progress.dailyGoal === goal && styles.goalOptionTextSelected,
-                  ]}>
-                    {goal} minutes
-                  </Text>
-                </View>
-                {progress.dailyGoal === goal && (
-                  <Check size={20} color={Colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
         visible={!!selectedArticle}
         animationType="slide"
         onRequestClose={() => setSelectedArticle(null)}
@@ -271,19 +186,19 @@ export default function PlayerProfileScreen() {
         <SafeAreaView style={styles.articleModalContainer}>
           <View style={styles.articleModalHeader}>
             <TouchableOpacity onPress={() => setSelectedArticle(null)} style={styles.closeButton}>
-              <X size={24} color={Colors.text} />
+              <X size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.articleModalTitle} numberOfLines={1}>{selectedArticle?.title}</Text>
             <View style={{ width: 40 }} />
           </View>
-          
+
           <ScrollView style={styles.articleModalScroll} showsVerticalScrollIndicator={false}>
             {selectedArticle && (
               <>
-                <Image 
-                  source={{ uri: selectedArticle.imageUrl }} 
-                  style={styles.articleModalImage} 
-                  contentFit="cover" 
+                <Image
+                  source={{ uri: selectedArticle.imageUrl }}
+                  style={styles.articleModalImage}
+                  contentFit="cover"
                 />
                 <View style={styles.articleModalContent}>
                   <View style={styles.articleModalMeta}>
@@ -292,7 +207,7 @@ export default function PlayerProfileScreen() {
                     </View>
                   </View>
                   <Text style={styles.articleModalHeading}>{selectedArticle.title}</Text>
-                  <FormattedContent content={selectedArticle.content} />
+                  <FormattedContent content={selectedArticle.content} colors={colors} />
                 </View>
               </>
             )}
@@ -303,22 +218,55 @@ export default function PlayerProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createFormattedStyles = (colors: any) => StyleSheet.create({
+  articleHeading: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.text,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  articleParagraph: {
+    fontSize: 16,
+    color: colors.text,
+    lineHeight: 26,
+    marginBottom: 16,
+  },
+  bulletContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    paddingLeft: 8,
+  },
+  bulletPoint: {
+    fontSize: 16,
+    color: colors.primary,
+    marginRight: 8,
+    lineHeight: 26,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+    lineHeight: 26,
+  },
+});
+
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   scrollView: {
     flex: 1,
@@ -326,12 +274,12 @@ const styles = StyleSheet.create({
   profileCard: {
     alignItems: 'center',
     padding: 24,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     marginHorizontal: 20,
     marginTop: 20,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   avatarContainer: {
     width: 100,
@@ -339,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     overflow: 'hidden',
     borderWidth: 4,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
     marginBottom: 16,
   },
   avatar: {
@@ -349,17 +297,17 @@ const styles = StyleSheet.create({
   mascotName: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 4,
   },
   mascotDescription: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   mascotDates: {
     fontSize: 13,
-    color: Colors.primary,
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 6,
     fontWeight: '500' as const,
@@ -374,10 +322,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 16,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   statIconContainer: {
     width: 48,
@@ -390,45 +338,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 2,
-  },
-  goalCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.card,
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  goalLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  goalIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  goalTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  goalValue: {
-    fontSize: 14,
-    color: Colors.textSecondary,
   },
   section: {
     marginTop: 24,
@@ -442,21 +357,21 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
     marginBottom: 16,
   },
   articleCard: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   articleImage: {
     width: '100%',
@@ -472,7 +387,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   categoryBadge: {
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: colors.primary + '20',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -480,84 +395,25 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
-  
   articleTitle: {
     fontSize: 18,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 4,
   },
   articleSummary: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   bottomPadding: {
     height: 40,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: Colors.card,
-    borderRadius: 20,
-    padding: 20,
-    width: '100%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: Colors.text,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 20,
-  },
-  goalOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.backgroundDark,
-    marginBottom: 12,
-  },
-  goalOptionSelected: {
-    backgroundColor: Colors.primary + '15',
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  goalOptionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  goalOptionText: {
-    fontSize: 16,
-    fontWeight: '500' as const,
-    color: Colors.text,
-  },
-  goalOptionTextSelected: {
-    color: Colors.primary,
-    fontWeight: '600' as const,
-  },
   articleModalContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   articleModalHeader: {
     flexDirection: 'row',
@@ -565,9 +421,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
   closeButton: {
     width: 40,
@@ -579,7 +435,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   articleModalScroll: {
@@ -601,43 +457,8 @@ const styles = StyleSheet.create({
   articleModalHeading: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 16,
     lineHeight: 34,
-  },
-  articleModalBody: {
-    fontSize: 16,
-    color: Colors.text,
-    lineHeight: 26,
-  },
-  articleHeading: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  articleParagraph: {
-    fontSize: 16,
-    color: Colors.text,
-    lineHeight: 26,
-    marginBottom: 16,
-  },
-  bulletContainer: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    paddingLeft: 8,
-  },
-  bulletPoint: {
-    fontSize: 16,
-    color: Colors.primary,
-    marginRight: 8,
-    lineHeight: 26,
-  },
-  bulletText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-    lineHeight: 26,
   },
 });

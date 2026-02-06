@@ -11,14 +11,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { BookOpen, ChevronRight, Heart, Star, Check } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { lessons } from '@/mocks/lessons';
 import { getBattleById } from '@/mocks/battles';
-import Colors from '@/constants/colors';
 
 export default function ReviewScreen() {
   const router = useRouter();
   const { progress, gainHeartFromReview, isLessonCompleted } = useUserProgress();
+  const { colors } = useSettings();
   const [completedReviews, setCompletedReviews] = useState<string[]>([]);
+  const styles = createStyles(colors);
 
   const reviewLessons = useMemo(() => {
     const completed = lessons.filter(l => isLessonCompleted(l.id));
@@ -50,9 +52,9 @@ export default function ReviewScreen() {
   if (reviewLessons.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
-        <Stack.Screen options={{ title: 'Daily Review' }} />
+        <Stack.Screen options={{ title: 'Review' }} />
         <View style={styles.emptyContainer}>
-          <BookOpen size={64} color={Colors.pathLine} />
+          <BookOpen size={64} color={colors.pathLine} />
           <Text style={styles.emptyTitle}>No Reviews Yet</Text>
           <Text style={styles.emptySubtitle}>
             Complete some lessons first to unlock review sessions
@@ -71,16 +73,16 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Stack.Screen options={{ title: 'Daily Review' }} />
-      
+      <Stack.Screen options={{ title: 'Review' }} />
+
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Practice Makes Perfect</Text>
         <Text style={styles.headerSubtitle}>
           Review battles you have learned to strengthen your memory
         </Text>
-        
+
         <View style={styles.rewardBanner}>
-          <Heart size={20} color={Colors.hearts} fill={Colors.hearts} />
+          <Heart size={20} color={colors.hearts} fill={colors.hearts} />
           <Text style={styles.rewardText}>
             Complete a review to earn a heart!
           </Text>
@@ -127,12 +129,12 @@ export default function ReviewScreen() {
                 >
                   {isReviewed ? (
                     <>
-                      <Check size={16} color={Colors.success} />
+                      <Check size={16} color={colors.success} />
                       <Text style={styles.quickReviewTextDone}>Reviewed</Text>
                     </>
                   ) : (
                     <>
-                      <Star size={16} color={Colors.secondary} />
+                      <Star size={16} color={colors.secondary} />
                       <Text style={styles.quickReviewText}>Quick Review</Text>
                     </>
                   )}
@@ -144,7 +146,7 @@ export default function ReviewScreen() {
                   activeOpacity={0.7}
                 >
                   <Text style={styles.fullLessonText}>Full Lesson</Text>
-                  <ChevronRight size={16} color={Colors.primary} />
+                  <ChevronRight size={16} color={colors.primary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -155,7 +157,7 @@ export default function ReviewScreen() {
       {completedReviews.length > 0 && (
         <View style={styles.footer}>
           <View style={styles.completedBanner}>
-            <Check size={20} color={Colors.success} />
+            <Check size={20} color={colors.success} />
             <Text style={styles.completedText}>
               {completedReviews.length} review{completedReviews.length !== 1 ? 's' : ''} completed!
             </Text>
@@ -166,39 +168,39 @@ export default function ReviewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
-    backgroundColor: Colors.card,
+    borderBottomColor: colors.cardBorder,
+    backgroundColor: colors.card,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 16,
   },
   rewardBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: Colors.hearts + '15',
+    backgroundColor: colors.hearts + '15',
     padding: 12,
     borderRadius: 12,
   },
   rewardText: {
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     fontWeight: '500' as const,
   },
   scrollView: {
@@ -209,10 +211,10 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   reviewCard: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     overflow: 'hidden',
   },
   cardHeader: {
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -238,27 +240,27 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   cardSubtitle: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   needsPractice: {
-    backgroundColor: Colors.warning + '20',
+    backgroundColor: colors.warning + '20',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
   },
   needsPracticeText: {
     fontSize: 11,
-    color: Colors.warning,
+    color: colors.warning,
     fontWeight: '600' as const,
   },
   cardActions: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
+    borderTopColor: colors.cardBorder,
   },
   quickReviewButton: {
     flex: 1,
@@ -268,19 +270,19 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 14,
     borderRightWidth: 1,
-    borderRightColor: Colors.cardBorder,
+    borderRightColor: colors.cardBorder,
   },
   quickReviewButtonDone: {
-    backgroundColor: Colors.successLight,
+    backgroundColor: colors.successLight,
   },
   quickReviewText: {
     fontSize: 14,
-    color: Colors.secondary,
+    color: colors.secondary,
     fontWeight: '500' as const,
   },
   quickReviewTextDone: {
     fontSize: 14,
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '500' as const,
   },
   fullLessonButton: {
@@ -293,27 +295,27 @@ const styles = StyleSheet.create({
   },
   fullLessonText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '500' as const,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
-    backgroundColor: Colors.card,
+    borderTopColor: colors.cardBorder,
+    backgroundColor: colors.card,
   },
   completedBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.successLight,
+    backgroundColor: colors.successLight,
     padding: 12,
     borderRadius: 12,
   },
   completedText: {
     fontSize: 14,
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '600' as const,
   },
   emptyContainer: {
@@ -325,18 +327,18 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginTop: 20,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 32,
   },
   backButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,
@@ -344,6 +346,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
 });

@@ -11,22 +11,23 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, User, Lock, Check, ChevronRight, BookOpen } from 'lucide-react-native';
+import { Flame, Heart, Star, User, Lock, Check } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { units } from '@/mocks/units';
 import { getLessonsByUnitId } from '@/mocks/lessons';
 import { mascots } from '@/mocks/mascots';
-import Colors from '@/constants/colors';
 
 const NODE_SIZE = 70;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { progress, isLessonCompleted, getDailyGoalProgress } = useUserProgress();
+  const { progress, isLessonCompleted } = useUserProgress();
+  const { colors } = useSettings();
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const dailyProgress = getDailyGoalProgress();
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
+  const styles = createStyles(colors);
 
   useEffect(() => {
     Animated.loop(
@@ -74,11 +75,6 @@ export default function HomeScreen() {
     router.push(`/lesson/${nextLesson.id}`);
   };
 
-  const handleReviewPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/review');
-  };
-
   const handleProfilePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push('/profile');
@@ -89,47 +85,26 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Flame size={20} color={Colors.streak} />
+            <Flame size={20} color={colors.streak} />
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
           </View>
           <View style={styles.statItem}>
-            <Heart size={20} color={Colors.hearts} fill={Colors.hearts} />
+            <Heart size={20} color={colors.hearts} fill={colors.hearts} />
             <Text style={styles.statValue}>{progress.hearts}</Text>
           </View>
           <View style={styles.statItem}>
-            <Star size={20} color={Colors.xp} fill={Colors.xp} />
+            <Star size={20} color={colors.xp} fill={colors.xp} />
             <Text style={styles.statValue}>{progress.totalXp}</Text>
           </View>
           <TouchableOpacity onPress={handleProfilePress} style={styles.profileButton}>
             {mascot ? (
               <Image source={{ uri: mascot.avatar }} style={styles.profileImage} />
             ) : (
-              <User size={20} color={Colors.primary} />
+              <User size={20} color={colors.primary} />
             )}
           </TouchableOpacity>
         </View>
-        
-        <View style={styles.dailyGoalContainer}>
-          <View style={styles.dailyGoalHeader}>
-            <Text style={styles.dailyGoalTitle}>Daily Goal</Text>
-            <Text style={styles.dailyGoalPercent}>{Math.round(dailyProgress * 100)}%</Text>
-          </View>
-          <View style={styles.dailyGoalBar}>
-            <View style={[styles.dailyGoalFill, { width: `${dailyProgress * 100}%` }]} />
-          </View>
-        </View>
       </View>
-
-      {progress.completedLessons.length > 0 && (
-        <TouchableOpacity style={styles.reviewBanner} onPress={handleReviewPress} activeOpacity={0.8}>
-          <BookOpen size={24} color={Colors.secondary} />
-          <View style={styles.reviewTextContainer}>
-            <Text style={styles.reviewTitle}>Daily Review Ready</Text>
-            <Text style={styles.reviewSubtitle}>Practice what you have learned</Text>
-          </View>
-          <ChevronRight size={24} color={Colors.secondary} />
-        </TouchableOpacity>
-      )}
 
       <ScrollView 
         style={styles.scrollView}
@@ -162,9 +137,9 @@ export default function HomeScreen() {
                     activeOpacity={0.7}
                   >
                     {!unlocked ? (
-                      <Lock size={28} color={Colors.textLight} />
+                      <Lock size={28} color={colors.textLight} />
                     ) : isComplete ? (
-                      <Check size={32} color={Colors.textInverse} strokeWidth={3} />
+                      <Check size={32} color={colors.textInverse} strokeWidth={3} />
                     ) : (
                       <Text style={styles.nodeIcon}>{unit.icon}</Text>
                     )}
@@ -198,23 +173,22 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
-    backgroundColor: Colors.card,
+    paddingVertical: 16,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 20,
-    marginBottom: 16,
   },
   statItem: {
     flexDirection: 'row',
@@ -224,14 +198,14 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   profileButton: {
     marginLeft: 'auto',
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -239,61 +213,6 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 40,
     height: 40,
-  },
-  dailyGoalContainer: {
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: 12,
-    padding: 12,
-  },
-  dailyGoalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  dailyGoalTitle: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.textSecondary,
-  },
-  dailyGoalPercent: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-    color: Colors.primary,
-  },
-  dailyGoalBar: {
-    height: 8,
-    backgroundColor: Colors.pathLine,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  dailyGoalFill: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
-    borderRadius: 4,
-  },
-  reviewBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary + '15',
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.secondary + '30',
-    gap: 12,
-  },
-  reviewTextContainer: {
-    flex: 1,
-  },
-  reviewTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  reviewSubtitle: {
-    fontSize: 13,
-    color: Colors.textSecondary,
   },
   scrollView: {
     flex: 1,
@@ -313,12 +232,12 @@ const styles = StyleSheet.create({
   pathLine: {
     width: 4,
     height: 32,
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     borderRadius: 2,
     marginVertical: 8,
   },
   pathLineComplete: {
-    backgroundColor: Colors.pathNodeComplete,
+    backgroundColor: colors.pathNodeComplete,
   },
   nodeWrapper: {
     alignItems: 'center',
@@ -328,26 +247,26 @@ const styles = StyleSheet.create({
     width: NODE_SIZE,
     height: NODE_SIZE,
     borderRadius: NODE_SIZE / 2,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
   },
   nodeLocked: {
-    backgroundColor: Colors.pathNodeLocked,
+    backgroundColor: colors.pathNodeLocked,
     shadowOpacity: 0,
   },
   nodeComplete: {
-    backgroundColor: Colors.pathNodeComplete,
-    shadowColor: Colors.pathNodeComplete,
+    backgroundColor: colors.pathNodeComplete,
+    shadowColor: colors.pathNodeComplete,
   },
   nodeCurrent: {
     borderWidth: 4,
-    borderColor: Colors.secondary,
+    borderColor: colors.secondary,
   },
   nodeIcon: {
     fontSize: 28,
@@ -359,14 +278,14 @@ const styles = StyleSheet.create({
   nodeTitle: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   nodeTitleLocked: {
-    color: Colors.textLight,
+    color: colors.textLight,
   },
   nodeProgress: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
 });

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Animated,
   Modal,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +20,9 @@ import { getUnitsByContinent } from '@/mocks/units';
 import { getLessonsByUnitId } from '@/mocks/lessons';
 import { mascots } from '@/mocks/mascots';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NODE_SIZE = 70;
+const BRANCH_OFFSET = 80; // How far nodes branch left/right
 
 const CONTINENTS: { id: Continent; name: string; icon: string }[] = [
   { id: 'all', name: 'All Regions', icon: '🌍' },
@@ -28,6 +31,18 @@ const CONTINENTS: { id: Continent; name: string; icon: string }[] = [
   { id: 'africa', name: 'Africa', icon: '🌴' },
   { id: 'americas', name: 'Americas', icon: '🗽' },
 ];
+
+// Generate a branching pattern for nodes
+const getBranchPosition = (index: number): 'left' | 'center' | 'right' => {
+  const patterns = [
+    ['center', 'left', 'right', 'center', 'right', 'left'],
+    ['center', 'right', 'left', 'center', 'left', 'right'],
+    ['left', 'center', 'right', 'left', 'center', 'right'],
+  ];
+  const patternIndex = Math.floor(index / 6) % patterns.length;
+  const positionIndex = index % 6;
+  return patterns[patternIndex][positionIndex] as 'left' | 'center' | 'right';
+};
 
 export default function LearnScreen() {
   const router = useRouter();
@@ -84,7 +99,9 @@ export default function LearnScreen() {
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const nextLesson = getNextLesson(unitId);
-    router.push(`/lesson/${nextLesson.id}`);
+    if (nextLesson) {
+      router.push(`/lesson/${nextLesson.id}`);
+    }
   };
 
   const handleContinentSelect = (continent: Continent) => {
@@ -94,6 +111,17 @@ export default function LearnScreen() {
   };
 
   const styles = createStyles(colors);
+
+  const getNodeHorizontalPosition = (position: 'left' | 'center' | 'right') => {
+    switch (position) {
+      case 'left':
+        return -BRANCH_OFFSET;
+      case 'right':
+        return BRANCH_OFFSET;
+      default:
+        return 0;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -153,15 +181,59 @@ export default function LearnScreen() {
             {filteredUnits.map((unit, index) => {
               const unlocked = isUnitUnlocked(index);
               const unitProgress = getUnitProgress(unit.id);
-              const isComplete = unitProgress.completed === unitProgress.total;
+              const isComplete = unitProgress.completed === unitProgress.total && unitProgress.total > 0;
               const isCurrent = unlocked && !isComplete;
+              const branchPosition = getBranchPosition(index);
+              const horizontalOffset = getNodeHorizontalPosition(branchPosition);
+              const prevPosition = index > 0 ? getBranchPosition(index - 1) : 'center';
+              const prevOffset = getNodeHorizontalPosition(prevPosition);
 
               return (
                 <View key={unit.id} style={styles.nodeContainer}>
+                  {/* Branching path line */}
+                  {index > 0 && (
+                    <View style={styles.pathLineContainer}>
+                      {/* Vertical line from previous node */}
+                      <View
+                        style={[
+                          styles.pathLineVertical,
+                          unlocked && styles.pathLineComplete,
+                          { left: SCREEN_WIDTH / 2 - 2 + prevOffset },
+                        ]}
+                      />
+                      {/* Diagonal/horizontal connector if positions differ */}
+                      {prevOffset !== horizontalOffset && (
+                        <View
+                          style={[
+                            styles.pathLineDiagonal,
+                            unlocked && styles.pathLineComplete,
+                            {
+                              left: Math.min(SCREEN_WIDTH / 2 + prevOffset, SCREEN_WIDTH / 2 + horizontalOffset),
+                              width: Math.abs(horizontalOffset - prevOffset) + 4,
+                              top: 16,
+                            },
+                          ]}
+                        />
+                      )}
+                      {/* Vertical line to current node */}
+                      <View
+                        style={[
+                          styles.pathLineVertical,
+                          unlocked && styles.pathLineComplete,
+                          {
+                            left: SCREEN_WIDTH / 2 - 2 + horizontalOffset,
+                            top: 20,
+                            height: 12,
+                          },
+                        ]}
+                      />
+                    </View>
+                  )}
+
                   <Animated.View
                     style={[
                       styles.nodeWrapper,
-                      { transform: [{ scale: isCurrent ? pulseAnim : 1 }] },
+                      { transform: [{ scale: isCurrent ? pulseAnim : 1 }, { translateX: horizontalOffset }] },
                     ]}
                   >
                     <TouchableOpacity
@@ -195,13 +267,6 @@ export default function LearnScreen() {
                       </Text>
                     </View>
                   </Animated.View>
-
-                  {index < filteredUnits.length - 1 && (
-                    <View style={[
-                      styles.pathLine,
-                      unlocked && styles.pathLineComplete,
-                    ]} />
-                  )}
                 </View>
               );
             })}
@@ -271,7 +336,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 20,
-    marginBottom: 16,
   },
   statItem: {
     flexDirection: 'row',
@@ -339,13 +403,28 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   nodeContainer: {
     alignItems: 'center',
+    width: '100%',
+    marginBottom: 24,
   },
-  pathLine: {
-    width: 4,
+  pathLineContainer: {
+    position: 'absolute',
+    top: -24,
+    left: 0,
+    right: 0,
     height: 32,
+  },
+  pathLineVertical: {
+    position: 'absolute',
+    width: 4,
+    height: 16,
     backgroundColor: colors.pathLine,
     borderRadius: 2,
-    marginVertical: 8,
+  },
+  pathLineDiagonal: {
+    position: 'absolute',
+    height: 4,
+    backgroundColor: colors.pathLine,
+    borderRadius: 2,
   },
   pathLineComplete: {
     backgroundColor: colors.pathNodeComplete,

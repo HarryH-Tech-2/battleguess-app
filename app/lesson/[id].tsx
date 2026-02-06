@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   LayoutChangeEvent,
+  ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,24 +15,32 @@ import * as Haptics from 'expo-haptics';
 import { X, Check, MapPin, ArrowRight, GripVertical } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getLessonById } from '@/mocks/lessons';
 import { getBattleById } from '@/mocks/battles';
 import { mascots } from '@/mocks/mascots';
 import { Step, MultiChoiceStep, MapTapStep, OrderEventsStep, MatchPairsStep, FillBlankStep, TimelineSliderStep, TwoTruthsStep, StoryCardStep } from '@/types';
-import Colors from '@/constants/colors';
 
 const { width } = Dimensions.get('window');
 
 type FeedbackState = 'none' | 'correct' | 'wrong';
 
+// Generate a battle image URL using a placeholder service with the battle name
+const getBattleImageUrl = (battleTitle: string) => {
+  // Using a themed placeholder that works well for battles
+  const encodedTitle = encodeURIComponent(battleTitle);
+  return `https://api.dicebear.com/7.x/shapes/png?seed=${encodedTitle}&backgroundColor=1C1917,292524&size=200`;
+};
+
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { loseHeart, progress } = useUserProgress();
-  
+  const { colors } = useSettings();
+
   const lesson = getLessonById(id || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
-  
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | number | string[] | null>(null);
   const [feedback, setFeedback] = useState<FeedbackState>('none');
@@ -40,15 +49,17 @@ export default function LessonScreen() {
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [sliderValue, setSliderValue] = useState<number | null>(null);
-  
+
   const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const feedbackSlideAnim = useRef(new Animated.Value(100)).current;
   const mascotAnim = useRef(new Animated.Value(0)).current;
   const mascotBounceAnim = useRef(new Animated.Value(0)).current;
   const sliderWidthRef = useRef(0);
-  
+
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
+
+  const styles = createStyles(colors);
 
   useEffect(() => {
     if (lesson) {
@@ -76,14 +87,14 @@ export default function LessonScreen() {
 
   const showFeedback = useCallback((isCorrect: boolean) => {
     setFeedback(isCorrect ? 'correct' : 'wrong');
-    
+
     mascotAnim.setValue(0);
     mascotBounceAnim.setValue(0);
-    
+
     if (isCorrect) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setCorrectCount(prev => prev + 1);
-      
+
       Animated.parallel([
         Animated.spring(mascotAnim, {
           toValue: 1,
@@ -101,7 +112,7 @@ export default function LessonScreen() {
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       loseHeart();
-      
+
       Animated.parallel([
         Animated.sequence([
           Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
@@ -120,7 +131,7 @@ export default function LessonScreen() {
           Animated.timing(mascotBounceAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
         ]),
       ]).start();
-      
+
       if (progress.hearts <= 1) {
         setOutOfHearts(true);
       }
@@ -223,7 +234,7 @@ export default function LessonScreen() {
 
   const canCheck = useCallback(() => {
     if (!currentStep) return false;
-    
+
     switch (currentStep.type) {
       case 'multiChoice':
       case 'mapTap':
@@ -240,6 +251,20 @@ export default function LessonScreen() {
         return true;
     }
   }, [currentStep, selectedAnswer, orderedItems, matchedPairs]);
+
+  const renderBattleImage = () => {
+    if (!battle) return null;
+    return (
+      <View style={styles.battleImageContainer}>
+        <Image
+          source={{ uri: getBattleImageUrl(battle.title) }}
+          style={styles.battleImage}
+          contentFit="cover"
+        />
+        <Text style={styles.battleImageCaption}>{battle.title}</Text>
+      </View>
+    );
+  };
 
   const renderMultiChoice = (step: MultiChoiceStep) => (
     <View style={styles.optionsContainer}>
@@ -271,6 +296,7 @@ export default function LessonScreen() {
           </Text>
         </TouchableOpacity>
       ))}
+      {renderBattleImage()}
     </View>
   );
 
@@ -297,9 +323,9 @@ export default function LessonScreen() {
             activeOpacity={0.7}
           >
             <MapPin size={24} color={
-              selectedAnswer === region.id ? Colors.textInverse :
-              feedback !== 'none' && region.id === step.data.correctRegionId ? Colors.textInverse :
-              Colors.primary
+              selectedAnswer === region.id ? colors.textInverse :
+              feedback !== 'none' && region.id === step.data.correctRegionId ? colors.textInverse :
+              colors.primary
             } />
             <Text style={[
               styles.regionText,
@@ -310,12 +336,13 @@ export default function LessonScreen() {
           </TouchableOpacity>
         ))}
       </View>
+      {renderBattleImage()}
     </View>
   );
 
   const renderOrderEvents = (step: OrderEventsStep) => {
     const unordered = step.data.events.filter(e => !orderedItems.includes(e.id));
-    
+
     return (
       <View style={styles.orderContainer}>
         <View style={styles.orderedList}>
@@ -341,7 +368,7 @@ export default function LessonScreen() {
             );
           })}
         </View>
-        
+
         <View style={styles.unorderedList}>
           {unordered.map((event) => (
             <TouchableOpacity
@@ -355,11 +382,12 @@ export default function LessonScreen() {
               }}
               disabled={feedback !== 'none'}
             >
-              <GripVertical size={16} color={Colors.textSecondary} />
+              <GripVertical size={16} color={colors.textSecondary} />
               <Text style={styles.unorderedItemText}>{event.text}</Text>
             </TouchableOpacity>
           ))}
         </View>
+        {renderBattleImage()}
       </View>
     );
   };
@@ -392,7 +420,7 @@ export default function LessonScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      
+
       <View style={styles.matchColumn}>
         {step.data.pairs.map((pair) => {
           const isMatched = Object.values(matchedPairs).includes(pair.right);
@@ -458,6 +486,7 @@ export default function LessonScreen() {
           </TouchableOpacity>
         ))}
       </View>
+      {renderBattleImage()}
     </View>
   );
 
@@ -466,11 +495,11 @@ export default function LessonScreen() {
     const maxYear = Number(step.data.maxYear);
     const range = maxYear - minYear;
     const currentValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
-    
+
     let displayYear: string;
     if (minYear < 0 || maxYear < 0) {
-      displayYear = currentValue < 0 
-        ? `${Math.abs(currentValue)} BC` 
+      displayYear = currentValue < 0
+        ? `${Math.abs(currentValue)} BC`
         : `${currentValue} AD`;
     } else {
       displayYear = currentValue.toString();
@@ -490,7 +519,7 @@ export default function LessonScreen() {
       const trackWidth = sliderWidthRef.current || 300;
       const percent = Math.max(0, Math.min(1, locationX / trackWidth));
       const newYear = Math.round(minYear + percent * range);
-      
+
       if (newYear !== currentValue) {
         setSliderValue(Math.max(minYear, Math.min(maxYear, newYear)));
         Haptics.selectionAsync();
@@ -508,8 +537,8 @@ export default function LessonScreen() {
         <Text style={styles.timelineYear}>
           {displayYear}
         </Text>
-        <View 
-          style={styles.sliderContainer} 
+        <View
+          style={styles.sliderContainer}
           onLayout={onSliderLayout}
           onStartShouldSetResponder={() => feedback === 'none'}
           onMoveShouldSetResponder={() => feedback === 'none'}
@@ -519,11 +548,11 @@ export default function LessonScreen() {
         >
           <View style={styles.sliderTrack}>
             <View style={[styles.sliderFill, { width: `${fillPercent}%` }]} />
-            <View 
+            <View
               style={[
                 styles.sliderThumb,
                 { left: `${fillPercent}%` }
-              ]} 
+              ]}
             />
           </View>
         </View>
@@ -538,6 +567,7 @@ export default function LessonScreen() {
         <View style={styles.sliderHint}>
           <Text style={styles.sliderHintText}>Drag to select the year</Text>
         </View>
+        {renderBattleImage()}
       </View>
     );
   };
@@ -572,6 +602,7 @@ export default function LessonScreen() {
           </Text>
         </TouchableOpacity>
       ))}
+      {renderBattleImage()}
     </View>
   );
 
@@ -632,17 +663,17 @@ export default function LessonScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-          <X size={24} color={Colors.textSecondary} />
+          <X size={24} color={colors.textSecondary} />
         </TouchableOpacity>
         <View style={styles.progressBar}>
-          <Animated.View 
+          <Animated.View
             style={[
               styles.progressFill,
               { width: progressAnim.interpolate({
                 inputRange: [0, 1],
                 outputRange: ['0%', '100%'],
               })}
-            ]} 
+            ]}
           />
         </View>
         <View style={styles.heartsContainer}>
@@ -651,28 +682,34 @@ export default function LessonScreen() {
         </View>
       </View>
 
-      <Animated.View 
-        style={[
-          styles.content,
-          { transform: [{ translateX: shakeAnim }] }
-        ]}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {currentStep.type !== 'storyCard' && (
-          <Text style={styles.prompt}>{currentStep.prompt}</Text>
-        )}
-        {renderStep(currentStep)}
-      </Animated.View>
+        <Animated.View
+          style={[
+            styles.content,
+            { transform: [{ translateX: shakeAnim }] }
+          ]}
+        >
+          {currentStep.type !== 'storyCard' && (
+            <Text style={styles.prompt}>{currentStep.prompt}</Text>
+          )}
+          {renderStep(currentStep)}
+        </Animated.View>
+      </ScrollView>
 
       {feedback !== 'none' && mascot && (
-        <Animated.View 
+        <Animated.View
           style={[
             styles.mascotCelebration,
-            { 
+            {
               opacity: mascotAnim,
               transform: [
                 { scale: mascotAnim },
                 { translateY: mascotBounceAnim },
-              ] 
+              ]
             }
           ]}
         >
@@ -691,21 +728,17 @@ export default function LessonScreen() {
         </Animated.View>
       )}
 
-      <Animated.View 
-        style={[
-          styles.feedbackPanel,
-          { transform: [{ translateY: feedbackSlideAnim }] },
-          feedback === 'correct' && styles.feedbackPanelCorrect,
-          feedback === 'wrong' && styles.feedbackPanelWrong,
-        ]}
-      >
+      <View style={styles.footer}>
         {feedback !== 'none' && (
-          <>
+          <View style={[
+            styles.feedbackInline,
+            feedback === 'correct' ? styles.feedbackInlineCorrect : styles.feedbackInlineWrong,
+          ]}>
             <View style={styles.feedbackHeader}>
               {feedback === 'correct' ? (
-                <Check size={24} color={Colors.success} />
+                <Check size={20} color={colors.success} />
               ) : (
-                <X size={24} color={Colors.error} />
+                <X size={20} color={colors.error} />
               )}
               <Text style={[
                 styles.feedbackTitle,
@@ -714,16 +747,14 @@ export default function LessonScreen() {
                 {feedback === 'correct' ? 'Correct!' : 'Not quite'}
               </Text>
             </View>
-            <Text style={styles.feedbackText}>
-              {outOfHearts 
-                ? "You're out of hearts! Tap continue to restart this lesson."
+            <Text style={styles.feedbackText} numberOfLines={2}>
+              {outOfHearts
+                ? "You're out of hearts!"
                 : (feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong)}
             </Text>
-          </>
+          </View>
         )}
-      </Animated.View>
 
-      <View style={styles.footer}>
         {feedback === 'none' ? (
           <TouchableOpacity
             style={[
@@ -748,7 +779,7 @@ export default function LessonScreen() {
             activeOpacity={0.8}
           >
             <Text style={styles.continueButtonText}>Continue</Text>
-            <ArrowRight size={20} color={Colors.textInverse} />
+            <ArrowRight size={20} color={colors.textInverse} />
           </TouchableOpacity>
         )}
       </View>
@@ -756,10 +787,10 @@ export default function LessonScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -774,13 +805,13 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 12,
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     borderRadius: 6,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
     borderRadius: 6,
   },
   heartsContainer: {
@@ -794,23 +825,30 @@ const styles = StyleSheet.create({
   heartsText: {
     fontSize: 16,
     fontWeight: '700' as const,
-    color: Colors.hearts,
+    color: colors.hearts,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 20,
   },
   prompt: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 24,
     lineHeight: 32,
   },
   errorText: {
     fontSize: 18,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 40,
   },
@@ -818,36 +856,59 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   optionButton: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderWidth: 2,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     borderRadius: 16,
     padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   optionButtonSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '15',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
   },
   optionButtonCorrect: {
-    borderColor: Colors.success,
-    backgroundColor: Colors.successLight,
+    borderColor: colors.success,
+    backgroundColor: colors.successLight,
   },
   optionButtonWrong: {
-    borderColor: Colors.error,
-    backgroundColor: Colors.errorLight,
+    borderColor: colors.error,
+    backgroundColor: colors.errorLight,
   },
   optionText: {
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   optionTextSelected: {
-    color: Colors.primary,
+    color: colors.primary,
     fontWeight: '600' as const,
   },
   optionTextCorrect: {
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '600' as const,
+  },
+  battleImageContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  battleImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+  },
+  battleImageCaption: {
+    marginTop: 8,
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic' as const,
   },
   mapContainer: {
     flex: 1,
@@ -861,34 +922,35 @@ const styles = StyleSheet.create({
   regionButton: {
     width: (width - 64) / 2,
     aspectRatio: 1.5,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderWidth: 2,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
   },
   regionButtonSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primary,
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
   },
   regionButtonCorrect: {
-    borderColor: Colors.success,
-    backgroundColor: Colors.success,
+    borderColor: colors.success,
+    backgroundColor: colors.success,
   },
   regionButtonWrong: {
-    borderColor: Colors.error,
-    backgroundColor: Colors.error,
+    borderColor: colors.error,
+    backgroundColor: colors.error,
   },
   regionText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
+    textAlign: 'center',
   },
   regionTextSelected: {
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
   orderContainer: {
     flex: 1,
@@ -901,7 +963,7 @@ const styles = StyleSheet.create({
   orderedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: colors.primary + '15',
     borderRadius: 12,
     padding: 12,
     gap: 12,
@@ -910,18 +972,18 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   orderNumberText: {
     fontSize: 14,
     fontWeight: '700' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
   orderedItemText: {
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
   },
   unorderedList: {
@@ -930,16 +992,16 @@ const styles = StyleSheet.create({
   unorderedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     borderRadius: 12,
     padding: 12,
     gap: 8,
   },
   unorderedItemText: {
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
   },
   matchContainer: {
@@ -951,29 +1013,29 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   matchItem: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderWidth: 2,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
   },
   matchItemSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '15',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
   },
   matchItemMatched: {
-    borderColor: Colors.success,
-    backgroundColor: Colors.successLight,
+    borderColor: colors.success,
+    backgroundColor: colors.successLight,
   },
   matchItemText: {
     fontSize: 14,
     fontWeight: '500' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   matchItemTextSelected: {
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '600' as const,
   },
   fillBlankContainer: {
@@ -981,7 +1043,7 @@ const styles = StyleSheet.create({
   },
   fillBlankSentence: {
     fontSize: 20,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 30,
     textAlign: 'center',
   },
@@ -992,31 +1054,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fillBlankOption: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderWidth: 2,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 20,
   },
   fillBlankOptionSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLight + '15',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
   },
   fillBlankOptionCorrect: {
-    borderColor: Colors.success,
-    backgroundColor: Colors.successLight,
+    borderColor: colors.success,
+    backgroundColor: colors.successLight,
   },
   fillBlankOptionWrong: {
-    borderColor: Colors.error,
-    backgroundColor: Colors.errorLight,
+    borderColor: colors.error,
+    backgroundColor: colors.errorLight,
   },
   fillBlankOptionText: {
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
   },
   fillBlankOptionTextSelected: {
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '600' as const,
   },
   timelineContainer: {
@@ -1027,7 +1089,7 @@ const styles = StyleSheet.create({
   timelineYear: {
     fontSize: 48,
     fontWeight: '700' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   sliderContainer: {
     width: '100%',
@@ -1043,7 +1105,7 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     height: 12,
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     borderRadius: 6,
     overflow: 'visible',
   },
@@ -1052,7 +1114,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     height: '100%',
-    backgroundColor: Colors.primary + '40',
+    backgroundColor: colors.primary + '40',
     borderRadius: 6,
   },
   sliderThumb: {
@@ -1061,15 +1123,15 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     marginLeft: -14,
-    shadowColor: Colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 4,
     borderWidth: 3,
-    borderColor: Colors.textInverse,
+    borderColor: colors.textInverse,
   },
   sliderHint: {
     marginTop: 8,
@@ -1077,7 +1139,7 @@ const styles = StyleSheet.create({
   },
   sliderHintText: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontStyle: 'italic' as const,
   },
   sliderLabels: {
@@ -1087,18 +1149,18 @@ const styles = StyleSheet.create({
   },
   sliderLabel: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   storyContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   storyCard: {
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -1108,13 +1170,13 @@ const styles = StyleSheet.create({
   storyTitle: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 16,
     textAlign: 'center',
   },
   storyNarrative: {
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 26,
     marginBottom: 20,
   },
@@ -1131,11 +1193,11 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: Colors.textInverse,
+    borderColor: colors.textInverse,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -1147,47 +1209,7 @@ const styles = StyleSheet.create({
   },
   storyMetaText: {
     fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  feedbackPanel: {
-    backgroundColor: Colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 20,
-    minHeight: 100,
-    borderWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: Colors.cardBorder,
-  },
-  feedbackPanelCorrect: {
-    borderTopColor: Colors.success,
-    backgroundColor: Colors.successLight,
-  },
-  feedbackPanelWrong: {
-    borderTopColor: Colors.error,
-    backgroundColor: Colors.errorLight,
-  },
-  feedbackHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  feedbackTitle: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-  },
-  feedbackTitleCorrect: {
-    color: Colors.success,
-  },
-  feedbackTitleWrong: {
-    color: Colors.error,
-  },
-  feedbackText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
+    color: colors.textSecondary,
   },
   mascotCelebration: {
     position: 'absolute',
@@ -1200,20 +1222,20 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: colors.secondaryLight,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: Colors.success,
-    shadowColor: Colors.success,
+    borderColor: colors.success,
+    shadowColor: colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
   },
   mascotBubbleWrong: {
-    borderColor: Colors.primary,
-    shadowColor: Colors.primary,
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
   },
   mascotAvatarImage: {
     width: '100%',
@@ -1221,46 +1243,83 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   cheerBubble: {
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
     marginTop: 8,
   },
   cheerBubbleWrong: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
   },
   cheerText: {
     fontSize: 12,
     fontWeight: '700' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
   footer: {
     padding: 20,
     paddingBottom: 24,
+    backgroundColor: colors.background,
+  },
+  feedbackInline: {
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  feedbackInlineCorrect: {
+    backgroundColor: colors.success + '20',
+    borderWidth: 1,
+    borderColor: colors.success + '40',
+  },
+  feedbackInlineWrong: {
+    backgroundColor: colors.error + '20',
+    borderWidth: 1,
+    borderColor: colors.error + '40',
+  },
+  feedbackHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  feedbackTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+  },
+  feedbackTitleCorrect: {
+    color: colors.success,
+  },
+  feedbackTitleWrong: {
+    color: colors.error,
+  },
+  feedbackText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
   checkButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
-    shadowColor: Colors.primaryDark,
+    shadowColor: colors.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 6,
     borderBottomWidth: 4,
-    borderBottomColor: Colors.primaryDark,
+    borderBottomColor: colors.primaryDark,
   },
   checkButtonDisabled: {
-    backgroundColor: Colors.pathLine,
+    backgroundColor: colors.pathLine,
     shadowOpacity: 0,
     borderBottomColor: '#A8A29E',
   },
   checkButtonText: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
   continueButton: {
     flexDirection: 'row',
@@ -1276,18 +1335,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 4,
   },
   continueButtonCorrect: {
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
     shadowColor: '#16A34A',
     borderBottomColor: '#16A34A',
   },
   continueButtonWrong: {
-    backgroundColor: Colors.primary,
-    shadowColor: Colors.primaryDark,
-    borderBottomColor: Colors.primaryDark,
+    backgroundColor: colors.primary,
+    shadowColor: colors.primaryDark,
+    borderBottomColor: colors.primaryDark,
   },
   continueButtonText: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
 });

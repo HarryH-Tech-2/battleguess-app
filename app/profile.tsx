@@ -10,19 +10,20 @@ import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, Trophy, Calendar, Target, ChevronRight } from 'lucide-react-native';
+import { Flame, Heart, Star, Trophy, Calendar, ChevronRight } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { mascots } from '@/mocks/mascots';
 import { badges as allBadges, getBadgeById } from '@/mocks/badges';
 import { lessons } from '@/mocks/lessons';
-import Colors from '@/constants/colors';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { progress, isLessonCompleted, getDailyGoalProgress } = useUserProgress();
-  
+  const { progress, isLessonCompleted } = useUserProgress();
+  const { colors } = useSettings();
+
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
-  const dailyProgress = getDailyGoalProgress();
+  const styles = createStyles(colors);
 
   const stats = useMemo(() => {
     const completedCount = lessons.filter(l => isLessonCompleted(l.id)).length;
@@ -60,41 +61,24 @@ export default function ProfileScreen() {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Flame size={28} color={Colors.streak} />
+            <Flame size={28} color={colors.streak} />
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
             <Text style={styles.statLabel}>Day Streak</Text>
           </View>
           <View style={styles.statCard}>
-            <Star size={28} color={Colors.xp} fill={Colors.xp} />
+            <Star size={28} color={colors.xp} fill={colors.xp} />
             <Text style={styles.statValue}>{progress.totalXp}</Text>
             <Text style={styles.statLabel}>Total XP</Text>
           </View>
           <View style={styles.statCard}>
-            <Heart size={28} color={Colors.hearts} fill={Colors.hearts} />
+            <Heart size={28} color={colors.hearts} fill={colors.hearts} />
             <Text style={styles.statValue}>{progress.hearts}/5</Text>
             <Text style={styles.statLabel}>Hearts</Text>
           </View>
           <View style={styles.statCard}>
-            <Trophy size={28} color={Colors.secondary} />
+            <Trophy size={28} color={colors.secondary} />
             <Text style={styles.statValue}>{progress.bestStreak}</Text>
             <Text style={styles.statLabel}>Best Streak</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Daily Goal</Text>
-          <View style={styles.goalCard}>
-            <View style={styles.goalHeader}>
-              <Target size={20} color={Colors.primary} />
-              <Text style={styles.goalText}>{progress.dailyGoal} minutes/day</Text>
-              <Text style={styles.goalPercent}>{Math.round(dailyProgress * 100)}%</Text>
-            </View>
-            <View style={styles.goalBar}>
-              <View style={[styles.goalFill, { width: `${dailyProgress * 100}%` }]} />
-            </View>
-            <Text style={styles.goalXp}>
-              {progress.dailyXp} / {progress.dailyGoal * 10} XP today
-            </Text>
           </View>
         </View>
 
@@ -153,7 +137,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Streak Calendar</Text>
           <View style={styles.calendarCard}>
-            <Calendar size={24} color={Colors.primary} />
+            <Calendar size={24} color={colors.primary} />
             <View style={styles.calendarInfo}>
               <Text style={styles.calendarTitle}>
                 {progress.currentStreak > 0 
@@ -177,17 +161,17 @@ export default function ProfileScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>Back to Learning</Text>
-          <ChevronRight size={20} color={Colors.textInverse} />
+          <ChevronRight size={20} color={colors.textInverse} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -198,9 +182,9 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     padding: 24,
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.cardBorder,
+    borderBottomColor: colors.cardBorder,
   },
   avatarContainer: {
     width: 100,
@@ -208,7 +192,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     overflow: 'hidden',
     borderWidth: 4,
-    borderColor: Colors.secondary,
+    borderColor: colors.secondary,
     marginBottom: 16,
   },
   avatar: {
@@ -218,12 +202,12 @@ const styles = StyleSheet.create({
   mascotName: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 4,
   },
   mascotDescription: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   statsGrid: {
@@ -234,22 +218,22 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '47%',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   statValue: {
     fontSize: 28,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginTop: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   section: {
@@ -264,78 +248,38 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.text,
+    color: colors.text,
     marginBottom: 12,
   },
   badgeCount: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 12,
-  },
-  goalCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  goalText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  goalPercent: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: Colors.primary,
-  },
-  goalBar: {
-    height: 10,
-    backgroundColor: Colors.pathLine,
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  goalFill: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
-    borderRadius: 5,
-  },
-  goalXp: {
-    fontSize: 13,
-    color: Colors.textSecondary,
   },
   progressCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     gap: 16,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   progressCircle: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: colors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: Colors.primary,
+    borderColor: colors.primary,
   },
   progressPercent: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: Colors.primary,
+    color: colors.primary,
   },
   progressInfo: {
     flex: 1,
@@ -343,11 +287,11 @@ const styles = StyleSheet.create({
   progressTitle: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   progressDetail: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   badgesGrid: {
     flexDirection: 'row',
@@ -356,16 +300,16 @@ const styles = StyleSheet.create({
   },
   badgeCard: {
     width: '30%',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   badgeCardLocked: {
-    backgroundColor: Colors.backgroundDark,
-    borderColor: Colors.pathLine,
+    backgroundColor: colors.backgroundDark,
+    borderColor: colors.pathLine,
   },
   badgeIcon: {
     fontSize: 28,
@@ -377,21 +321,21 @@ const styles = StyleSheet.create({
   badgeTitle: {
     fontSize: 11,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
     textAlign: 'center',
   },
   badgeTitleLocked: {
-    color: Colors.textLight,
+    color: colors.textLight,
   },
   calendarCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.card,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     gap: 16,
     borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    borderColor: colors.cardBorder,
   },
   calendarInfo: {
     flex: 1,
@@ -399,21 +343,21 @@ const styles = StyleSheet.create({
   calendarTitle: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: Colors.text,
+    color: colors.text,
   },
   calendarSubtitle: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   footer: {
     padding: 20,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.cardBorder,
-    backgroundColor: Colors.card,
+    borderTopColor: colors.cardBorder,
+    backgroundColor: colors.card,
   },
   continueButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -424,6 +368,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: 18,
     fontWeight: '600' as const,
-    color: Colors.textInverse,
+    color: colors.textInverse,
   },
 });
