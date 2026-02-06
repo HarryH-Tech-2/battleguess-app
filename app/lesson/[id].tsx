@@ -27,34 +27,23 @@ type FeedbackState = 'none' | 'correct' | 'wrong';
 
 const QUIZ_STARTING_HEARTS = 3;
 
-// Battle placeholder images using Unsplash/Pexels style URLs
-// These provide thematic historical images for each battle until custom images are generated
-const battleImageUrls: Record<string, string> = {
-  'thermopylae': 'https://images.unsplash.com/photo-1564399263809-d8c0f8988aed?w=400&h=300&fit=crop', // Greek temple
-  'marathon': 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=400&h=300&fit=crop', // Running/athletics
-  'hastings': 'https://images.unsplash.com/photo-1590845947698-8924d7409b56?w=400&h=300&fit=crop', // Medieval castle
-  'agincourt': 'https://images.unsplash.com/photo-1584717489969-dda7c459ec2b?w=400&h=300&fit=crop', // Medieval armor
-  'waterloo': 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=400&h=300&fit=crop', // Battlefield
-  'austerlitz': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop', // Napoleon era
-  'stalingrad': 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=300&fit=crop', // WWII
-  'dday': 'https://images.unsplash.com/photo-1562016600-ece13e8ba570?w=400&h=300&fit=crop', // Beach/Normandy
-  'gettysburg': 'https://images.unsplash.com/photo-1569672455082-ef7eedf21d9c?w=400&h=300&fit=crop', // Civil War cannon
-  'sekigahara': 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop', // Japanese samurai
-  'somme': 'https://images.unsplash.com/photo-1516410529446-2c777cb7366d?w=400&h=300&fit=crop', // WWI trenches
-  'cannae': 'https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?w=400&h=300&fit=crop', // Roman
-  'zama': 'https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?w=400&h=300&fit=crop', // Roman
-  'midway': 'https://images.unsplash.com/photo-1517232115160-ff93364542dd?w=400&h=300&fit=crop', // Aircraft carrier
-  'iwo-jima': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop', // Pacific island
+// Local battle images generated with Gemini API (nano-banana)
+// Images are stored in assets/images/battles/{battleId}.png
+const battleImages: Record<string, any> = {
+  'thermopylae': require('@/assets/images/battles/thermopylae.png'),
+  'marathon': require('@/assets/images/battles/marathon.png'),
+  'hastings': require('@/assets/images/battles/hastings.png'),
+  'agincourt': require('@/assets/images/battles/agincourt.png'),
+  'waterloo': require('@/assets/images/battles/waterloo.png'),
+  'austerlitz': require('@/assets/images/battles/austerlitz.png'),
+  'stalingrad': require('@/assets/images/battles/stalingrad.png'),
+  'dday': require('@/assets/images/battles/dday.png'),
+  'gettysburg': require('@/assets/images/battles/gettysburg.png'),
+  'sekigahara': require('@/assets/images/battles/sekigahara.png'),
 };
 
-const getBattleImageUrl = (battleId: string): string => {
-  return battleImageUrls[battleId] || getFallbackImageUrl(battleId);
-};
-
-// Fallback image URL using picsum.photos for battles without local images
-const getFallbackImageUrl = (battleId: string): string => {
-  const seed = battleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return `https://picsum.photos/seed/${seed}/400/300`;
+const getBattleImage = (battleId: string): any => {
+  return battleImages[battleId] || null;
 };
 
 export default function LessonScreen() {
@@ -77,8 +66,8 @@ export default function LessonScreen() {
   // Per-quiz hearts - start with 3 for each quiz
   const [quizHearts, setQuizHearts] = useState(QUIZ_STARTING_HEARTS);
 
-  // Battle image URL
-  const battleImageUrl = battle ? getBattleImageUrl(battle.id) : null;
+  // Battle image (local file)
+  const battleImage = battle ? getBattleImage(battle.id) : null;
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -285,12 +274,12 @@ export default function LessonScreen() {
   }, [currentStep, selectedAnswer, orderedItems, matchedPairs]);
 
   const renderBattleImage = () => {
-    if (!battle || !battleImageUrl) return null;
+    if (!battle || !battleImage) return null;
 
     return (
       <View style={styles.battleImageContainer}>
         <Image
-          source={{ uri: battleImageUrl }}
+          source={battleImage}
           style={styles.battleImage}
           contentFit="cover"
         />

@@ -5,6 +5,10 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const GEMINI_API_KEY = 'REDACTED_GEMINI_KEY';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent';
@@ -45,7 +49,8 @@ async function generateBattleImage(battleTitle: string, battleId: string): Promi
     });
 
     if (!response.ok) {
-      console.error(`API error for ${battleId}:`, response.status);
+      const errorText = await response.text();
+      console.error(`API error for ${battleId}:`, response.status, errorText);
       return null;
     }
 
@@ -61,6 +66,7 @@ async function generateBattleImage(battleTitle: string, battleId: string): Promi
       }
     }
 
+    console.log(`No image in response for ${battleId}:`, JSON.stringify(data, null, 2));
     return null;
   } catch (error) {
     console.error(`Error generating image for ${battleId}:`, error);
