@@ -309,16 +309,6 @@ export default function LearnScreen() {
                         },
                       ]}
                     >
-                      {/* START label for current node */}
-                      {isCurrent && (
-                        <View style={styles.startLabelContainer}>
-                          <View style={styles.startLabel}>
-                            <Text style={styles.startLabelText}>START</Text>
-                          </View>
-                          <View style={styles.startLabelArrow} />
-                        </View>
-                      )}
-
                       <TouchableOpacity
                         style={[
                           styles.node,
@@ -505,34 +495,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   nodeWrapper: {
     alignItems: 'center',
     position: 'relative',
-  },
-  startLabelContainer: {
-    position: 'absolute',
-    top: -45,
-    alignItems: 'center',
-  },
-  startLabel: {
-    backgroundColor: THEME_COLORS.success,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  startLabelText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800' as const,
-    letterSpacing: 1,
-  },
-  startLabelArrow: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderTopWidth: 8,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: THEME_COLORS.success,
-    marginTop: -1,
   },
   node: {
     width: NODE_SIZE,
