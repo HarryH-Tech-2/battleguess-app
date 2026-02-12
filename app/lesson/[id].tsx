@@ -334,13 +334,11 @@ export default function LessonScreen() {
     if (!battle || !battleImage) return null;
 
     return (
-      <View style={styles.battleImageContainer}>
-        <Image
-          source={battleImage}
-          style={styles.battleImage}
-          contentFit="cover"
-        />
-      </View>
+      <Image
+        source={battleImage}
+        style={styles.battleImage}
+        contentFit="cover"
+      />
     );
   };
 
@@ -967,19 +965,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.success,
     fontWeight: '600' as const,
   },
-  battleImageContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
   battleImage: {
-    width: 160,
-    height: 120,
-    borderRadius: 12,
+    width: '100%',
+    height: 200,
+    borderRadius: 16,
+    marginTop: 20,
   },
   mapContainer: {
     flex: 1,
@@ -999,8 +989,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
+    gap: 6,
+    padding: 12,
   },
   regionButtonSelected: {
     borderColor: colors.primary,
