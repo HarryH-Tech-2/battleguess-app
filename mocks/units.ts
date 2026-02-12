@@ -101,7 +101,7 @@ export const units: Unit[] = [
     themeTag: 'ancient',
     continent: 'africa',
     orderIndex: 0,
-    lessonIds: ['lesson-cannae', 'lesson-zama'],
+    lessonIds: ['lesson-cannae', 'lesson-zama', 'lesson-pyramids'],
     icon: '🏺',
   },
   {
@@ -111,7 +111,7 @@ export const units: Unit[] = [
     themeTag: 'modern',
     continent: 'africa',
     orderIndex: 1,
-    lessonIds: ['lesson-isandlwana', 'lesson-adwa'],
+    lessonIds: ['lesson-isandlwana', 'lesson-adwa', 'lesson-rorkes-drift'],
     icon: '🛡️',
   },
   {

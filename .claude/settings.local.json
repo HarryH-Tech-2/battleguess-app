@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx expo start)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(bun install:*)",
+      "Bash(npm install)",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(npx ts-node:*)"
+    ]
+  }
+}
