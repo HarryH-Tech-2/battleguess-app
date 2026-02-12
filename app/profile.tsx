@@ -10,7 +10,7 @@ import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, Trophy, Calendar, ChevronRight } from 'lucide-react-native';
+import { Flame, Heart, Star, Trophy, Calendar, ChevronRight, Cake, Skull } from 'lucide-react-native';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { mascots } from '@/mocks/mascots';
@@ -57,6 +57,22 @@ export default function ProfileScreen() {
           )}
           <Text style={styles.mascotName}>{mascot?.name || 'Historian'}</Text>
           <Text style={styles.mascotDescription}>{mascot?.description}</Text>
+
+          {mascot && (
+            <View style={styles.mascotDates}>
+              <View style={styles.dateRow}>
+                <Cake size={16} color={colors.success} />
+                <Text style={styles.dateLabel}>Born:</Text>
+                <Text style={styles.dateValue}>{mascot.dob}</Text>
+              </View>
+              <View style={styles.dateRow}>
+                <Skull size={16} color={colors.textSecondary} />
+                <Text style={styles.dateLabel}>Died:</Text>
+                <Text style={styles.dateValue}>{mascot.dod}</Text>
+              </View>
+              <Text style={styles.causeOfDeath}>{mascot.causeOfDeath}</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.statsGrid}>
@@ -209,6 +225,37 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  mascotDates: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
+    width: '100%',
+    gap: 8,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dateLabel: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    fontWeight: '500' as const,
+    width: 40,
+  },
+  dateValue: {
+    fontSize: 13,
+    color: colors.text,
+    fontWeight: '600' as const,
+  },
+  causeOfDeath: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontStyle: 'italic' as const,
+    textAlign: 'center',
+    marginTop: 4,
   },
   statsGrid: {
     flexDirection: 'row',

@@ -15,6 +15,9 @@ export interface Mascot {
   description: string;
   gender: 'male' | 'female';
   dates: string;
+  dob: string;
+  dod: string;
+  causeOfDeath: string;
 }
 
 export interface Battle {

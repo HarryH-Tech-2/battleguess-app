@@ -417,7 +417,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    zIndex: 100,
+    zIndex: 1000,
+    elevation: 1000,
   },
   continentSelector: {
     flexDirection: 'row',
@@ -479,6 +480,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    zIndex: 1,
   },
   pathContainer: {
     paddingTop: 20,
