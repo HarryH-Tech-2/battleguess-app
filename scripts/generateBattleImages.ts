@@ -86,7 +86,7 @@ const battles = [
 
 async function generateBattleImage(battleTitle: string, battleId: string): Promise<Buffer | null> {
   try {
-    const prompt = `Create a dramatic, historically-inspired illustration of the ${battleTitle}. Style: Epic historical painting style, dramatic lighting, no text or labels. Focus on the battle scene with soldiers, weapons, and landscape appropriate to the era. Make it visually striking and educational. 16:9 aspect ratio.`;
+    const prompt = `Present a clear, 45° top-down isometric miniature 3D cartoon scene of ${battleTitle}, featuring its most iconic landmarks and people. Use soft, refined textures with realistic PBR materials and gentle, lifelike lighting and shadows. Integrate weather conditions directly into the environment to create an immersive atmospheric mood. Use a clean, minimalistic composition with a soft, solid-colored background.`;
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -139,23 +139,25 @@ async function main() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  console.log('Starting battle image generation...');
+  console.log('Starting battle image generation with NEW isometric style...');
   console.log(`Output directory: ${outputDir}`);
   console.log(`Total battles: ${battles.length}`);
 
+  // Delete existing images to regenerate all
+  console.log('Deleting existing images...');
+  const existingFiles = fs.readdirSync(outputDir);
+  for (const file of existingFiles) {
+    if (file.endsWith('.png')) {
+      fs.unlinkSync(path.join(outputDir, file));
+    }
+  }
+  console.log(`Deleted ${existingFiles.length} existing images`);
+
   let generated = 0;
-  let skipped = 0;
   let failed = 0;
 
   for (const battle of battles) {
     const outputPath = path.join(outputDir, `${battle.id}.png`);
-
-    // Skip if already exists
-    if (fs.existsSync(outputPath)) {
-      console.log(`Skipping ${battle.id} - already exists`);
-      skipped++;
-      continue;
-    }
 
     console.log(`Generating image for: ${battle.title}...`);
 
@@ -176,7 +178,6 @@ async function main() {
 
   console.log('\n--- Summary ---');
   console.log(`Generated: ${generated}`);
-  console.log(`Skipped (already exists): ${skipped}`);
   console.log(`Failed: ${failed}`);
   console.log('Done!');
 }
