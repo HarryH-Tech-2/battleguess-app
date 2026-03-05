@@ -684,6 +684,13 @@ export default function LessonScreen() {
 
   const renderStoryCard = (step: StoryCardStep) => (
     <View style={styles.storyContainer}>
+      {battleImage && (
+        <Image
+          source={battleImage}
+          style={styles.storyBattleImage}
+          contentFit="cover"
+        />
+      )}
       <View style={styles.storyCard}>
         <Text style={styles.storyTitle}>{step.data.title}</Text>
         <Text style={styles.storyNarrative}>{step.data.narrative}</Text>
@@ -1154,7 +1161,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   sliderContainer: {
     width: '100%',
-    height: 50,
+    height: 70,
     position: 'relative',
     justifyContent: 'center',
     paddingHorizontal: 14,
@@ -1162,12 +1169,12 @@ const createStyles = (colors: any) => StyleSheet.create({
 
   sliderTrack: {
     position: 'absolute',
-    top: 16,
+    top: 24,
     left: 14,
     right: 14,
-    height: 12,
+    height: 16,
     backgroundColor: colors.pathLine,
-    borderRadius: 6,
+    borderRadius: 8,
     overflow: 'visible',
   },
   sliderFill: {
@@ -1176,22 +1183,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     left: 0,
     height: '100%',
     backgroundColor: colors.primary + '40',
-    borderRadius: 6,
+    borderRadius: 8,
   },
   sliderThumb: {
     position: 'absolute',
-    top: -6,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: -10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.primary,
-    marginLeft: -14,
+    marginLeft: -20,
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 4,
-    borderWidth: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
+    borderWidth: 4,
     borderColor: colors.textInverse,
   },
   sliderHint: {
@@ -1215,6 +1222,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   storyContainer: {
     flex: 1,
     justifyContent: 'center',
+  },
+  storyBattleImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 16,
+    marginBottom: 16,
   },
   storyCard: {
     backgroundColor: colors.card,

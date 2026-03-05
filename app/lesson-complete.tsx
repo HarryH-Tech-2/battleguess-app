@@ -18,6 +18,76 @@ import { getBattleById } from '@/mocks/battles';
 import { mascots } from '@/mocks/mascots';
 import Colors from '@/constants/colors';
 
+const battleImages: Record<string, any> = {
+  'thermopylae': require('@/assets/images/battles/thermopylae.png'),
+  'marathon': require('@/assets/images/battles/marathon.png'),
+  'hastings': require('@/assets/images/battles/hastings.png'),
+  'agincourt': require('@/assets/images/battles/agincourt.png'),
+  'waterloo': require('@/assets/images/battles/waterloo.png'),
+  'austerlitz': require('@/assets/images/battles/austerlitz.png'),
+  'somme': require('@/assets/images/battles/somme.png'),
+  'stalingrad': require('@/assets/images/battles/stalingrad.png'),
+  'dday': require('@/assets/images/battles/dday.png'),
+  'gettysburg': require('@/assets/images/battles/gettysburg.png'),
+  'yorktown': require('@/assets/images/battles/yorktown.png'),
+  'alamo': require('@/assets/images/battles/alamo.png'),
+  'puebla': require('@/assets/images/battles/puebla.png'),
+  'ayacucho': require('@/assets/images/battles/ayacucho.png'),
+  'gaugamela': require('@/assets/images/battles/gaugamela.png'),
+  'sekigahara': require('@/assets/images/battles/sekigahara.png'),
+  'red-cliffs': require('@/assets/images/battles/red-cliffs.png'),
+  'panipat-first': require('@/assets/images/battles/panipat-first.png'),
+  'tsushima': require('@/assets/images/battles/tsushima.png'),
+  'midway': require('@/assets/images/battles/midway.png'),
+  'zama': require('@/assets/images/battles/zama.png'),
+  'el-alamein': require('@/assets/images/battles/el-alamein.png'),
+  'isandlwana': require('@/assets/images/battles/isandlwana.png'),
+  'adwa': require('@/assets/images/battles/adwa.png'),
+  'cannae': require('@/assets/images/battles/cannae.png'),
+  'verdun': require('@/assets/images/battles/verdun.png'),
+  'kursk': require('@/assets/images/battles/kursk.png'),
+  'tours': require('@/assets/images/battles/tours.png'),
+  'gallipoli': require('@/assets/images/battles/gallipoli.png'),
+  'lepanto': require('@/assets/images/battles/lepanto.png'),
+  'borodino': require('@/assets/images/battles/borodino.png'),
+  'trafalgar': require('@/assets/images/battles/trafalgar.png'),
+  'vienna-1683': require('@/assets/images/battles/vienna-1683.png'),
+  'plassey': require('@/assets/images/battles/plassey.png'),
+  'singapore': require('@/assets/images/battles/singapore.png'),
+  'dien-bien-phu': require('@/assets/images/battles/dien-bien-phu.png'),
+  'changping': require('@/assets/images/battles/changping.png'),
+  'omdurman': require('@/assets/images/battles/omdurman.png'),
+  'carthage-destruction': require('@/assets/images/battles/carthage-destruction.png'),
+  'tobruk': require('@/assets/images/battles/tobruk.png'),
+  'saratoga': require('@/assets/images/battles/saratoga.png'),
+  'chacabuco': require('@/assets/images/battles/chacabuco.png'),
+  'new-orleans': require('@/assets/images/battles/new-orleans.png'),
+  'boyaca': require('@/assets/images/battles/boyaca.png'),
+  'rorkes-drift': require('@/assets/images/battles/rorkes-drift.png'),
+  'iwo-jima': require('@/assets/images/battles/iwo-jima.png'),
+  'marne': require('@/assets/images/battles/marne.png'),
+  'passchendaele': require('@/assets/images/battles/passchendaele.png'),
+  'bulge': require('@/assets/images/battles/bulge.png'),
+  'buena-vista': require('@/assets/images/battles/buena-vista.png'),
+  'talas': require('@/assets/images/battles/talas.png'),
+  'constantinople-1453': require('@/assets/images/battles/constantinople-1453.png'),
+  'nagashino': require('@/assets/images/battles/nagashino.png'),
+  'myeongnyang': require('@/assets/images/battles/myeongnyang.png'),
+  'kohima': require('@/assets/images/battles/kohima.png'),
+  'bach-dang': require('@/assets/images/battles/bach-dang.png'),
+  'panipat-third': require('@/assets/images/battles/panipat-third.png'),
+  'pyramids': require('@/assets/images/battles/pyramids.png'),
+  'khartoum': require('@/assets/images/battles/khartoum.png'),
+  'tangier': require('@/assets/images/battles/tangier.png'),
+  'kairouan': require('@/assets/images/battles/kairouan.png'),
+  'tenochtitlan': require('@/assets/images/battles/tenochtitlan.png'),
+  'cajamarca': require('@/assets/images/battles/cajamarca.png'),
+  'san-juan-hill': require('@/assets/images/battles/san-juan-hill.png'),
+  'falklands': require('@/assets/images/battles/falklands.png'),
+  'chapultepec': require('@/assets/images/battles/chapultepec.png'),
+  'carabobo': require('@/assets/images/battles/carabobo.png'),
+};
+
 export default function LessonCompleteScreen() {
   const { lessonId, correctAnswers, totalSteps, xpReward } = useLocalSearchParams<{
     lessonId: string;
@@ -94,9 +164,7 @@ export default function LessonCompleteScreen() {
     router.replace('/(tabs)/(home)/learn');
   };
 
-  const getMapUrl = (lat: number, lng: number) => {
-    return `https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/static/pin-l+FF6B35(${lng},${lat})/${lng},${lat},6,0/400x200@2x?access_token=REDACTED_MAPBOX_TOKEN`;
-  };
+  const battleImage = battle ? battleImages[battle.id] || null : null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,25 +214,20 @@ export default function LessonCompleteScreen() {
 
           {battle && (
             <Animated.View style={[styles.battleMapContainer, { opacity: fadeAnim }]}>
-              <View style={styles.mapWrapper}>
+              {battleImage && (
                 <Image
-                  source={{ uri: getMapUrl(battle.lat, battle.lng) }}
+                  source={battleImage}
                   style={styles.battleMap}
                   contentFit="cover"
                 />
-                <View style={styles.mapPinOverlay}>
-                  <View style={styles.mapPin}>
-                    <Text style={styles.mapPinIcon}>⚔️</Text>
-                  </View>
-                </View>
-              </View>
+              )}
               <View style={styles.battleInfoCard}>
                 <Text style={styles.battleName}>{battle.title}</Text>
                 <View style={styles.battleMeta}>
                   <Text style={styles.battleDate}>📅 {battle.date}</Text>
                   <Text style={styles.battleRegion}>📍 {battle.region}</Text>
                 </View>
-                <Text style={styles.battleSummary} numberOfLines={2}>
+                <Text style={styles.battleSummary}>
                   {battle.shortSummary}
                 </Text>
               </View>
@@ -282,44 +345,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.cardBorder,
   },
-  mapWrapper: {
-    width: '100%',
-    height: 140,
-    position: 'relative',
-  },
   battleMap: {
     width: '100%',
-    height: '100%',
-  },
-  mapPinOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mapPin: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-    borderWidth: 3,
-    borderColor: Colors.textInverse,
-  },
-  mapPinIcon: {
-    fontSize: 18,
+    height: 160,
   },
   battleInfoCard: {
-    padding: 12,
+    padding: 14,
   },
   battleName: {
     fontSize: 16,
@@ -341,9 +372,9 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   battleSummary: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textSecondary,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   statsContainer: {
     flexDirection: 'row',

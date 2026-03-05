@@ -14,6 +14,8 @@ export default function TabLayout() {
           borderTopColor: Colors.cardBorder,
           borderTopWidth: 1,
           paddingTop: 8,
+          paddingBottom: 12,
+          height: 65,
         },
         tabBarLabelStyle: {
           fontSize: 12,
