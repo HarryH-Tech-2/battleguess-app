@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Git & IDE
+.git/
+.claude/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native builds
+ios/
+android/
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS
+.DS_Store
+
+# Env
+.env
+.env*.local
+
+# Misc
+.rork
+rork-eslint.config.js
+*.tsbuildinfo

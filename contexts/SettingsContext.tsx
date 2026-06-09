@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, I18nManager } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { lightColors, darkColors, ColorScheme } from '@/constants/colors';
+import type { LanguageCode } from '@/i18n';
 
 const SETTINGS_KEY = 'battleguess_settings';
 
@@ -17,6 +19,7 @@ export interface AppSettings {
   largerText: boolean;
   selectedContinent: Continent;
   themeMode: ThemeMode;
+  language: LanguageCode | 'auto';
 }
 
 const defaultSettings: AppSettings = {
@@ -26,12 +29,14 @@ const defaultSettings: AppSettings = {
   largerText: false,
   selectedContinent: 'all',
   themeMode: 'system',
+  language: 'auto',
 };
 
 export const [SettingsProvider, useSettings] = createContextHook(() => {
   const queryClient = useQueryClient();
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const systemColorScheme = useColorScheme();
+  const { i18n } = useTranslation();
 
   const settingsQuery = useQuery({
     queryKey: ['appSettings'],
@@ -68,6 +73,20 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     }
   }, [settingsQuery.data]);
 
+  // Sync language with i18next when settings change
+  useEffect(() => {
+    if (settings.language !== 'auto') {
+      if (i18n.language !== settings.language) {
+        i18n.changeLanguage(settings.language);
+      }
+      // Enable RTL for Arabic
+      const isRTL = settings.language === 'ar';
+      if (I18nManager.isRTL !== isRTL) {
+        I18nManager.forceRTL(isRTL);
+      }
+    }
+  }, [settings.language, i18n]);
+
   const updateSettings = useCallback((updates: Partial<AppSettings>) => {
     setSettings(prev => {
       const newSettings = { ...prev, ...updates };
@@ -100,11 +119,20 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     updateSettings({ themeMode: mode });
   }, [updateSettings]);
 
+  const setLanguage = useCallback((lang: LanguageCode | 'auto') => {
+    updateSettings({ language: lang });
+    if (lang !== 'auto') {
+      i18n.changeLanguage(lang);
+    }
+  }, [updateSettings, i18n]);
+
   // Determine the actual theme based on settings and system preference
   const isDarkMode = settings.themeMode === 'dark' ||
     (settings.themeMode === 'system' && systemColorScheme === 'dark');
 
   const colors: ColorScheme = isDarkMode ? darkColors : lightColors;
+
+  const fontScale = settings.largerText ? 1.2 : 1;
 
   return {
     settings,
@@ -116,7 +144,9 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     toggleLargerText,
     setContinent,
     setThemeMode,
+    setLanguage,
     isDarkMode,
     colors,
+    fontScale,
   };
 });

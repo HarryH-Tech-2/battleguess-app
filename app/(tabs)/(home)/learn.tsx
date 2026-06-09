@@ -14,17 +14,19 @@ import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Flame, Star, Lock, Check, ChevronDown, Globe } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { units, getUnitsByContinent } from '@/mocks/units';
-import { getLessonsByUnitId } from '@/mocks/lessons';
-import { mascots } from '@/mocks/mascots';
+import { useContent } from '@/i18n/useContent';
+import { mascots as rawMascots } from '@/mocks/mascots';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NODE_SIZE = 72;
+const BRANCH_NODE_SIZE = 56;
 const PATH_WIDTH = SCREEN_WIDTH - 40;
 const CENTER_X = PATH_WIDTH / 2;
 const HORIZONTAL_OFFSET = 80;
+const BRANCH_HORIZONTAL_OFFSET = 110; // distance from trunk node center to branch node center
 const VERTICAL_SPACING = 120;
 
 // Orange color palette (Duolingo-inspired but warmer)
@@ -41,12 +43,12 @@ const THEME_COLORS = {
 };
 
 // Continent data with icons and colors
-const CONTINENTS = [
-  { id: 'all', name: 'All Continents', icon: '🌍', color: '#FF9500' },
-  { id: 'europe', name: 'Europe', icon: '🏰', color: '#3B82F6' },
-  { id: 'asia', name: 'Asia', icon: '🏯', color: '#EF4444' },
-  { id: 'africa', name: 'Africa', icon: '🌴', color: '#F59E0B' },
-  { id: 'americas', name: 'Americas', icon: '🗽', color: '#10B981' },
+const CONTINENT_DATA = [
+  { id: 'all', key: 'learn.allContinents', icon: '🌍', color: '#FF9500' },
+  { id: 'europe', key: 'learn.europe', icon: '🏰', color: '#3B82F6' },
+  { id: 'asia', key: 'learn.asia', icon: '🏯', color: '#EF4444' },
+  { id: 'africa', key: 'learn.africa', icon: '🌴', color: '#F59E0B' },
+  { id: 'americas', key: 'learn.americas', icon: '🗽', color: '#10B981' },
 ];
 
 // Get winding path position (alternates left-center-right like Duolingo)
@@ -66,20 +68,23 @@ const getHorizontalOffset = (position: 'left' | 'center' | 'right'): number => {
 
 export default function LearnScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { progress, isLessonCompleted } = useUserProgress();
-  const { colors } = useSettings();
+  const { colors, fontScale } = useSettings();
+  const { getUnitsByContinent, getLessonsByUnitId, mascots: translatedMascots } = useContent();
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const [selectedContinent, setSelectedContinent] = useState('all');
   const [showContinentMenu, setShowContinentMenu] = useState(false);
 
-  const mascot = mascots.find(m => m.id === progress.selectedMascotId);
-  const selectedContinentData = CONTINENTS.find(c => c.id === selectedContinent) || CONTINENTS[0];
+  const mascot = rawMascots.find(m => m.id === progress.selectedMascotId);
+  const continents = CONTINENT_DATA.map(c => ({ ...c, name: t(c.key) }));
+  const selectedContinentData = continents.find(c => c.id === selectedContinent) || continents[0];
 
   // Get units for selected continent
   const filteredUnits = useMemo(() => {
     const continentUnits = getUnitsByContinent(selectedContinent);
     return continentUnits.sort((a, b) => a.orderIndex - b.orderIndex);
-  }, [selectedContinent]);
+  }, [selectedContinent, getUnitsByContinent]);
 
   useEffect(() => {
     // Pulse animation for current node
@@ -101,23 +106,22 @@ export default function LearnScreen() {
 
   const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
-    // Must complete ALL lessons in the previous unit to unlock the next one
     const prevUnit = filteredUnits[unitIndex - 1];
     const prevLessons = getLessonsByUnitId(prevUnit.id);
     const completedCount = prevLessons.filter(l => isLessonCompleted(l.id)).length;
     return completedCount >= prevLessons.length;
-  }, [isLessonCompleted, filteredUnits]);
+  }, [isLessonCompleted, filteredUnits, getLessonsByUnitId]);
 
   const getNextLesson = useCallback((unitId: string) => {
     const unitLessons = getLessonsByUnitId(unitId);
     return unitLessons.find(l => !isLessonCompleted(l.id)) || unitLessons[0];
-  }, [isLessonCompleted]);
+  }, [isLessonCompleted, getLessonsByUnitId]);
 
   const getUnitProgress = useCallback((unitId: string) => {
     const unitLessons = getLessonsByUnitId(unitId);
     const completed = unitLessons.filter(l => isLessonCompleted(l.id)).length;
     return { completed, total: unitLessons.length };
-  }, [isLessonCompleted]);
+  }, [isLessonCompleted, getLessonsByUnitId]);
 
   // Find current unit index (first incomplete unlocked unit)
   const currentUnitIndex = useMemo(() => {
@@ -141,13 +145,25 @@ export default function LearnScreen() {
     }
   };
 
+  const handleBranchPress = (lessonId: string, unlocked: boolean) => {
+    if (!unlocked) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(`/lesson/${lessonId}`);
+  };
+
+  // Only show branching layout when viewing all continents
+  const showBranches = selectedContinent === 'all';
+
   const handleContinentSelect = (continentId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedContinent(continentId);
     setShowContinentMenu(false);
   };
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, fontScale);
 
   // Generate SVG path for the winding line
   const generatePath = () => {
@@ -180,7 +196,41 @@ export default function LearnScreen() {
     return pathD;
   };
 
+  // Generate short SVG curves connecting each trunk node to its branch nodes
+  const generateBranchPaths = () => {
+    if (!showBranches || filteredUnits.length === 0) return [];
+
+    const segments: string[] = [];
+    filteredUnits.forEach((unit, index) => {
+      const lessons = getLessonsByUnitId(unit.id);
+      if (lessons.length <= 1) return;
+
+      const trunkPosition = getNodePosition(index);
+      const trunkX = CENTER_X + getHorizontalOffset(trunkPosition);
+      const trunkY = 60 + index * VERTICAL_SPACING;
+
+      // Branch on opposite horizontal side from the trunk's offset
+      const branchSide: 1 | -1 = trunkPosition === 'left' ? 1 : -1;
+
+      lessons.slice(1).forEach((_, branchIdx) => {
+        const branchX = trunkX + branchSide * BRANCH_HORIZONTAL_OFFSET;
+        const branchY = trunkY + branchIdx * (BRANCH_NODE_SIZE + 16);
+        // Short curve from trunk edge to branch edge
+        const startX = trunkX + branchSide * (NODE_SIZE / 2);
+        const startY = trunkY;
+        const endX = branchX - branchSide * (BRANCH_NODE_SIZE / 2);
+        const endY = branchY;
+        const midX = (startX + endX) / 2;
+        segments.push(
+          `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`
+        );
+      });
+    });
+    return segments;
+  };
+
   const pathD = generatePath();
+  const branchPaths = generateBranchPaths();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -226,7 +276,7 @@ export default function LearnScreen() {
 
         {showContinentMenu && (
           <View style={styles.continentMenu}>
-            {CONTINENTS.map((continent) => (
+            {continents.map((continent) => (
               <TouchableOpacity
                 key={continent.id}
                 style={[
@@ -262,14 +312,14 @@ export default function LearnScreen() {
         {filteredUnits.length === 0 ? (
           <View style={styles.emptyState}>
             <Globe size={48} color={THEME_COLORS.locked} />
-            <Text style={styles.emptyStateText}>No battles found for this continent</Text>
+            <Text style={styles.emptyStateText}>{t('learn.noBattles')}</Text>
           </View>
         ) : (
           <>
             {/* SVG Path background */}
             <View style={styles.pathSvgContainer}>
               <Svg width={PATH_WIDTH} height={filteredUnits.length * VERTICAL_SPACING + 100}>
-                {/* Background path */}
+                {/* Background trunk path */}
                 <Path
                   d={pathD}
                   stroke={THEME_COLORS.pathLine}
@@ -277,6 +327,17 @@ export default function LearnScreen() {
                   fill="none"
                   strokeLinecap="round"
                 />
+                {/* Branch connectors */}
+                {branchPaths.map((d, i) => (
+                  <Path
+                    key={`branch-${i}`}
+                    d={d}
+                    stroke={THEME_COLORS.pathLine}
+                    strokeWidth={5}
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                ))}
               </Svg>
             </View>
 
@@ -289,6 +350,12 @@ export default function LearnScreen() {
                 const isCurrent = index === currentUnitIndex;
                 const position = getNodePosition(index);
                 const horizontalOffset = getHorizontalOffset(position);
+
+                const lessons = getLessonsByUnitId(unit.id);
+                const trunkLesson = lessons[0];
+                const branchLessons = showBranches ? lessons.slice(1) : [];
+                const branchSide: 1 | -1 = position === 'left' ? 1 : -1;
+                const trunkComplete = trunkLesson ? isLessonCompleted(trunkLesson.id) : false;
 
                 return (
                   <View
@@ -343,6 +410,43 @@ export default function LearnScreen() {
                         )}
                       </View>
                     </Animated.View>
+
+                    {/* Branch nodes (only on "All Continents") */}
+                    {branchLessons.map((lesson, branchIdx) => {
+                      const branchUnlocked = unlocked && trunkComplete;
+                      const branchComplete = isLessonCompleted(lesson.id);
+                      return (
+                        <View
+                          key={lesson.id}
+                          style={[
+                            styles.branchNodeWrapper,
+                            {
+                              left: '50%',
+                              marginLeft: horizontalOffset + branchSide * BRANCH_HORIZONTAL_OFFSET - BRANCH_NODE_SIZE / 2,
+                              top: 20 + branchIdx * (BRANCH_NODE_SIZE + 16),
+                            },
+                          ]}
+                        >
+                          <TouchableOpacity
+                            style={[
+                              styles.branchNode,
+                              !branchUnlocked && styles.nodeLocked,
+                              branchComplete && styles.nodeComplete,
+                            ]}
+                            onPress={() => handleBranchPress(lesson.id, branchUnlocked)}
+                            activeOpacity={0.7}
+                          >
+                            {!branchUnlocked ? (
+                              <Lock size={20} color={THEME_COLORS.lockedBorder} />
+                            ) : branchComplete ? (
+                              <Check size={24} color="#FFFFFF" strokeWidth={3} />
+                            ) : (
+                              <Text style={styles.branchNodeIcon}>{unit.icon}</Text>
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
                   </View>
                 );
               })}
@@ -354,7 +458,7 @@ export default function LearnScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -377,7 +481,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: 6,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 18 * fs,
     fontWeight: '700' as const,
     color: '#4B4B4B',
   },
@@ -424,7 +528,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   continentName: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 16 * fs,
     fontWeight: '600' as const,
     color: '#4B4B4B',
   },
@@ -461,7 +565,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   continentMenuText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 15 * fs,
     color: '#4B4B4B',
   },
   continentMenuTextActive: {
@@ -532,13 +636,35 @@ const createStyles = (colors: any) => StyleSheet.create({
   nodeIcon: {
     fontSize: 30,
   },
+  branchNodeWrapper: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  branchNode: {
+    width: BRANCH_NODE_SIZE,
+    height: BRANCH_NODE_SIZE,
+    borderRadius: BRANCH_NODE_SIZE / 2,
+    backgroundColor: THEME_COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: THEME_COLORS.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 0,
+    elevation: 4,
+    borderBottomWidth: 4,
+    borderBottomColor: THEME_COLORS.primaryDark,
+  },
+  branchNodeIcon: {
+    fontSize: 22,
+  },
   unitTitleContainer: {
     marginTop: 8,
     alignItems: 'center',
     maxWidth: 120,
   },
   unitTitle: {
-    fontSize: 13,
+    fontSize: 13 * fs,
     fontWeight: '600' as const,
     color: '#4B4B4B',
     textAlign: 'center',
@@ -547,7 +673,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: '#AFAFAF',
   },
   unitProgress: {
-    fontSize: 11,
+    fontSize: 11 * fs,
     color: '#888888',
     marginTop: 2,
   },
@@ -559,7 +685,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: 16,
   },
   emptyStateText: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     color: '#888888',
     textAlign: 'center',
   },

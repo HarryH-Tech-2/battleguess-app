@@ -11,23 +11,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Flame, Heart, Star, Trophy, Calendar, ChevronRight, Cake, Skull } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { mascots } from '@/mocks/mascots';
-import { badges as allBadges, getBadgeById } from '@/mocks/badges';
-import { lessons } from '@/mocks/lessons';
+import { useContent } from '@/i18n/useContent';
+import { badges as allBadgesRaw } from '@/mocks/badges';
+import { lessons as rawLessons } from '@/mocks/lessons';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { progress, isLessonCompleted } = useUserProgress();
   const { colors } = useSettings();
+  const { mascots, badges: allBadges } = useContent();
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
   const styles = createStyles(colors);
 
   const stats = useMemo(() => {
-    const completedCount = lessons.filter(l => isLessonCompleted(l.id)).length;
-    const totalCount = lessons.length;
+    const completedCount = rawLessons.filter(l => isLessonCompleted(l.id)).length;
+    const totalCount = rawLessons.length;
     return {
       completedLessons: completedCount,
       totalLessons: totalCount,
@@ -36,8 +39,8 @@ export default function ProfileScreen() {
   }, [isLessonCompleted]);
 
   const earnedBadges = useMemo(() => {
-    return progress.badges.map(id => getBadgeById(id)).filter(Boolean);
-  }, [progress.badges]);
+    return progress.badges.map(id => allBadges.find(b => b.id === id)).filter(Boolean);
+  }, [progress.badges, allBadges]);
 
   const handleBackToLearning = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -55,19 +58,19 @@ export default function ProfileScreen() {
               <Image source={{ uri: mascot.avatar }} style={styles.avatar} />
             </View>
           )}
-          <Text style={styles.mascotName}>{mascot?.name || 'Historian'}</Text>
+          <Text style={styles.mascotName}>{mascot?.name || t('profile.historian')}</Text>
           <Text style={styles.mascotDescription}>{mascot?.description}</Text>
 
           {mascot && (
             <View style={styles.mascotDates}>
               <View style={styles.dateRow}>
                 <Cake size={16} color={colors.success} />
-                <Text style={styles.dateLabel}>Born:</Text>
+                <Text style={styles.dateLabel}>{t('profile.born')}</Text>
                 <Text style={styles.dateValue}>{mascot.dob}</Text>
               </View>
               <View style={styles.dateRow}>
                 <Skull size={16} color={colors.textSecondary} />
-                <Text style={styles.dateLabel}>Died:</Text>
+                <Text style={styles.dateLabel}>{t('profile.died')}</Text>
                 <Text style={styles.dateValue}>{mascot.dod}</Text>
               </View>
               <Text style={styles.causeOfDeath}>{mascot.causeOfDeath}</Text>
@@ -79,35 +82,35 @@ export default function ProfileScreen() {
           <View style={styles.statCard}>
             <Flame size={28} color={colors.streak} />
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+            <Text style={styles.statLabel}>{t('profile.dayStreak')}</Text>
           </View>
           <View style={styles.statCard}>
             <Star size={28} color={colors.xp} fill={colors.xp} />
             <Text style={styles.statValue}>{progress.totalXp}</Text>
-            <Text style={styles.statLabel}>Total XP</Text>
+            <Text style={styles.statLabel}>{t('profile.totalXp')}</Text>
           </View>
           <View style={styles.statCard}>
             <Heart size={28} color={colors.hearts} fill={colors.hearts} />
             <Text style={styles.statValue}>{progress.hearts}/5</Text>
-            <Text style={styles.statLabel}>Hearts</Text>
+            <Text style={styles.statLabel}>{t('profile.hearts')}</Text>
           </View>
           <View style={styles.statCard}>
             <Trophy size={28} color={colors.secondary} />
             <Text style={styles.statValue}>{progress.bestStreak}</Text>
-            <Text style={styles.statLabel}>Best Streak</Text>
+            <Text style={styles.statLabel}>{t('profile.bestStreak')}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Progress</Text>
+          <Text style={styles.sectionTitle}>{t('profile.progress')}</Text>
           <View style={styles.progressCard}>
             <View style={styles.progressCircle}>
               <Text style={styles.progressPercent}>{stats.progressPercent}%</Text>
             </View>
             <View style={styles.progressInfo}>
-              <Text style={styles.progressTitle}>Lessons Completed</Text>
+              <Text style={styles.progressTitle}>{t('profile.lessonsCompleted')}</Text>
               <Text style={styles.progressDetail}>
-                {stats.completedLessons} of {stats.totalLessons} lessons
+                {t('profile.lessonsOf', { completed: stats.completedLessons, total: stats.totalLessons })}
               </Text>
             </View>
           </View>
@@ -115,7 +118,7 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Badges</Text>
+            <Text style={styles.sectionTitle}>{t('profile.badges')}</Text>
             <Text style={styles.badgeCount}>
               {earnedBadges.length}/{allBadges.length}
             </Text>
@@ -151,19 +154,19 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Streak Calendar</Text>
+          <Text style={styles.sectionTitle}>{t('profile.streakCalendar')}</Text>
           <View style={styles.calendarCard}>
             <Calendar size={24} color={colors.primary} />
             <View style={styles.calendarInfo}>
               <Text style={styles.calendarTitle}>
-                {progress.currentStreak > 0 
-                  ? `${progress.currentStreak} day streak!` 
-                  : 'Start your streak today!'}
+                {progress.currentStreak > 0
+                  ? t('profile.dayStreakCount', { count: progress.currentStreak })
+                  : t('profile.startStreak')}
               </Text>
               <Text style={styles.calendarSubtitle}>
-                {progress.lastActiveDate 
-                  ? `Last active: ${new Date(progress.lastActiveDate).toLocaleDateString()}`
-                  : 'Complete a lesson to start'}
+                {progress.lastActiveDate
+                  ? t('profile.lastActive', { date: new Date(progress.lastActiveDate).toLocaleDateString() })
+                  : t('profile.completeToStart')}
               </Text>
             </View>
           </View>
@@ -176,7 +179,7 @@ export default function ProfileScreen() {
           onPress={handleBackToLearning}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Back to Learning</Text>
+          <Text style={styles.continueButtonText}>{t('profile.backToLearning')}</Text>
           <ChevronRight size={20} color={colors.textInverse} />
         </TouchableOpacity>
       </View>

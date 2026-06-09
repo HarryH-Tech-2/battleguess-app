@@ -10,7 +10,25 @@
       "Bash(npm install)",
       "Bash(where:*)",
       "Bash(npm install:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(of [battle], featuring its most iconic landmarks and people. Use soft,)",
+      "Bash(refined textures with realistic PBR materials and gentle, lifelike)",
+      "Bash(lighting and shadows. Integrate weather conditions directly into the)",
+      "Bash(environment to create an immersive atmospheric mood. Use a clean,)",
+      "Bash(minimalistic composition with a soft, solid-colored background.\"\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx expo:*)",
+      "Bash(grep id: ''lesson-:*)",
+      "Bash(grep:*)",
+      "Bash(eas build:*)",
+      "Bash(EAS_SKIP_AUTO_FINGERPRINT=1 eas build:*)",
+      "Bash(eas build:view:*)",
+      "WebFetch(domain:job-logs.eascdn.net)",
+      "Bash(chmod:*)",
+      "Bash(npx eas:*)"
     ]
   }
 }

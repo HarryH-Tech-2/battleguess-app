@@ -1,12 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Bell, Volume2, Eye, Type, Info, ChevronRight, Moon, Sun, Smartphone, FileText, Shield } from 'lucide-react-native';
+import { Bell, Volume2, Eye, Type, Info, ChevronRight, Moon, Sun, Smartphone, FileText, Shield, UserCircle, Globe } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { useSettings, ThemeMode } from '@/contexts/SettingsContext';
+import { LANGUAGES, LanguageCode } from '@/i18n';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     settings,
     toggleVibration,
@@ -14,7 +17,9 @@ export default function SettingsScreen() {
     toggleReducedMotion,
     toggleLargerText,
     setThemeMode,
+    setLanguage,
     colors,
+    fontScale,
   } = useSettings();
 
   const handleToggle = (toggleFn: () => void) => {
@@ -31,7 +36,14 @@ export default function SettingsScreen() {
     setThemeMode(mode);
   };
 
-  const styles = createStyles(colors);
+  const handleLanguageChange = (lang: LanguageCode | 'auto') => {
+    if (settings.vibrationEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setLanguage(lang);
+  };
+
+  const styles = createStyles(colors, fontScale);
 
   const getThemeIcon = (mode: ThemeMode) => {
     switch (mode) {
@@ -44,15 +56,38 @@ export default function SettingsScreen() {
     }
   };
 
+  const currentLang = settings.language === 'auto' ? 'auto' : settings.language;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={styles.headerTitle}>{t('settings.title')}</Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Appearance</Text>
+          <Text style={styles.sectionTitle}>{t('settings.profile')}</Text>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            activeOpacity={0.7}
+            onPress={() => router.push('/choose-guide' as any)}
+          >
+            <View style={styles.settingLeft}>
+              <View style={[styles.iconContainer, { backgroundColor: colors.secondary + '20' }]}>
+                <UserCircle size={20} color={colors.secondary} />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>{t('settings.changeGuide')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.changeGuideDesc')}</Text>
+              </View>
+            </View>
+            <ChevronRight size={20} color={colors.textLight} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('settings.appearance')}</Text>
 
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -60,8 +95,8 @@ export default function SettingsScreen() {
                 <Moon size={20} color={colors.primary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Theme</Text>
-                <Text style={styles.settingDescription}>Choose your preferred appearance</Text>
+                <Text style={styles.settingTitle}>{t('settings.theme')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.themeDesc')}</Text>
               </View>
             </View>
           </View>
@@ -82,7 +117,7 @@ export default function SettingsScreen() {
                   styles.themeOptionText,
                   settings.themeMode === mode && styles.themeOptionTextSelected,
                 ]}>
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {t(`settings.${mode}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -90,7 +125,59 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Feedback</Text>
+          <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+
+          <View style={styles.settingItem}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+                <Globe size={20} color={colors.primary} />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingTitle}>{t('settings.language')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.languageDesc')}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.languageOptions}>
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                currentLang === 'auto' && styles.languageOptionSelected,
+              ]}
+              onPress={() => handleLanguageChange('auto')}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.languageOptionText,
+                currentLang === 'auto' && styles.languageOptionTextSelected,
+              ]}>
+                Auto
+              </Text>
+            </TouchableOpacity>
+            {LANGUAGES.map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[
+                  styles.languageOption,
+                  currentLang === lang.code && styles.languageOptionSelected,
+                ]}
+                onPress={() => handleLanguageChange(lang.code)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.languageOptionText,
+                  currentLang === lang.code && styles.languageOptionTextSelected,
+                ]}>
+                  {lang.nativeName}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('settings.feedback')}</Text>
 
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -98,8 +185,8 @@ export default function SettingsScreen() {
                 <Bell size={20} color={colors.primary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Vibration</Text>
-                <Text style={styles.settingDescription}>Haptic feedback for interactions</Text>
+                <Text style={styles.settingTitle}>{t('settings.vibration')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.vibrationDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -116,8 +203,8 @@ export default function SettingsScreen() {
                 <Volume2 size={20} color={colors.secondary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Sound Effects</Text>
-                <Text style={styles.settingDescription}>Audio feedback for correct/wrong answers</Text>
+                <Text style={styles.settingTitle}>{t('settings.soundEffects')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.soundEffectsDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -130,7 +217,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Accessibility</Text>
+          <Text style={styles.sectionTitle}>{t('settings.accessibility')}</Text>
 
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -138,8 +225,8 @@ export default function SettingsScreen() {
                 <Eye size={20} color={colors.success} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Reduce Motion</Text>
-                <Text style={styles.settingDescription}>Minimize animations throughout the app</Text>
+                <Text style={styles.settingTitle}>{t('settings.reduceMotion')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.reduceMotionDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -156,8 +243,8 @@ export default function SettingsScreen() {
                 <Type size={20} color={colors.xp} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Larger Text</Text>
-                <Text style={styles.settingDescription}>Increase text size for readability</Text>
+                <Text style={styles.settingTitle}>{t('settings.largerText')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.largerTextDesc')}</Text>
               </View>
             </View>
             <Switch
@@ -170,7 +257,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Legal</Text>
+          <Text style={styles.sectionTitle}>{t('settings.legal')}</Text>
 
           <TouchableOpacity
             style={styles.settingItem}
@@ -182,8 +269,8 @@ export default function SettingsScreen() {
                 <Shield size={20} color={colors.textSecondary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Privacy Policy</Text>
-                <Text style={styles.settingDescription}>How we handle your data</Text>
+                <Text style={styles.settingTitle}>{t('settings.privacyPolicy')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.privacyPolicyDesc')}</Text>
               </View>
             </View>
             <ChevronRight size={20} color={colors.textLight} />
@@ -199,8 +286,8 @@ export default function SettingsScreen() {
                 <FileText size={20} color={colors.textSecondary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>Terms of Service</Text>
-                <Text style={styles.settingDescription}>Rules and guidelines for using the app</Text>
+                <Text style={styles.settingTitle}>{t('settings.termsOfService')}</Text>
+                <Text style={styles.settingDescription}>{t('settings.termsOfServiceDesc')}</Text>
               </View>
             </View>
             <ChevronRight size={20} color={colors.textLight} />
@@ -208,7 +295,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
 
           <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
             <View style={styles.settingLeft}>
@@ -216,7 +303,7 @@ export default function SettingsScreen() {
                 <Info size={20} color={colors.textSecondary} />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingTitle}>App Version</Text>
+                <Text style={styles.settingTitle}>{t('settings.appVersion')}</Text>
                 <Text style={styles.settingDescription}>1.0.0</Text>
               </View>
             </View>
@@ -230,7 +317,7 @@ export default function SettingsScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -243,7 +330,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderBottomColor: colors.cardBorder,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 28 * fs,
     fontWeight: '700' as const,
     color: colors.text,
   },
@@ -255,7 +342,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     fontWeight: '600' as const,
     color: colors.textSecondary,
     textTransform: 'uppercase',
@@ -290,13 +377,13 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
   },
   settingTitle: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     fontWeight: '600' as const,
     color: colors.text,
     marginBottom: 2,
   },
   settingDescription: {
-    fontSize: 13,
+    fontSize: 13 * fs,
     color: colors.textSecondary,
   },
   themeOptions: {
@@ -321,11 +408,38 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.primary + '15',
   },
   themeOptionText: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     fontWeight: '500' as const,
     color: colors.textSecondary,
   },
   themeOptionTextSelected: {
+    color: colors.primary,
+    fontWeight: '600' as const,
+  },
+  languageOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 12,
+  },
+  languageOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.cardBorder,
+  },
+  languageOptionSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
+  },
+  languageOptionText: {
+    fontSize: 14 * fs,
+    fontWeight: '500' as const,
+    color: colors.textSecondary,
+  },
+  languageOptionTextSelected: {
     color: colors.primary,
     fontWeight: '600' as const,
   },

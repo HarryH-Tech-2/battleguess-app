@@ -1,29 +1,26 @@
-import { useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import Colors from '@/constants/colors';
 
 export default function IndexScreen() {
-  const router = useRouter();
   const { progress, isLoading } = useUserProgress();
 
-  useEffect(() => {
-    if (!isLoading) {
-      console.log('[Index] Checking onboarding status:', progress.hasCompletedOnboarding);
-      if (progress.hasCompletedOnboarding) {
-        router.replace('/(tabs)/(home)/learn');
-      } else {
-        router.replace('/onboarding');
-      }
-    }
-  }, [isLoading, progress.hasCompletedOnboarding, router]);
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
 
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color={Colors.primary} />
-    </View>
-  );
+  console.log('[Index] Checking onboarding status:', progress.hasCompletedOnboarding);
+
+  if (progress.hasCompletedOnboarding) {
+    return <Redirect href="/(tabs)/(home)/learn" />;
+  }
+
+  return <Redirect href="/onboarding" />;
 }
 
 const styles = StyleSheet.create({

@@ -3,6 +3,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { I18nextProvider } from "react-i18next";
+import i18n from "@/i18n";
 import { UserProgressProvider } from "@/contexts/UserProgressContext";
 import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
 import { lightColors } from "@/constants/colors";
@@ -31,6 +33,7 @@ function RootLayoutNav() {
       <Stack.Screen name="lesson-complete" options={{ headerShown: false, presentation: "modal" }} />
       <Stack.Screen name="review" options={{ title: "Daily Review" }} />
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
+      <Stack.Screen name="choose-guide" options={{ headerShown: false }} />
       <Stack.Screen name="privacy-policy" options={{ title: "Privacy Policy" }} />
       <Stack.Screen name="terms-of-service" options={{ title: "Terms of Service" }} />
       <Stack.Screen name="+not-found" />
@@ -44,14 +47,16 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <UserProgressProvider>
-          <SettingsProvider>
-            <RootLayoutNav />
-          </SettingsProvider>
-        </UserProgressProvider>
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <UserProgressProvider>
+            <SettingsProvider>
+              <RootLayoutNav />
+            </SettingsProvider>
+          </UserProgressProvider>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </I18nextProvider>
   );
 }

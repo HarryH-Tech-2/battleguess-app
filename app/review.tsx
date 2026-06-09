@@ -10,15 +10,17 @@ import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { BookOpen, ChevronRight, Heart, Star, Check } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { lessons } from '@/mocks/lessons';
-import { getBattleById } from '@/mocks/battles';
+import { useContent } from '@/i18n/useContent';
 
 export default function ReviewScreen() {
   const router = useRouter();
   const { progress, gainHeartFromReview, isLessonCompleted } = useUserProgress();
   const { colors } = useSettings();
+  const { t } = useTranslation();
+  const { lessons, getBattleById } = useContent();
   const [completedReviews, setCompletedReviews] = useState<string[]>([]);
   const styles = createStyles(colors);
 
@@ -34,7 +36,7 @@ export default function ReviewScreen() {
       .slice(0, 5);
     
     return withWrongAnswers;
-  }, [progress.wrongAnswers, isLessonCompleted]);
+  }, [progress.wrongAnswers, isLessonCompleted, lessons, getBattleById]);
 
   const handleReviewLesson = useCallback((lessonId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -52,19 +54,19 @@ export default function ReviewScreen() {
   if (reviewLessons.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
-        <Stack.Screen options={{ title: 'Review' }} />
+        <Stack.Screen options={{ title: t('review.title') }} />
         <View style={styles.emptyContainer}>
           <BookOpen size={64} color={colors.pathLine} />
-          <Text style={styles.emptyTitle}>No Reviews Yet</Text>
+          <Text style={styles.emptyTitle}>{t('review.noReviews')}</Text>
           <Text style={styles.emptySubtitle}>
-            Complete some lessons first to unlock review sessions
+            {t('review.completeLessonsFirst')}
           </Text>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
             activeOpacity={0.8}
           >
-            <Text style={styles.backButtonText}>Back to Learning</Text>
+            <Text style={styles.backButtonText}>{t('review.backToLearning')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -73,18 +75,18 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Stack.Screen options={{ title: 'Review' }} />
+      <Stack.Screen options={{ title: t('review.title') }} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Practice Makes Perfect</Text>
+        <Text style={styles.headerTitle}>{t('review.practiceMakesPerfect')}</Text>
         <Text style={styles.headerSubtitle}>
-          Review battles you have learned to strengthen your memory
+          {t('review.reviewBattles')}
         </Text>
 
         <View style={styles.rewardBanner}>
           <Heart size={20} color={colors.hearts} fill={colors.hearts} />
           <Text style={styles.rewardText}>
-            Complete a review to earn a heart!
+            {t('review.earnHeart')}
           </Text>
         </View>
       </View>
@@ -112,7 +114,7 @@ export default function ReviewScreen() {
                 </View>
                 {wrongCount > 0 && (
                   <View style={styles.needsPractice}>
-                    <Text style={styles.needsPracticeText}>Needs practice</Text>
+                    <Text style={styles.needsPracticeText}>{t('review.needsPractice')}</Text>
                   </View>
                 )}
               </View>
@@ -130,12 +132,12 @@ export default function ReviewScreen() {
                   {isReviewed ? (
                     <>
                       <Check size={16} color={colors.success} />
-                      <Text style={styles.quickReviewTextDone}>Reviewed</Text>
+                      <Text style={styles.quickReviewTextDone}>{t('review.reviewed')}</Text>
                     </>
                   ) : (
                     <>
                       <Star size={16} color={colors.secondary} />
-                      <Text style={styles.quickReviewText}>Quick Review</Text>
+                      <Text style={styles.quickReviewText}>{t('review.quickReview')}</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -145,7 +147,7 @@ export default function ReviewScreen() {
                   onPress={() => handleReviewLesson(lesson.id)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.fullLessonText}>Full Lesson</Text>
+                  <Text style={styles.fullLessonText}>{t('review.fullLesson')}</Text>
                   <ChevronRight size={16} color={colors.primary} />
                 </TouchableOpacity>
               </View>
@@ -159,7 +161,9 @@ export default function ReviewScreen() {
           <View style={styles.completedBanner}>
             <Check size={20} color={colors.success} />
             <Text style={styles.completedText}>
-              {completedReviews.length} review{completedReviews.length !== 1 ? 's' : ''} completed!
+              {completedReviews.length !== 1
+                ? t('review.reviewsCompletedPlural', { count: completedReviews.length })
+                : t('review.reviewsCompleted', { count: completedReviews.length })}
             </Text>
           </View>
         </View>

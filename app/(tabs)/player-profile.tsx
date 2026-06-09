@@ -17,10 +17,11 @@ import {
   X,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { mascots } from '@/mocks/mascots';
-import { educationalArticles, EducationalArticle } from '@/mocks/educational';
+import { useContent } from '@/i18n/useContent';
+import { EducationalArticle } from '@/mocks/educational';
 
 const FormattedContent = ({ content, colors }: { content: string; colors: any }) => {
   const elements = useMemo(() => {
@@ -91,8 +92,10 @@ const FormattedContent = ({ content, colors }: { content: string; colors: any })
 };
 
 export default function PlayerProfileScreen() {
+  const { t } = useTranslation();
   const { progress } = useUserProgress();
   const { colors } = useSettings();
+  const { mascots, articles: educationalArticles } = useContent();
   const [selectedArticle, setSelectedArticle] = useState<EducationalArticle | null>(null);
 
   const mascot = mascots.find(m => m.id === progress.selectedMascotId);
@@ -106,7 +109,7 @@ export default function PlayerProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={styles.headerTitle}>{t('profile.title')}</Text>
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -116,7 +119,7 @@ export default function PlayerProfileScreen() {
               <Image source={{ uri: mascot.avatar }} style={styles.avatar} contentFit="cover" />
             </View>
           )}
-          <Text style={styles.mascotName}>{mascot?.name || 'Choose a Guide'}</Text>
+          <Text style={styles.mascotName}>{mascot?.name || t('profile.chooseGuide')}</Text>
           <Text style={styles.mascotDescription}>{mascot?.description || ''}</Text>
           {mascot?.dates && <Text style={styles.mascotDates}>{mascot.dates}</Text>}
         </View>
@@ -127,7 +130,7 @@ export default function PlayerProfileScreen() {
               <Flame size={24} color={colors.streak} />
             </View>
             <Text style={styles.statValue}>{progress.currentStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+            <Text style={styles.statLabel}>{t('profile.dayStreak')}</Text>
           </View>
 
           <View style={styles.statCard}>
@@ -135,7 +138,7 @@ export default function PlayerProfileScreen() {
               <Star size={24} color={colors.xp} />
             </View>
             <Text style={styles.statValue}>{progress.totalXp}</Text>
-            <Text style={styles.statLabel}>Total XP</Text>
+            <Text style={styles.statLabel}>{t('profile.totalXp')}</Text>
           </View>
 
           <View style={styles.statCard}>
@@ -143,16 +146,16 @@ export default function PlayerProfileScreen() {
               <Trophy size={24} color={colors.success} />
             </View>
             <Text style={styles.statValue}>{progress.completedLessons.length}</Text>
-            <Text style={styles.statLabel}>Lessons</Text>
+            <Text style={styles.statLabel}>{t('profile.lessons')}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <BookOpen size={20} color={colors.primary} />
-            <Text style={styles.sectionTitle}>Learn More</Text>
+            <Text style={styles.sectionTitle}>{t('profile.learnMore')}</Text>
           </View>
-          <Text style={styles.sectionSubtitle}>Educational articles about military history</Text>
+          <Text style={styles.sectionSubtitle}>{t('profile.educationalArticles')}</Text>
 
           {educationalArticles.map((article) => (
             <TouchableOpacity

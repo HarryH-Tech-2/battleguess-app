@@ -8,16 +8,17 @@ import {
   Dimensions,
   LayoutChangeEvent,
   ScrollView,
+  PanResponder,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { X, Check, MapPin, ArrowRight, GripVertical } from 'lucide-react-native';
 import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getLessonById } from '@/mocks/lessons';
-import { getBattleById } from '@/mocks/battles';
+import { useContent } from '@/i18n/useContent';
 import { mascots } from '@/mocks/mascots';
 import { Step, MultiChoiceStep, MapTapStep, OrderEventsStep, MatchPairsStep, FillBlankStep, TimelineSliderStep, TwoTruthsStep, StoryCardStep } from '@/types';
 
@@ -106,8 +107,10 @@ const getBattleImage = (battleId: string): any => {
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const { progress } = useUserProgress();
-  const { colors } = useSettings();
+  const { colors, fontScale } = useSettings();
+  const { getLessonById, getBattleById, mascots: translatedMascots } = useContent();
 
   const lesson = getLessonById(id || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
@@ -133,9 +136,9 @@ export default function LessonScreen() {
   const mascotBounceAnim = useRef(new Animated.Value(0)).current;
   const sliderWidthRef = useRef(0);
 
-  const mascot = mascots.find(m => m.id === progress.selectedMascotId);
+  const mascot = translatedMascots.find(m => m.id === progress.selectedMascotId);
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, fontScale);
 
   useEffect(() => {
     if (lesson) {
@@ -581,29 +584,37 @@ export default function LessonScreen() {
       displayYear = currentValue.toString();
     }
 
-    const handleSliderTouch = (locationX: number) => {
-      if (feedback !== 'none') return;
+    // locationX is relative to the touched view (sliderContainer).
+    // Track starts 14px from the container's left edge (paddingHorizontal: 14).
+    const SLIDER_HORIZONTAL_PADDING = 14;
+    const calcYearFromLocalX = (locationX: number) => {
       const trackWidth = sliderWidthRef.current || 300;
-      const percent = Math.max(0, Math.min(1, locationX / trackWidth));
-      const year = Math.round(minYear + percent * range);
-      setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const x = locationX - SLIDER_HORIZONTAL_PADDING;
+      const percent = Math.max(0, Math.min(1, x / trackWidth));
+      return Math.round(minYear + percent * range);
     };
 
-    const handleSliderMove = (locationX: number) => {
-      if (feedback !== 'none') return;
-      const trackWidth = sliderWidthRef.current || 300;
-      const percent = Math.max(0, Math.min(1, locationX / trackWidth));
-      const newYear = Math.round(minYear + percent * range);
-
-      if (newYear !== currentValue) {
-        setSliderValue(Math.max(minYear, Math.min(maxYear, newYear)));
-        Haptics.selectionAsync();
-      }
-    };
+    const sliderPanResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => feedback === 'none',
+      onMoveShouldSetPanResponder: () => feedback === 'none',
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (e) => {
+        const year = calcYearFromLocalX(e.nativeEvent.locationX);
+        setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      },
+      onPanResponderMove: (e) => {
+        const year = calcYearFromLocalX(e.nativeEvent.locationX);
+        const clamped = Math.max(minYear, Math.min(maxYear, year));
+        setSliderValue(clamped);
+      },
+      onPanResponderRelease: () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      },
+    });
 
     const onSliderLayout = (e: LayoutChangeEvent) => {
-      sliderWidthRef.current = e.nativeEvent.layout.width;
+      sliderWidthRef.current = e.nativeEvent.layout.width - 28;
     };
 
     const fillPercent = ((currentValue - minYear) / range) * 100;
@@ -616,11 +627,7 @@ export default function LessonScreen() {
         <View
           style={styles.sliderContainer}
           onLayout={onSliderLayout}
-          onStartShouldSetResponder={() => feedback === 'none'}
-          onMoveShouldSetResponder={() => feedback === 'none'}
-          onResponderGrant={(e) => handleSliderTouch(e.nativeEvent.locationX)}
-          onResponderMove={(e) => handleSliderMove(e.nativeEvent.locationX)}
-          onResponderRelease={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+          {...sliderPanResponder.panHandlers}
         >
           <View style={styles.sliderTrack}>
             <View style={[styles.sliderFill, { width: `${fillPercent}%` }]} />
@@ -641,7 +648,7 @@ export default function LessonScreen() {
           </Text>
         </View>
         <View style={styles.sliderHint}>
-          <Text style={styles.sliderHintText}>Drag to select the year</Text>
+          <Text style={styles.sliderHintText}>{t('lesson.dragToSelect')}</Text>
         </View>
         {renderBattleImage()}
       </View>
@@ -737,7 +744,7 @@ export default function LessonScreen() {
   if (!lesson || !currentStep) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Lesson not found</Text>
+        <Text style={styles.errorText}>{t('lesson.lessonNotFound')}</Text>
       </SafeAreaView>
     );
   }
@@ -805,7 +812,7 @@ export default function LessonScreen() {
           </View>
           <View style={[styles.cheerBubble, feedback === 'wrong' && styles.cheerBubbleWrong]}>
             <Text style={styles.cheerText}>
-              {feedback === 'correct' ? 'Great job!' : outOfHearts ? 'Try again!' : 'Keep going!'}
+              {feedback === 'correct' ? t('lesson.greatJob') : outOfHearts ? t('lesson.tryAgain') : t('lesson.keepGoing')}
             </Text>
           </View>
         </Animated.View>
@@ -827,12 +834,12 @@ export default function LessonScreen() {
                 styles.feedbackTitle,
                 feedback === 'correct' ? styles.feedbackTitleCorrect : styles.feedbackTitleWrong,
               ]}>
-                {feedback === 'correct' ? 'Correct!' : 'Not quite'}
+                {feedback === 'correct' ? t('lesson.correct') : t('lesson.wrong')}
               </Text>
             </View>
             <Text style={styles.feedbackText} numberOfLines={2}>
               {outOfHearts
-                ? "You're out of hearts!"
+                ? t('lesson.outOfHearts')
                 : (feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong)}
             </Text>
           </View>
@@ -849,7 +856,7 @@ export default function LessonScreen() {
             activeOpacity={0.8}
           >
             <Text style={styles.checkButtonText}>
-              {currentStep.type === 'storyCard' ? 'Continue' : 'Check'}
+              {currentStep.type === 'storyCard' ? t('lesson.continue') : t('lesson.check')}
             </Text>
           </TouchableOpacity>
         ) : (
@@ -861,7 +868,7 @@ export default function LessonScreen() {
             onPress={handleContinue}
             activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
+            <Text style={styles.continueButtonText}>{t('lesson.continue')}</Text>
             <ArrowRight size={20} color={colors.textInverse} />
           </TouchableOpacity>
         )}
@@ -870,7 +877,7 @@ export default function LessonScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -923,11 +930,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingBottom: 20,
   },
   prompt: {
-    fontSize: 24,
+    fontSize: 24 * fs,
     fontWeight: '700' as const,
     color: colors.text,
     marginBottom: 24,
-    lineHeight: 32,
+    lineHeight: 32 * fs,
   },
   errorText: {
     fontSize: 18,
@@ -960,7 +967,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.errorLight,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     color: colors.text,
     textAlign: 'center',
   },
@@ -1012,7 +1019,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.error,
   },
   regionText: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     fontWeight: '600' as const,
     color: colors.text,
     textAlign: 'center',
@@ -1050,7 +1057,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textInverse,
   },
   orderedItemText: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     color: colors.text,
     flex: 1,
   },
@@ -1068,7 +1075,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: 8,
   },
   unorderedItemText: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     color: colors.text,
     flex: 1,
   },
@@ -1097,7 +1104,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.successLight,
   },
   matchItemText: {
-    fontSize: 14,
+    fontSize: 14 * fs,
     fontWeight: '500' as const,
     color: colors.text,
     textAlign: 'center',
@@ -1110,9 +1117,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: 24,
   },
   fillBlankSentence: {
-    fontSize: 20,
+    fontSize: 20 * fs,
     color: colors.text,
-    lineHeight: 30,
+    lineHeight: 30 * fs,
     textAlign: 'center',
   },
   fillBlankOptions: {
@@ -1142,7 +1149,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.errorLight,
   },
   fillBlankOptionText: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     color: colors.text,
   },
   fillBlankOptionTextSelected: {
@@ -1161,7 +1168,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   sliderContainer: {
     width: '100%',
-    height: 70,
+    height: 80,
     position: 'relative',
     justifyContent: 'center',
     paddingHorizontal: 14,
@@ -1242,16 +1249,16 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 4,
   },
   storyTitle: {
-    fontSize: 24,
+    fontSize: 24 * fs,
     fontWeight: '700' as const,
     color: colors.primary,
     marginBottom: 16,
     textAlign: 'center',
   },
   storyNarrative: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     color: colors.text,
-    lineHeight: 26,
+    lineHeight: 26 * fs,
     marginBottom: 20,
   },
   storyMeta: {
@@ -1362,7 +1369,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: 4,
   },
   feedbackTitle: {
-    fontSize: 16,
+    fontSize: 16 * fs,
     fontWeight: '700' as const,
   },
   feedbackTitleCorrect: {
@@ -1372,9 +1379,9 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.error,
   },
   feedbackText: {
-    fontSize: 13,
+    fontSize: 13 * fs,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 18 * fs,
   },
   checkButton: {
     backgroundColor: colors.primary,
@@ -1395,7 +1402,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderBottomColor: '#A8A29E',
   },
   checkButtonText: {
-    fontSize: 18,
+    fontSize: 18 * fs,
     fontWeight: '700' as const,
     color: colors.textInverse,
   },
@@ -1423,7 +1430,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderBottomColor: colors.primaryDark,
   },
   continueButtonText: {
-    fontSize: 18,
+    fontSize: 18 * fs,
     fontWeight: '700' as const,
     color: colors.textInverse,
   },

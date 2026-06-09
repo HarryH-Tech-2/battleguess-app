@@ -12,10 +12,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Star, Flame, ArrowRight } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
-import { getLessonById } from '@/mocks/lessons';
-import { getBattleById } from '@/mocks/battles';
-import { mascots } from '@/mocks/mascots';
+import { useContent } from '@/i18n/useContent';
 import Colors from '@/constants/colors';
 
 const battleImages: Record<string, any> = {
@@ -97,9 +96,11 @@ export default function LessonCompleteScreen() {
   }>();
   
   const router = useRouter();
+  const { t } = useTranslation();
   const { completeLesson, progress } = useUserProgress();
-  const mascot = mascots.find(m => m.id === progress.selectedMascotId);
-  
+  const { getLessonById, getBattleById, mascots: translatedMascots } = useContent();
+  const mascot = translatedMascots.find(m => m.id === progress.selectedMascotId);
+
   const lesson = getLessonById(lessonId || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
   const correct = parseInt(correctAnswers || '0', 10);
@@ -207,7 +208,7 @@ export default function LessonCompleteScreen() {
 
           <Animated.View style={[styles.titleContainer, { opacity: fadeAnim }]}>
             <Text style={styles.title}>
-              {isPerfect ? 'Perfect!' : 'Lesson Complete!'}
+              {isPerfect ? t('lessonComplete.perfect') : t('lessonComplete.complete')}
             </Text>
             <Text style={styles.lessonTitle}>{lesson?.title}</Text>
           </Animated.View>
@@ -238,9 +239,9 @@ export default function LessonCompleteScreen() {
             <View style={styles.statCard}>
               <Star size={24} color={Colors.xp} fill={Colors.xp} />
               <Text style={styles.statValue}>+{totalXp}</Text>
-              <Text style={styles.statLabel}>XP Earned</Text>
+              <Text style={styles.statLabel}>{t('lessonComplete.xpEarned')}</Text>
               {bonusXp > 0 && (
-                <Text style={styles.bonusText}>+{bonusXp} bonus!</Text>
+                <Text style={styles.bonusText}>+{bonusXp} {t('lessonComplete.bonus')}</Text>
               )}
             </View>
 
@@ -250,14 +251,14 @@ export default function LessonCompleteScreen() {
                   {Math.round((correct / total) * 100)}%
                 </Text>
               </View>
-              <Text style={styles.statLabel}>Accuracy</Text>
-              <Text style={styles.statSubLabel}>{correct}/{total} correct</Text>
+              <Text style={styles.statLabel}>{t('lessonComplete.accuracy')}</Text>
+              <Text style={styles.statSubLabel}>{correct}/{total} {t('lessonComplete.correct')}</Text>
             </View>
 
             <View style={styles.statCard}>
               <Flame size={24} color={Colors.streak} />
               <Text style={styles.statValue}>{progress.currentStreak}</Text>
-              <Text style={styles.statLabel}>Day Streak</Text>
+              <Text style={styles.statLabel}>{t('lessonComplete.dayStreak')}</Text>
             </View>
           </Animated.View>
         </View>
@@ -269,7 +270,7 @@ export default function LessonCompleteScreen() {
           onPress={handleContinue}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{t('lessonComplete.continue')}</Text>
           <ArrowRight size={20} color={Colors.textInverse} />
         </TouchableOpacity>
       </View>

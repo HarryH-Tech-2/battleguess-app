@@ -8,11 +8,10 @@ import {
   Animated,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { ChevronRight, Check } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronRight, ChevronLeft, Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -22,68 +21,48 @@ import { Mascot } from '@/types';
 
 const { width } = Dimensions.get('window');
 
-export default function OnboardingScreen() {
+export default function ChooseGuideScreen() {
   const router = useRouter();
-  const { completeOnboarding } = useUserProgress();
-  const { colors } = useSettings();
   const { t } = useTranslation();
+  const { progress, updateProgress } = useUserProgress();
+  const { colors } = useSettings();
   const { mascots: translatedMascots } = useContent();
-  const [selectedMascot, setSelectedMascot] = useState<Mascot | null>(null);
+  const [selectedMascot, setSelectedMascot] = useState<Mascot | null>(
+    mascots.find(m => m.id === progress.selectedMascotId) || null
+  );
 
-  // Animations
   const headerAnim = useRef(new Animated.Value(0)).current;
   const cardAnims = useRef(mascots.map(() => new Animated.Value(0))).current;
   const buttonAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const iconRotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Header animation
     Animated.timing(headerAnim, {
       toValue: 1,
-      duration: 600,
+      duration: 500,
       useNativeDriver: true,
     }).start();
 
-    // Icon rotation animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(iconRotateAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(iconRotateAnim, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Staggered card animations
     cardAnims.forEach((anim, index) => {
       Animated.timing(anim, {
         toValue: 1,
-        duration: 500,
-        delay: 300 + index * 150,
+        duration: 400,
+        delay: 200 + index * 100,
         useNativeDriver: true,
       }).start();
     });
 
-    // Button animation
     Animated.timing(buttonAnim, {
       toValue: 1,
-      duration: 500,
-      delay: 900,
+      duration: 400,
+      delay: 700,
       useNativeDriver: true,
     }).start();
 
-    // Pulse animation for selected card
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.05,
+          toValue: 1.03,
           duration: 1000,
           useNativeDriver: true,
         }),
@@ -96,32 +75,35 @@ export default function OnboardingScreen() {
     ).start();
   }, []);
 
-  const handleComplete = () => {
+  const handleSelect = () => {
     if (selectedMascot) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      completeOnboarding(
-        selectedMascot.id,
-        10, // Default daily goal
-        ['Random'], // Default interests
-        'nothing' // Default knowledge level
-      );
-      router.replace('/home');
+      updateProgress({ selectedMascotId: selectedMascot.id });
+      router.back();
     }
   };
 
-  const iconRotation = iconRotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['-10deg', '10deg'],
-  });
+  const hasChanged = selectedMascot?.id !== progress.selectedMascotId;
 
   const styles = createStyles(colors);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <LinearGradient
-        colors={[colors.background, colors.backgroundDark || colors.background]}
-        style={StyleSheet.absoluteFill}
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: '',
+          headerStyle: { backgroundColor: colors.background },
+          headerShadowVisible: false,
+          headerTintColor: colors.text,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+              <ChevronLeft size={28} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        }}
       />
+
       <View style={styles.content}>
         <Animated.View
           style={[
@@ -132,20 +114,15 @@ export default function OnboardingScreen() {
                 {
                   translateY: headerAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [-30, 0],
+                    outputRange: [-20, 0],
                   }),
                 },
               ],
             },
           ]}
         >
-          <Animated.Text
-            style={[styles.welcomeIcon, { transform: [{ rotate: iconRotation }] }]}
-          >
-            ⚔️
-          </Animated.Text>
-          <Text style={styles.title}>{t('onboarding.welcome')}</Text>
-          <Text style={styles.subtitle}>{t('onboarding.chooseCommander')}</Text>
+          <Text style={styles.title}>{t('chooseGuide.title')}</Text>
+          <Text style={styles.subtitle}>{t('chooseGuide.subtitle')}</Text>
         </Animated.View>
 
         <View style={styles.mascotGrid}>
@@ -161,7 +138,7 @@ export default function OnboardingScreen() {
                       {
                         translateY: cardAnims[index].interpolate({
                           inputRange: [0, 1],
-                          outputRange: [50, 0],
+                          outputRange: [40, 0],
                         }),
                       },
                       { scale: isSelected ? pulseAnim : 1 },
@@ -205,7 +182,6 @@ export default function OnboardingScreen() {
                   >
                     {mascot.name}
                   </Text>
-                  <Text style={styles.mascotDates}>{mascot.dates}</Text>
                   <Text style={styles.mascotDescription} numberOfLines={2}>
                     {mascot.description}
                   </Text>
@@ -224,7 +200,7 @@ export default function OnboardingScreen() {
                 {
                   translateY: buttonAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [30, 0],
+                    outputRange: [20, 0],
                   }),
                 },
               ],
@@ -234,14 +210,16 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             style={[
               styles.primaryButton,
-              !selectedMascot && styles.primaryButtonDisabled,
+              !hasChanged && styles.primaryButtonDisabled,
             ]}
-            onPress={handleComplete}
-            disabled={!selectedMascot}
+            onPress={handleSelect}
+            disabled={!hasChanged}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryButtonText}>{t('onboarding.beginJourney')}</Text>
-            <ChevronRight size={20} color={colors.textInverse} />
+            <Text style={styles.primaryButtonText}>
+              {hasChanged ? t('chooseGuide.saveGuide') : t('chooseGuide.currentGuide')}
+            </Text>
+            {hasChanged && <ChevronRight size={20} color={colors.textInverse} />}
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -262,12 +240,7 @@ const createStyles = (colors: any) =>
     },
     headerSection: {
       alignItems: 'center',
-      marginTop: 32,
       marginBottom: 24,
-    },
-    welcomeIcon: {
-      fontSize: 56,
-      marginBottom: 16,
     },
     title: {
       fontSize: 28,
@@ -294,61 +267,49 @@ const createStyles = (colors: any) =>
       backgroundColor: colors.card,
       borderRadius: 20,
       borderWidth: 2,
-      borderColor: colors.cardBorder,
-      padding: 14,
-      paddingTop: 18,
+      borderColor: colors.secondary,
+      padding: 16,
       alignItems: 'center',
       position: 'relative',
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 4,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 3,
     },
     mascotCardSelected: {
       borderColor: colors.primary,
-      borderWidth: 3,
-      backgroundColor: colors.card,
+      backgroundColor: colors.primaryLight,
       shadowColor: colors.primary,
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 8,
+      shadowOpacity: 0.25,
+      shadowRadius: 8,
+      elevation: 6,
     },
     selectedBadge: {
       position: 'absolute',
-      top: -10,
-      right: -10,
-      width: 30,
-      height: 30,
-      borderRadius: 15,
+      top: -8,
+      right: -8,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       backgroundColor: colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 3,
       borderColor: colors.card,
       zIndex: 10,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.4,
-      shadowRadius: 4,
-      elevation: 4,
     },
     mascotImageContainer: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
+      width: 72,
+      height: 72,
+      borderRadius: 36,
       backgroundColor: colors.secondaryLight,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 12,
       borderWidth: 3,
-      borderColor: colors.cardBorder,
+      borderColor: colors.secondary,
       overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
-      elevation: 3,
     },
     mascotImageContainerSelected: {
       borderColor: colors.primary,
@@ -357,33 +318,26 @@ const createStyles = (colors: any) =>
     mascotImage: {
       width: '100%',
       height: '100%',
-      borderRadius: 40,
+      borderRadius: 36,
     },
     mascotName: {
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: '700' as const,
       color: colors.text,
-      marginBottom: 2,
+      marginBottom: 4,
       textAlign: 'center',
     },
     mascotNameSelected: {
       color: colors.primary,
     },
-    mascotDates: {
-      fontSize: 11,
-      color: colors.textLight,
-      marginBottom: 6,
-      fontStyle: 'italic',
-    },
     mascotDescription: {
-      fontSize: 11,
+      fontSize: 12,
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 16,
     },
     buttonContainer: {
-      marginTop: 24,
-      paddingTop: 16,
+      marginTop: 'auto',
     },
     primaryButton: {
       backgroundColor: colors.primary,
