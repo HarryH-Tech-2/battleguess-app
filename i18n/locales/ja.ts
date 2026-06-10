@@ -146,7 +146,7 @@ export default {
 
   // Privacy Policy
   privacy: {
-    lastUpdated: '最終更新日：2025年2月',
+    lastUpdated: '最終更新日：2月',
     introTitle: 'はじめに',
     introText: 'BattleGuessへようこそ。私たちはお客様のプライバシーを尊重し、個人データの保護に努めています。このプライバシーポリシーでは、アプリケーションをご利用いただく際に、お客様の情報をどのように収集、使用、保護するかについて説明いたします。',
     collectTitle: '収集する情報',
@@ -178,7 +178,7 @@ export default {
 
   // Terms of Service
   terms: {
-    lastUpdated: '最終更新日：2025年2月',
+    lastUpdated: '最終更新日：2月',
     acceptTitle: '利用規約への同意',
     acceptText: 'BattleGuessをダウンロード、インストール、または使用することにより、お客様はこの利用規約に拘束されることに同意するものとします。これらの規約に同意されない場合は、アプリケーションのご使用をお控えください。',
     descTitle: 'サービスの説明',

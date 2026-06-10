@@ -146,7 +146,7 @@ export default {
 
   // Privacy Policy
   privacy: {
-    lastUpdated: 'Last Updated: February 2025',
+    lastUpdated: 'Last Updated: February',
     introTitle: 'Introduction',
     introText: 'Welcome to BattleGuess. We respect your privacy and are committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our application.',
     collectTitle: 'Information We Collect',
@@ -178,7 +178,7 @@ export default {
 
   // Terms of Service
   terms: {
-    lastUpdated: 'Last Updated: February 2025',
+    lastUpdated: 'Last Updated: February',
     acceptTitle: 'Acceptance of Terms',
     acceptText: 'By downloading, installing, or using BattleGuess, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.',
     descTitle: 'Description of Service',

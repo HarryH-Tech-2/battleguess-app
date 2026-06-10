@@ -14,11 +14,13 @@ import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { Flame, Star, Lock, Check, ChevronDown, Globe } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
 import { mascots as rawMascots } from '@/mocks/mascots';
+import { getCivImage } from '@/mocks/civImages';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const NODE_SIZE = 72;
@@ -26,8 +28,12 @@ const BRANCH_NODE_SIZE = 56;
 const PATH_WIDTH = SCREEN_WIDTH - 40;
 const CENTER_X = PATH_WIDTH / 2;
 const HORIZONTAL_OFFSET = 80;
-const BRANCH_HORIZONTAL_OFFSET = 110; // distance from trunk node center to branch node center
 const VERTICAL_SPACING = 120;
+// Sub-battle (branch) layout — fan out below the trunk
+const SUB_HORIZONTAL = 100; // left/right offset of sub-battle center from trunk center
+const SUB_VERTICAL_FROM_TRUNK = 130; // vertical distance from trunk center to first sub-battle row center
+const SUB_ROW_SPACING = 80; // vertical distance between sub-battle rows when there are 3+ subs
+const SUB_TO_NEXT_TRUNK = 110; // vertical distance from last sub-battle row center to next trunk center
 
 // Orange color palette (Duolingo-inspired but warmer)
 const THEME_COLORS = {
@@ -35,11 +41,21 @@ const THEME_COLORS = {
   primaryDark: '#E68600',
   success: '#58CC02',
   successDark: '#4CAF00',
-  locked: '#E5E5E5',
-  lockedBorder: '#AFAFAF',
+  locked: '#D9CFB8',
+  lockedBorder: '#9C8E6E',
   current: '#FFC800',
-  pathLine: '#E5E5E5',
+  pathLine: '#D9CFB8',
   pathLineComplete: '#58CC02',
+};
+
+// Parchment palette — warm cream tones for an "old map" feel on the Learn screen
+const PARCHMENT = {
+  base: '#FBF5E5',     // warm cream base
+  baseSoft: '#F6EDD3', // a touch deeper for gradient bottom
+  baseEdge: '#EFE2BD', // slight vignette tint at extreme edges
+  ink: '#5C4A2B',      // dark ink-brown for text on parchment
+  inkSoft: '#8A7656',  // muted ink for secondary text
+  divider: '#E8DBB8',
 };
 
 // Continent data with icons and colors
@@ -106,10 +122,12 @@ export default function LearnScreen() {
 
   const isUnitUnlocked = useCallback((unitIndex: number) => {
     if (unitIndex === 0) return true;
+    // Only the previous unit's MAIN BATTLE (trunk lesson) needs to be completed
+    // to unlock the next stage. Sub-battles are optional.
     const prevUnit = filteredUnits[unitIndex - 1];
     const prevLessons = getLessonsByUnitId(prevUnit.id);
-    const completedCount = prevLessons.filter(l => isLessonCompleted(l.id)).length;
-    return completedCount >= prevLessons.length;
+    const prevTrunkLesson = prevLessons[0];
+    return prevTrunkLesson ? isLessonCompleted(prevTrunkLesson.id) : true;
   }, [isLessonCompleted, filteredUnits, getLessonsByUnitId]);
 
   const getNextLesson = useCallback((unitId: string) => {
@@ -165,66 +183,109 @@ export default function LearnScreen() {
 
   const styles = createStyles(colors, fontScale);
 
-  // Generate SVG path for the winding line
+  // Number of branch lessons (sub-battles) for a given unit
+  const getBranchCount = useCallback((unitId: string) => {
+    if (!showBranches) return 0;
+    return Math.max(0, getLessonsByUnitId(unitId).length - 1);
+  }, [showBranches, getLessonsByUnitId]);
+
+  // For sub-battle index i: which row (0-based) and which side (-1=left, +1=right).
+  // The first sub-battle alternates side based on unitIndex (even→left, odd→right)
+  // so units with only one sub-battle don't all land on the same side.
+  const getSubInfo = (subIdx: number, unitIndex: number) => {
+    const baseSide: 1 | -1 = unitIndex % 2 === 0 ? -1 : 1;
+    const side = (subIdx % 2 === 0 ? baseSide : -baseSide) as 1 | -1;
+    return {
+      row: Math.floor(subIdx / 2),
+      side,
+    };
+  };
+
+  // Number of sub-battle rows (each row holds left + right)
+  const getNumSubRows = (branchCount: number) =>
+    branchCount === 0 ? 0 : Math.ceil(branchCount / 2);
+
+  // When sub-battles are shown for a unit, the trunk is centered so subs fit on both sides.
+  // Without sub-battles, trunks use the original winding pattern.
+  const getTrunkX = useCallback((index: number) => {
+    if (showBranches) return CENTER_X;
+    return CENTER_X + getHorizontalOffset(getNodePosition(index));
+  }, [showBranches]);
+
+  // Per-unit vertical layout: trunk-center Y, and total path height
+  // Y=56 matches the actual rendered trunk-center: pathContainer paddingTop(20) +
+  // nodeRow paddingTop(20) + NODE_SIZE/2(36) - svgContainer top(20) = 56
+  const { unitYs, totalPathHeight } = useMemo(() => {
+    const ys: number[] = [];
+    let y = 56;
+    filteredUnits.forEach((unit) => {
+      ys.push(y);
+      const branchCount = getBranchCount(unit.id);
+      const numRows = getNumSubRows(branchCount);
+      const delta = numRows > 0
+        ? SUB_VERTICAL_FROM_TRUNK + (numRows - 1) * SUB_ROW_SPACING + SUB_TO_NEXT_TRUNK
+        : VERTICAL_SPACING;
+      y += delta;
+    });
+    return { unitYs: ys, totalPathHeight: y };
+  }, [filteredUnits, getBranchCount]);
+
+  // Main spine: connects trunk nodes only. Sub-battle connectors are drawn separately.
   const generatePath = () => {
     if (filteredUnits.length === 0) return '';
 
     let pathD = '';
-    const nodePositions: { x: number; y: number }[] = [];
-
     filteredUnits.forEach((_, index) => {
-      const position = getNodePosition(index);
-      const x = CENTER_X + getHorizontalOffset(position);
-      const y = 60 + index * VERTICAL_SPACING;
-      nodePositions.push({ x, y });
-    });
+      const x = getTrunkX(index);
+      const trunkY = unitYs[index];
+      const trunkTop = trunkY - NODE_SIZE / 2;
+      const trunkBottom = trunkY + NODE_SIZE / 2;
 
-    // Draw curved paths between nodes
-    for (let i = 0; i < nodePositions.length - 1; i++) {
-      const current = nodePositions[i];
-      const next = nodePositions[i + 1];
-      const midY = (current.y + next.y) / 2;
-
-      if (i === 0) {
-        pathD += `M ${current.x} ${current.y + NODE_SIZE / 2}`;
+      if (index === 0) {
+        pathD += `M ${x} ${trunkTop} L ${x} ${trunkBottom}`;
+      } else {
+        const prevX = getTrunkX(index - 1);
+        const prevTrunkBottom = unitYs[index - 1] + NODE_SIZE / 2;
+        const midY = (prevTrunkBottom + trunkTop) / 2;
+        pathD += ` C ${prevX} ${midY}, ${x} ${midY}, ${x} ${trunkTop} L ${x} ${trunkBottom}`;
       }
-
-      // Create S-curve between nodes
-      pathD += ` C ${current.x} ${midY}, ${next.x} ${midY}, ${next.x} ${next.y - NODE_SIZE / 2}`;
-    }
+    });
 
     return pathD;
   };
 
-  // Generate short SVG curves connecting each trunk node to its branch nodes
+  // Short curves from each trunk down-and-out to its sub-battles
   const generateBranchPaths = () => {
     if (!showBranches || filteredUnits.length === 0) return [];
 
     const segments: string[] = [];
     filteredUnits.forEach((unit, index) => {
-      const lessons = getLessonsByUnitId(unit.id);
-      if (lessons.length <= 1) return;
+      const branchCount = getBranchCount(unit.id);
+      if (branchCount === 0) return;
 
-      const trunkPosition = getNodePosition(index);
-      const trunkX = CENTER_X + getHorizontalOffset(trunkPosition);
-      const trunkY = 60 + index * VERTICAL_SPACING;
+      const trunkX = getTrunkX(index);
+      const trunkY = unitYs[index];
 
-      // Branch on opposite horizontal side from the trunk's offset
-      const branchSide: 1 | -1 = trunkPosition === 'left' ? 1 : -1;
-
-      lessons.slice(1).forEach((_, branchIdx) => {
-        const branchX = trunkX + branchSide * BRANCH_HORIZONTAL_OFFSET;
-        const branchY = trunkY + branchIdx * (BRANCH_NODE_SIZE + 16);
-        // Short curve from trunk edge to branch edge
-        const startX = trunkX + branchSide * (NODE_SIZE / 2);
-        const startY = trunkY;
-        const endX = branchX - branchSide * (BRANCH_NODE_SIZE / 2);
-        const endY = branchY;
-        const midX = (startX + endX) / 2;
+      for (let i = 0; i < branchCount; i++) {
+        const { row, side } = getSubInfo(i, index);
+        const subCenterX = trunkX + side * SUB_HORIZONTAL;
+        const subCenterY = trunkY + SUB_VERTICAL_FROM_TRUNK + row * SUB_ROW_SPACING;
+        // Place endpoints exactly on each circle's edge along the line connecting their centers,
+        // so the connector touches both circles with no whitespace gap.
+        const dx = subCenterX - trunkX;
+        const dy = subCenterY - trunkY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const ux = dx / dist;
+        const uy = dy / dist;
+        const startX = trunkX + (NODE_SIZE / 2) * ux;
+        const startY = trunkY + (NODE_SIZE / 2) * uy;
+        const endX = subCenterX - (BRANCH_NODE_SIZE / 2) * ux;
+        const endY = subCenterY - (BRANCH_NODE_SIZE / 2) * uy;
+        const midY = (startY + endY) / 2;
         segments.push(
-          `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`
+          `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`
         );
-      });
+      }
     });
     return segments;
   };
@@ -234,6 +295,13 @@ export default function LearnScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Parchment background — warm cream gradient gives an aged-paper feel */}
+      <LinearGradient
+        colors={[PARCHMENT.base, PARCHMENT.baseSoft, PARCHMENT.baseEdge]}
+        locations={[0, 0.65, 1]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.statsRow}>
@@ -269,7 +337,7 @@ export default function LearnScreen() {
           <Text style={styles.continentName}>{selectedContinentData.name}</Text>
           <ChevronDown
             size={20}
-            color="#4B4B4B"
+            color={PARCHMENT.ink}
             style={{ transform: [{ rotate: showContinentMenu ? '180deg' : '0deg' }] }}
           />
         </TouchableOpacity>
@@ -305,7 +373,7 @@ export default function LearnScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.pathContainer,
-          { minHeight: filteredUnits.length * VERTICAL_SPACING + 200 }
+          { minHeight: totalPathHeight + 200 }
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -318,8 +386,8 @@ export default function LearnScreen() {
           <>
             {/* SVG Path background */}
             <View style={styles.pathSvgContainer}>
-              <Svg width={PATH_WIDTH} height={filteredUnits.length * VERTICAL_SPACING + 100}>
-                {/* Background trunk path */}
+              <Svg width={PATH_WIDTH} height={totalPathHeight + 100}>
+                {/* Main spine connecting trunks */}
                 <Path
                   d={pathD}
                   stroke={THEME_COLORS.pathLine}
@@ -327,7 +395,7 @@ export default function LearnScreen() {
                   fill="none"
                   strokeLinecap="round"
                 />
-                {/* Branch connectors */}
+                {/* Sub-battle connectors (fan out from trunk) */}
                 {branchPaths.map((d, i) => (
                   <Path
                     key={`branch-${i}`}
@@ -354,15 +422,20 @@ export default function LearnScreen() {
                 const lessons = getLessonsByUnitId(unit.id);
                 const trunkLesson = lessons[0];
                 const branchLessons = showBranches ? lessons.slice(1) : [];
-                const branchSide: 1 | -1 = position === 'left' ? 1 : -1;
                 const trunkComplete = trunkLesson ? isLessonCompleted(trunkLesson.id) : false;
+                const numSubRows = getNumSubRows(branchLessons.length);
+                const rowHeight = numSubRows > 0
+                  ? SUB_VERTICAL_FROM_TRUNK + (numSubRows - 1) * SUB_ROW_SPACING + SUB_TO_NEXT_TRUNK
+                  : VERTICAL_SPACING;
+                // When sub-battles are present, trunk is centered. Otherwise use winding pattern.
+                const trunkTranslateX = showBranches ? 0 : horizontalOffset;
 
                 return (
                   <View
                     key={unit.id}
                     style={[
                       styles.nodeRow,
-                      { height: VERTICAL_SPACING }
+                      { height: rowHeight }
                     ]}
                   >
                     <Animated.View
@@ -370,7 +443,7 @@ export default function LearnScreen() {
                         styles.nodeWrapper,
                         {
                           transform: [
-                            { translateX: horizontalOffset },
+                            { translateX: trunkTranslateX },
                             { scale: isCurrent ? pulseAnim : 1 },
                           ],
                         },
@@ -387,9 +460,26 @@ export default function LearnScreen() {
                         activeOpacity={0.7}
                       >
                         {!unlocked ? (
-                          <Lock size={28} color={THEME_COLORS.lockedBorder} />
+                          <>
+                            {getCivImage(unit.id) && (
+                              <Image
+                                source={getCivImage(unit.id)}
+                                style={styles.civImageLocked}
+                                contentFit="cover"
+                              />
+                            )}
+                            <View style={styles.lockOverlay}>
+                              <Lock size={26} color="#FFFFFF" />
+                            </View>
+                          </>
                         ) : isComplete ? (
                           <Check size={32} color="#FFFFFF" strokeWidth={3} />
+                        ) : getCivImage(unit.id) ? (
+                          <Image
+                            source={getCivImage(unit.id)}
+                            style={styles.civImage}
+                            contentFit="cover"
+                          />
                         ) : (
                           <Text style={styles.nodeIcon}>{unit.icon}</Text>
                         )}
@@ -403,18 +493,21 @@ export default function LearnScreen() {
                         ]} numberOfLines={2}>
                           {unit.title}
                         </Text>
-                        {unitProgress.total > 0 && (
-                          <Text style={styles.unitProgress}>
-                            {unitProgress.completed}/{unitProgress.total}
-                          </Text>
-                        )}
                       </View>
                     </Animated.View>
 
-                    {/* Branch nodes (only on "All Continents") */}
+                    {/* Sub-battles fan out left/right below the trunk (only on "All Continents") */}
                     {branchLessons.map((lesson, branchIdx) => {
                       const branchUnlocked = unlocked && trunkComplete;
                       const branchComplete = isLessonCompleted(lesson.id);
+                      const { row: subRow, side: subSide } = getSubInfo(branchIdx, index);
+                      // Trunk node center sits at row Y = 20 (paddingTop) + NODE_SIZE/2 = 56.
+                      // Sub row N center: 56 + SUB_VERTICAL_FROM_TRUNK + N * SUB_ROW_SPACING.
+                      const branchTopInRow =
+                        20 + NODE_SIZE / 2 + SUB_VERTICAL_FROM_TRUNK - BRANCH_NODE_SIZE / 2 +
+                        subRow * SUB_ROW_SPACING;
+                      // Trunk centered when subs are shown, so subSide * SUB_HORIZONTAL is absolute offset from CENTER_X
+                      const subMarginLeft = subSide * SUB_HORIZONTAL - BRANCH_NODE_SIZE / 2;
                       return (
                         <View
                           key={lesson.id}
@@ -422,8 +515,8 @@ export default function LearnScreen() {
                             styles.branchNodeWrapper,
                             {
                               left: '50%',
-                              marginLeft: horizontalOffset + branchSide * BRANCH_HORIZONTAL_OFFSET - BRANCH_NODE_SIZE / 2,
-                              top: 20 + branchIdx * (BRANCH_NODE_SIZE + 16),
+                              marginLeft: subMarginLeft,
+                              top: branchTopInRow,
                             },
                           ]}
                         >
@@ -461,14 +554,14 @@ export default function LearnScreen() {
 const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PARCHMENT.base,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: PARCHMENT.divider,
   },
   statsRow: {
     flexDirection: 'row',
@@ -483,14 +576,14 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   statValue: {
     fontSize: 18 * fs,
     fontWeight: '700' as const,
-    color: '#4B4B4B',
+    color: PARCHMENT.ink,
   },
   profileButton: {
     marginLeft: 'auto',
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -510,18 +603,20 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   continentSelectorContainer: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
     zIndex: 1000,
     elevation: 1000,
   },
   continentSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 10,
+    borderWidth: 1,
+    borderColor: PARCHMENT.divider,
   },
   continentIcon: {
     fontSize: 24,
@@ -530,14 +625,14 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     flex: 1,
     fontSize: 16 * fs,
     fontWeight: '600' as const,
-    color: '#4B4B4B',
+    color: PARCHMENT.ink,
   },
   continentMenu: {
     position: 'absolute',
     top: 70,
     left: 20,
     right: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PARCHMENT.base,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -545,7 +640,7 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: PARCHMENT.divider,
     zIndex: 1000,
   },
   continentMenuItem: {
@@ -555,10 +650,10 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     paddingVertical: 14,
     gap: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
+    borderBottomColor: PARCHMENT.divider,
   },
   continentMenuItemActive: {
-    backgroundColor: '#F0FFF4',
+    backgroundColor: 'rgba(88, 204, 2, 0.12)',
   },
   continentMenuIcon: {
     fontSize: 22,
@@ -566,7 +661,7 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   continentMenuText: {
     flex: 1,
     fontSize: 15 * fs,
-    color: '#4B4B4B',
+    color: PARCHMENT.ink,
   },
   continentMenuTextActive: {
     fontWeight: '600' as const,
@@ -614,6 +709,32 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     elevation: 6,
     borderBottomWidth: 6,
     borderBottomColor: THEME_COLORS.primaryDark,
+    overflow: 'hidden',
+  },
+  civImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: NODE_SIZE,
+    height: NODE_SIZE,
+  },
+  civImageLocked: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: NODE_SIZE,
+    height: NODE_SIZE,
+    opacity: 0.55,
+  },
+  lockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(80, 80, 80, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   nodeLocked: {
     backgroundColor: THEME_COLORS.locked,
@@ -666,15 +787,15 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   unitTitle: {
     fontSize: 13 * fs,
     fontWeight: '600' as const,
-    color: '#4B4B4B',
+    color: PARCHMENT.ink,
     textAlign: 'center',
   },
   unitTitleLocked: {
-    color: '#AFAFAF',
+    color: PARCHMENT.inkSoft,
   },
   unitProgress: {
     fontSize: 11 * fs,
-    color: '#888888',
+    color: PARCHMENT.inkSoft,
     marginTop: 2,
   },
   emptyState: {
@@ -686,7 +807,7 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16 * fs,
-    color: '#888888',
+    color: PARCHMENT.inkSoft,
     textAlign: 'center',
   },
 });

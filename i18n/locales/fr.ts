@@ -146,7 +146,7 @@ export default {
 
   // Politique de confidentialité
   privacy: {
-    lastUpdated: 'Dernière mise à jour : février 2025',
+    lastUpdated: 'Dernière mise à jour : février',
     introTitle: 'Introduction',
     introText: 'Bienvenue sur BattleGuess. Nous respectons votre vie privée et nous nous engageons à protéger vos données personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre application.',
     collectTitle: 'Informations que nous collectons',
@@ -178,7 +178,7 @@ export default {
 
   // Conditions d'utilisation
   terms: {
-    lastUpdated: 'Dernière mise à jour : février 2025',
+    lastUpdated: 'Dernière mise à jour : février',
     acceptTitle: 'Acceptation des conditions',
     acceptText: 'En téléchargeant, installant ou utilisant BattleGuess, vous acceptez d\'être lié par ces Conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, veuillez ne pas utiliser l\'application.',
     descTitle: 'Description du service',
