@@ -108,7 +108,7 @@ export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
-  const { progress } = useUserProgress();
+  const { progress, recordQuestionAttempt } = useUserProgress();
   const { colors, fontScale } = useSettings();
   const { getLessonById, getBattleById, mascots: translatedMascots } = useContent();
 
@@ -130,8 +130,6 @@ export default function LessonScreen() {
   const battleImage = battle ? getBattleImage(battle.id) : null;
 
   const progressAnim = useRef(new Animated.Value(0)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-  const feedbackSlideAnim = useRef(new Animated.Value(100)).current;
   const mascotAnim = useRef(new Animated.Value(0)).current;
   const mascotBounceAnim = useRef(new Animated.Value(0)).current;
   const sliderWidthRef = useRef(0);
@@ -160,8 +158,7 @@ export default function LessonScreen() {
     setMatchedPairs({});
     setSelectedLeft(null);
     setSliderValue(null);
-    feedbackSlideAnim.setValue(100);
-  }, [feedbackSlideAnim]);
+  }, []);
 
   const [outOfHearts, setOutOfHearts] = useState(false);
 
@@ -195,12 +192,6 @@ export default function LessonScreen() {
       setQuizHearts(prev => prev - 1);
 
       Animated.parallel([
-        Animated.sequence([
-          Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-          Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-        ]),
         Animated.spring(mascotAnim, {
           toValue: 1,
           useNativeDriver: true,
@@ -217,45 +208,53 @@ export default function LessonScreen() {
         setOutOfHearts(true);
       }
     }
-
-    Animated.spring(feedbackSlideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 50,
-      friction: 8,
-    }).start();
-  }, [shakeAnim, feedbackSlideAnim, mascotAnim, mascotBounceAnim, quizHearts]);
+  }, [mascotAnim, mascotBounceAnim, quizHearts]);
 
   const checkAnswer = useCallback(() => {
     if (!currentStep) return;
 
     let isCorrect = false;
+    let userAnswerText = '';
+    let correctAnswerText = '';
 
     switch (currentStep.type) {
       case 'multiChoice': {
         const step = currentStep as MultiChoiceStep;
         isCorrect = selectedAnswer === step.data.correctIndex;
+        userAnswerText = typeof selectedAnswer === 'number' ? step.data.options[selectedAnswer] ?? '' : '';
+        correctAnswerText = step.data.options[step.data.correctIndex];
         break;
       }
       case 'mapTap': {
         const step = currentStep as MapTapStep;
         isCorrect = selectedAnswer === step.data.correctRegionId;
+        userAnswerText = step.data.regions.find(r => r.id === selectedAnswer)?.name ?? '';
+        correctAnswerText = step.data.regions.find(r => r.id === step.data.correctRegionId)?.name ?? '';
         break;
       }
       case 'orderEvents': {
         const step = currentStep as OrderEventsStep;
-        const correctOrder = [...step.data.events].sort((a, b) => a.order - b.order).map(e => e.id);
+        const sorted = [...step.data.events].sort((a, b) => a.order - b.order);
+        const correctOrder = sorted.map(e => e.id);
         isCorrect = JSON.stringify(orderedItems) === JSON.stringify(correctOrder);
+        userAnswerText = orderedItems
+          .map((id, i) => `${i + 1}. ${step.data.events.find(e => e.id === id)?.text ?? ''}`)
+          .join(' | ');
+        correctAnswerText = sorted.map((e, i) => `${i + 1}. ${e.text}`).join(' | ');
         break;
       }
       case 'matchPairs': {
         const step = currentStep as MatchPairsStep;
         isCorrect = step.data.pairs.every(p => matchedPairs[p.left] === p.right);
+        userAnswerText = Object.entries(matchedPairs).map(([l, r]) => `${l} → ${r}`).join(' | ');
+        correctAnswerText = step.data.pairs.map(p => `${p.left} → ${p.right}`).join(' | ');
         break;
       }
       case 'fillBlank': {
         const step = currentStep as FillBlankStep;
         isCorrect = selectedAnswer === step.data.blankWord;
+        userAnswerText = typeof selectedAnswer === 'string' ? selectedAnswer : '';
+        correctAnswerText = step.data.blankWord;
         break;
       }
       case 'timelineSlider': {
@@ -266,12 +265,17 @@ export default function LessonScreen() {
         const tolerance = Number(step.data.tolerance);
         const currentSliderValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
         isCorrect = Math.abs(currentSliderValue - correctYear) <= tolerance;
+        const formatYear = (y: number) => (y < 0 ? `${Math.abs(y)} BC` : `${y} AD`);
+        userAnswerText = formatYear(currentSliderValue);
+        correctAnswerText = formatYear(correctYear);
         break;
       }
       case 'twoTruths': {
         const step = currentStep as TwoTruthsStep;
         const lieIndex = step.data.statements.findIndex(s => s.isLie);
         isCorrect = selectedAnswer === lieIndex;
+        userAnswerText = typeof selectedAnswer === 'number' ? step.data.statements[selectedAnswer]?.text ?? '' : '';
+        correctAnswerText = step.data.statements[lieIndex]?.text ?? '';
         break;
       }
       case 'storyCard':
@@ -279,8 +283,23 @@ export default function LessonScreen() {
         break;
     }
 
+    // Story cards are passive — don't log them as quiz attempts.
+    if (currentStep.type !== 'storyCard' && lesson && battle) {
+      recordQuestionAttempt({
+        lessonId: lesson.id,
+        stepId: currentStep.id,
+        stepType: currentStep.type,
+        battleId: battle.id,
+        battleTitle: battle.title,
+        prompt: currentStep.prompt,
+        userAnswerText,
+        correctAnswerText,
+        isCorrect,
+      });
+    }
+
     showFeedback(isCorrect);
-  }, [currentStep, selectedAnswer, orderedItems, matchedPairs, sliderValue, showFeedback]);
+  }, [currentStep, selectedAnswer, orderedItems, matchedPairs, sliderValue, showFeedback, lesson, battle, recordQuestionAttempt]);
 
   const handleContinue = useCallback(() => {
     if (!lesson) return;
@@ -529,6 +548,7 @@ export default function LessonScreen() {
           );
         })}
       </View>
+      {renderBattleImage()}
     </View>
   );
 
@@ -777,17 +797,12 @@ export default function LessonScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View
-          style={[
-            styles.content,
-            { transform: [{ translateX: shakeAnim }] }
-          ]}
-        >
+        <View style={styles.content}>
           {currentStep.type !== 'storyCard' && (
             <Text style={styles.prompt}>{currentStep.prompt}</Text>
           )}
           {renderStep(currentStep)}
-        </Animated.View>
+        </View>
       </ScrollView>
 
       {feedback !== 'none' && mascot && (

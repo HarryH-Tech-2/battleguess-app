@@ -183,6 +183,20 @@ export interface Badge {
   unlockedAt?: string;
 }
 
+export interface QuestionAttempt {
+  id: string;
+  lessonId: string;
+  stepId: string;
+  stepType: StepType;
+  battleId: string;
+  battleTitle: string;
+  prompt: string;
+  userAnswerText: string;
+  correctAnswerText: string;
+  isCorrect: boolean;
+  timestamp: string;
+}
+
 export interface UserProgress {
   completedLessons: string[];
   masteryLevels: Record<string, number>;
@@ -201,6 +215,7 @@ export interface UserProgress {
   interests: Interest[];
   knowledgeLevel: KnowledgeLevel;
   hasCompletedOnboarding: boolean;
+  questionAttempts: QuestionAttempt[];
 }
 
 export interface LessonAttempt {

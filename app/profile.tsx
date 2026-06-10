@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,17 @@ import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { Flame, Heart, Star, Trophy, Calendar, ChevronRight, Cake, Skull } from 'lucide-react-native';
+import { Flame, Heart, Star, Trophy, Calendar, ChevronRight, Cake, Skull, Target, CheckCircle2, XCircle, BookOpen, Brain } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
 import { badges as allBadgesRaw } from '@/mocks/badges';
 import { lessons as rawLessons } from '@/mocks/lessons';
+
+const HISTORY_PREVIEW_LIMIT = 10;
+const HISTORY_FILTERS = ['all', 'wrong', 'correct'] as const;
+type HistoryFilter = (typeof HISTORY_FILTERS)[number];
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -31,12 +35,50 @@ export default function ProfileScreen() {
   const stats = useMemo(() => {
     const completedCount = rawLessons.filter(l => isLessonCompleted(l.id)).length;
     const totalCount = rawLessons.length;
+    const attempts = progress.questionAttempts ?? [];
+    const totalAnswered = attempts.length;
+    const correctAnswered = attempts.filter(a => a.isCorrect).length;
+    const wrongAnswered = totalAnswered - correctAnswered;
+    const accuracy = totalAnswered > 0 ? Math.round((correctAnswered / totalAnswered) * 100) : 0;
+    const battlesStudied = new Set(attempts.map(a => a.battleId)).size;
+    const masteryValues = Object.values(progress.masteryLevels ?? {});
+    const masteredCount = masteryValues.filter(v => v >= 3).length;
     return {
       completedLessons: completedCount,
       totalLessons: totalCount,
       progressPercent: Math.round((completedCount / totalCount) * 100),
+      totalAnswered,
+      correctAnswered,
+      wrongAnswered,
+      accuracy,
+      battlesStudied,
+      masteredCount,
     };
-  }, [isLessonCompleted]);
+  }, [isLessonCompleted, progress.questionAttempts, progress.masteryLevels]);
+
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>('all');
+  const [showAllHistory, setShowAllHistory] = useState(false);
+
+  const filteredHistory = useMemo(() => {
+    const attempts = progress.questionAttempts ?? [];
+    if (historyFilter === 'wrong') return attempts.filter(a => !a.isCorrect);
+    if (historyFilter === 'correct') return attempts.filter(a => a.isCorrect);
+    return attempts;
+  }, [progress.questionAttempts, historyFilter]);
+
+  const visibleHistory = showAllHistory ? filteredHistory : filteredHistory.slice(0, HISTORY_PREVIEW_LIMIT);
+
+  const performanceStats = [
+    { Icon: Target, color: colors.primary, value: `${stats.accuracy}%`, label: t('profile.accuracy') },
+    { Icon: CheckCircle2, color: colors.success, value: stats.correctAnswered, label: t('profile.correctAnswers') },
+    { Icon: XCircle, color: colors.error, value: stats.wrongAnswered, label: t('profile.wrongAnswers') },
+    { Icon: BookOpen, color: colors.secondary, value: stats.battlesStudied, label: t('profile.battlesStudied') },
+    { Icon: Brain, color: colors.xp, value: stats.masteredCount, label: t('profile.lessonsMastered') },
+    { Icon: Star, color: colors.xp, fill: colors.xp, value: progress.totalXp, label: t('profile.totalXp') },
+  ];
+
+  const filterLabel = (f: HistoryFilter) =>
+    f === 'all' ? t('profile.filterAll') : f === 'wrong' ? t('profile.filterWrong') : t('profile.filterCorrect');
 
   const earnedBadges = useMemo(() => {
     return progress.badges.map(id => allBadges.find(b => b.id === id)).filter(Boolean);
@@ -114,6 +156,133 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.quizPerformance')}</Text>
+          <View style={styles.statsGridFlat}>
+            {performanceStats.map(({ Icon, color, fill, value, label }) => (
+              <View key={label} style={styles.statCardWide}>
+                <Icon size={24} color={color} fill={fill} />
+                <View style={styles.statCardWideText}>
+                  <Text style={styles.statCardWideValue}>{value}</Text>
+                  <Text style={styles.statCardWideLabel}>{label}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('profile.questionHistory')}</Text>
+            <Text style={styles.badgeCount}>{t('profile.answeredCount', { count: stats.totalAnswered })}</Text>
+          </View>
+
+          {stats.totalAnswered === 0 ? (
+            <View style={styles.historyEmpty}>
+              <Text style={styles.historyEmptyText}>{t('profile.historyEmpty')}</Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.historyFilters}>
+                {HISTORY_FILTERS.map(filter => (
+                  <TouchableOpacity
+                    key={filter}
+                    style={[
+                      styles.historyFilterChip,
+                      historyFilter === filter && styles.historyFilterChipActive,
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setHistoryFilter(filter);
+                      setShowAllHistory(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.historyFilterText,
+                        historyFilter === filter && styles.historyFilterTextActive,
+                      ]}
+                    >
+                      {filterLabel(filter)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {visibleHistory.length === 0 ? (
+                <View style={styles.historyEmpty}>
+                  <Text style={styles.historyEmptyText}>{t('profile.historyNoMatch')}</Text>
+                </View>
+              ) : (
+                <View style={styles.historyList}>
+                  {visibleHistory.map(attempt => (
+                    <View
+                      key={attempt.id}
+                      style={[
+                        styles.historyItem,
+                        attempt.isCorrect ? styles.historyItemCorrect : styles.historyItemWrong,
+                      ]}
+                    >
+                      <View style={styles.historyItemHeader}>
+                        {attempt.isCorrect ? (
+                          <CheckCircle2 size={18} color={colors.success} />
+                        ) : (
+                          <XCircle size={18} color={colors.error} />
+                        )}
+                        <Text style={styles.historyItemBattle} numberOfLines={1}>
+                          {attempt.battleTitle}
+                        </Text>
+                      </View>
+                      <Text style={styles.historyItemPrompt} numberOfLines={2}>
+                        {attempt.prompt}
+                      </Text>
+                      <View style={styles.historyAnswerRow}>
+                        <Text style={styles.historyAnswerLabel}>{t('profile.yourAnswer')}</Text>
+                        <Text
+                          style={[
+                            styles.historyAnswerText,
+                            attempt.isCorrect ? styles.historyAnswerCorrect : styles.historyAnswerWrong,
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {attempt.userAnswerText || '—'}
+                        </Text>
+                      </View>
+                      {!attempt.isCorrect && (
+                        <View style={styles.historyAnswerRow}>
+                          <Text style={styles.historyAnswerLabel}>{t('profile.correctLabel')}</Text>
+                          <Text
+                            style={[styles.historyAnswerText, styles.historyAnswerCorrect]}
+                            numberOfLines={2}
+                          >
+                            {attempt.correctAnswerText}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {filteredHistory.length > HISTORY_PREVIEW_LIMIT && (
+                <TouchableOpacity
+                  style={styles.historyToggle}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowAllHistory(prev => !prev);
+                  }}
+                >
+                  <Text style={styles.historyToggleText}>
+                    {showAllHistory
+                      ? t('profile.showLess')
+                      : t('profile.showAll', { count: filteredHistory.length })}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -342,6 +511,144 @@ const createStyles = (colors: any) => StyleSheet.create({
   progressDetail: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  statsGridFlat: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  statCardWide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 12,
+    width: '48%',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  statCardWideText: {
+    flex: 1,
+  },
+  statCardWideValue: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: colors.text,
+  },
+  statCardWideLabel: {
+    fontSize: 11,
+    color: colors.textSecondary,
+  },
+  historyFilters: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  historyFilterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  historyFilterChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  historyFilterText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: colors.textSecondary,
+  },
+  historyFilterTextActive: {
+    color: colors.textInverse,
+  },
+  historyEmpty: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  historyEmptyText: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  historyList: {
+    gap: 10,
+  },
+  historyItem: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+  },
+  historyItemCorrect: {
+    borderColor: colors.cardBorder,
+    borderLeftColor: colors.success,
+  },
+  historyItemWrong: {
+    borderColor: colors.cardBorder,
+    borderLeftColor: colors.error,
+  },
+  historyItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  historyItemBattle: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: colors.text,
+  },
+  historyItemPrompt: {
+    fontSize: 13,
+    color: colors.text,
+    marginBottom: 8,
+    lineHeight: 18,
+  },
+  historyAnswerRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 2,
+  },
+  historyAnswerLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '600' as const,
+    minWidth: 80,
+  },
+  historyAnswerText: {
+    flex: 1,
+    fontSize: 12,
+    color: colors.text,
+  },
+  historyAnswerCorrect: {
+    color: colors.success,
+    fontWeight: '600' as const,
+  },
+  historyAnswerWrong: {
+    color: colors.error,
+    fontWeight: '600' as const,
+    textDecorationLine: 'line-through' as const,
+  },
+  historyToggle: {
+    marginTop: 12,
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  historyToggleText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: colors.primary,
   },
   badgesGrid: {
     flexDirection: 'row',

@@ -297,7 +297,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('settings.about')}</Text>
 
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+          <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
               <View style={[styles.iconContainer, { backgroundColor: colors.textSecondary + '20' }]}>
                 <Info size={20} color={colors.textSecondary} />
@@ -307,8 +307,7 @@ export default function SettingsScreen() {
                 <Text style={styles.settingDescription}>1.0.0</Text>
               </View>
             </View>
-            <ChevronRight size={20} color={colors.textLight} />
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.bottomPadding} />

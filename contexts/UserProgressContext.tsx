@@ -2,11 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { UserProgress, DailyGoal, Interest, KnowledgeLevel, LessonAttempt } from '@/types';
+import { UserProgress, DailyGoal, Interest, KnowledgeLevel, LessonAttempt, QuestionAttempt } from '@/types';
 
 const STORAGE_KEY = 'battleguess_progress';
 const HEARTS_REFILL_HOURS = 3; // Hearts refill every 3 hours after hitting 0
 const MAX_HEARTS = 5;
+const MAX_QUESTION_HISTORY = 200;
+
+let questionAttemptCounter = 0;
 
 const defaultProgress: UserProgress = {
   completedLessons: [],
@@ -26,6 +29,7 @@ const defaultProgress: UserProgress = {
   interests: [],
   knowledgeLevel: 'nothing',
   hasCompletedOnboarding: false,
+  questionAttempts: [],
 };
 
 export const [UserProgressProvider, useUserProgress] = createContextHook(() => {
@@ -38,9 +42,12 @@ export const [UserProgressProvider, useUserProgress] = createContextHook(() => {
       console.log('[UserProgress] Loading from storage...');
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as UserProgress;
-        console.log('[UserProgress] Loaded:', parsed);
-        return parsed;
+        const parsed = JSON.parse(stored) as Partial<UserProgress>;
+        // Merge with defaults so newly-added fields (e.g. questionAttempts)
+        // are present for users upgrading from older versions of the app.
+        const merged = { ...defaultProgress, ...parsed } as UserProgress;
+        console.log('[UserProgress] Loaded:', merged);
+        return merged;
       }
       console.log('[UserProgress] No stored data, using defaults');
       return defaultProgress;
@@ -209,6 +216,20 @@ export const [UserProgressProvider, useUserProgress] = createContextHook(() => {
     });
   }, []);
 
+  const recordQuestionAttempt = useCallback((attempt: Omit<QuestionAttempt, 'id' | 'timestamp'>) => {
+    setProgress(prev => {
+      const fullAttempt: QuestionAttempt = {
+        ...attempt,
+        id: `${attempt.lessonId}-${attempt.stepId}-${Date.now()}-${++questionAttemptCounter}`,
+        timestamp: new Date().toISOString(),
+      };
+      const newAttempts = [fullAttempt, ...prev.questionAttempts].slice(0, MAX_QUESTION_HISTORY);
+      const newProgress = { ...prev, questionAttempts: newAttempts };
+      saveProgressRef.current(newProgress);
+      return newProgress;
+    });
+  }, []);
+
   const recordWrongAnswer = useCallback((battleId: string) => {
     setProgress(prev => {
       const newWrong = { ...prev.wrongAnswers };
@@ -251,6 +272,7 @@ export const [UserProgressProvider, useUserProgress] = createContextHook(() => {
     completeLesson,
     loseHeart,
     recordWrongAnswer,
+    recordQuestionAttempt,
     gainHeartFromReview,
     isLessonCompleted,
     getLessonMastery,

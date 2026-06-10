@@ -242,7 +242,7 @@ export default function LearnScreen() {
       const trunkBottom = trunkY + NODE_SIZE / 2;
 
       if (index === 0) {
-        pathD += `M ${x} ${trunkTop} L ${x} ${trunkBottom}`;
+        pathD += `M ${x} ${trunkY} L ${x} ${trunkBottom}`;
       } else {
         const prevX = getTrunkX(index - 1);
         const prevTrunkBottom = unitYs[index - 1] + NODE_SIZE / 2;
@@ -702,13 +702,6 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     backgroundColor: THEME_COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: THEME_COLORS.primaryDark,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 0,
-    elevation: 6,
-    borderBottomWidth: 6,
-    borderBottomColor: THEME_COLORS.primaryDark,
     overflow: 'hidden',
   },
   civImage: {
@@ -738,21 +731,14 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   },
   nodeLocked: {
     backgroundColor: THEME_COLORS.locked,
-    borderBottomColor: THEME_COLORS.lockedBorder,
-    shadowColor: THEME_COLORS.lockedBorder,
   },
   nodeComplete: {
     backgroundColor: THEME_COLORS.success,
-    borderBottomColor: THEME_COLORS.successDark,
-    shadowColor: THEME_COLORS.successDark,
   },
   nodeCurrent: {
     backgroundColor: THEME_COLORS.primary,
-    borderBottomColor: THEME_COLORS.primaryDark,
-    shadowColor: THEME_COLORS.primaryDark,
     borderWidth: 3,
     borderColor: '#FFFFFF',
-    borderBottomWidth: 6,
   },
   nodeIcon: {
     fontSize: 30,
