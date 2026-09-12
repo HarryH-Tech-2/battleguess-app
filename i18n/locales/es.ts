@@ -54,6 +54,19 @@ export default {
     keepGoing: '¡Sigue adelante!',
     outOfHearts: '¡Te quedaste sin vidas!',
     lessonNotFound: 'Lección no encontrada',
+    questionOf: 'Pregunta {{current}} de {{total}}',
+    matchHint: 'Toca un elemento de la izquierda y luego su pareja a la derecha',
+    matchTapToUnpair: 'Toca un elemento emparejado para deshacerlo',
+    stepTypes: {
+      multiChoice: 'Opción múltiple',
+      mapTap: 'Encuentra el lugar',
+      orderEvents: 'Ordena los eventos',
+      matchPairs: 'Empareja',
+      fillBlank: 'Completa el espacio',
+      timelineSlider: 'Línea de tiempo',
+      twoTruths: 'Dos verdades, una mentira',
+      nameBattle: 'Nombra la batalla',
+    },
   },
 
   // Leccion completada

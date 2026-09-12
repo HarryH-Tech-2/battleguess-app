@@ -54,6 +54,19 @@ export default {
     keepGoing: '頑張って！',
     outOfHearts: 'ハートがなくなりました！',
     lessonNotFound: 'レッスンが見つかりません',
+    questionOf: '問題 {{current}} / {{total}}',
+    matchHint: '左の項目をタップしてから、右の対応する項目をタップ',
+    matchTapToUnpair: 'ペアになった項目をタップすると解除できます',
+    stepTypes: {
+      multiChoice: '選択問題',
+      mapTap: '場所を探す',
+      orderEvents: '順番に並べる',
+      matchPairs: 'ペアを合わせる',
+      fillBlank: '空欄を埋める',
+      timelineSlider: '年代を当てる',
+      twoTruths: '嘘を見つける',
+      nameBattle: '戦いの名前',
+    },
   },
 
   // Lesson Complete

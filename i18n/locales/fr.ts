@@ -54,6 +54,19 @@ export default {
     keepGoing: 'Continuez !',
     outOfHearts: 'Plus de vies !',
     lessonNotFound: 'Leçon introuvable',
+    questionOf: 'Question {{current}} sur {{total}}',
+    matchHint: 'Touchez un élément à gauche, puis sa correspondance à droite',
+    matchTapToUnpair: 'Touchez un élément associé pour annuler',
+    stepTypes: {
+      multiChoice: 'Choix multiple',
+      mapTap: 'Trouvez le lieu',
+      orderEvents: 'Mettez dans l’ordre',
+      matchPairs: 'Associez les paires',
+      fillBlank: 'Complétez la phrase',
+      timelineSlider: 'Frise chronologique',
+      twoTruths: 'Deux vérités, un mensonge',
+      nameBattle: 'Nommez la bataille',
+    },
   },
 
   // Leçon terminée

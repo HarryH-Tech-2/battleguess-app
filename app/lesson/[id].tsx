@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -104,6 +104,31 @@ const getBattleImage = (battleId: string): any => {
   return battleImages[battleId] || null;
 };
 
+// Deterministic shuffle so the right-hand column of a match question is
+// stable across re-renders but never in the same order as the left column.
+const seededShuffle = <T,>(items: T[], seed: string): T[] => {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  }
+  const rand = () => {
+    h = (h ^ (h << 13)) | 0;
+    h = (h ^ (h >>> 17)) | 0;
+    h = (h ^ (h << 5)) | 0;
+    return (h >>> 0) / 4294967296;
+  };
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  // Guard against the shuffle landing on the original order (trivial puzzle).
+  if (arr.length > 1 && arr.every((v, i) => v === items[i])) {
+    arr.push(arr.shift() as T);
+  }
+  return arr;
+};
+
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -150,6 +175,22 @@ export default function LessonScreen() {
 
 
   const currentStep = lesson?.steps[currentStepIndex];
+
+  // Right-hand column for match questions, shuffled once per step.
+  const shuffledRights = useMemo(() => {
+    if (!currentStep || currentStep.type !== 'matchPairs') return [];
+    return seededShuffle(currentStep.data.pairs.map(p => p.right), currentStep.id);
+  }, [currentStep]);
+
+  // "Question N of M" ignores passive story cards.
+  const questionMeta = useMemo(() => {
+    if (!lesson) return { current: 0, total: 0 };
+    const total = lesson.steps.filter(s => s.type !== 'storyCard').length;
+    const current = lesson.steps
+      .slice(0, currentStepIndex + 1)
+      .filter(s => s.type !== 'storyCard').length;
+    return { current, total };
+  }, [lesson, currentStepIndex]);
 
   const resetStepState = useCallback(() => {
     setSelectedAnswer(null);
@@ -394,7 +435,6 @@ export default function LessonScreen() {
           </Text>
         </TouchableOpacity>
       ))}
-      {renderBattleImage()}
     </View>
   );
 
@@ -434,7 +474,6 @@ export default function LessonScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      {renderBattleImage()}
     </View>
   );
 
@@ -485,72 +524,152 @@ export default function LessonScreen() {
             </TouchableOpacity>
           ))}
         </View>
-        {renderBattleImage()}
       </View>
     );
   };
 
-  const renderMatchPairs = (step: MatchPairsStep) => (
-    <View style={styles.matchContainer}>
-      <View style={styles.matchColumn}>
-        {step.data.pairs.map((pair) => (
-          <TouchableOpacity
-            key={pair.left}
-            style={[
-              styles.matchItem,
-              selectedLeft === pair.left && styles.matchItemSelected,
-              matchedPairs[pair.left] && styles.matchItemMatched,
-            ]}
-            onPress={() => {
-              if (feedback === 'none' && !matchedPairs[pair.left]) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedLeft(pair.left);
-              }
-            }}
-            disabled={feedback !== 'none' || !!matchedPairs[pair.left]}
-          >
-            <Text style={[
-              styles.matchItemText,
-              (selectedLeft === pair.left || matchedPairs[pair.left]) && styles.matchItemTextSelected,
-            ]}>
-              {pair.left}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+  const renderMatchPairs = (step: MatchPairsStep) => {
+    // Badge number for each pair = the order it was made in.
+    const pairOrder = Object.keys(matchedPairs);
+    const badgeFor = (left: string) => {
+      const i = pairOrder.indexOf(left);
+      return i === -1 ? null : i + 1;
+    };
+    const leftOfRight = (right: string) =>
+      pairOrder.find(l => matchedPairs[l] === right) ?? null;
+    const isPairCorrect = (left: string) =>
+      step.data.pairs.some(p => p.left === left && p.right === matchedPairs[left]);
 
-      <View style={styles.matchColumn}>
-        {step.data.pairs.map((pair) => {
-          const isMatched = Object.values(matchedPairs).includes(pair.right);
-          return (
-            <TouchableOpacity
-              key={pair.right}
-              style={[
-                styles.matchItem,
-                isMatched && styles.matchItemMatched,
-              ]}
-              onPress={() => {
-                if (feedback === 'none' && selectedLeft && !isMatched) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setMatchedPairs({ ...matchedPairs, [selectedLeft]: pair.right });
-                  setSelectedLeft(null);
-                }
-              }}
-              disabled={feedback !== 'none' || isMatched || !selectedLeft}
-            >
-              <Text style={[
-                styles.matchItemText,
-                isMatched && styles.matchItemTextSelected,
-              ]}>
-                {pair.right}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+    const unpair = (left: string) => {
+      const next = { ...matchedPairs };
+      delete next[left];
+      setMatchedPairs(next);
+    };
+
+    const allPaired = pairOrder.length === step.data.pairs.length;
+
+    const resultStyle = (left: string | null) => {
+      if (feedback === 'none' || !left) return null;
+      return isPairCorrect(left) ? styles.matchItemCorrect : styles.matchItemWrong;
+    };
+    const resultTextStyle = (left: string | null) => {
+      if (feedback === 'none' || !left) return null;
+      return isPairCorrect(left) ? styles.matchItemTextCorrect : styles.matchItemTextWrong;
+    };
+    const badgeResultStyle = (left: string | null) => {
+      if (feedback === 'none' || !left) return null;
+      return isPairCorrect(left) ? styles.matchBadgeCorrect : styles.matchBadgeWrong;
+    };
+
+    return (
+      <View style={styles.matchContainer}>
+        <View style={styles.matchColumns}>
+          <View style={styles.matchColumn}>
+            {step.data.pairs.map((pair) => {
+              const badge = badgeFor(pair.left);
+              const isSelected = selectedLeft === pair.left;
+              const isPaired = badge !== null;
+              return (
+                <TouchableOpacity
+                  key={pair.left}
+                  style={[
+                    styles.matchItem,
+                    isSelected && styles.matchItemSelected,
+                    isPaired && styles.matchItemPaired,
+                    resultStyle(isPaired ? pair.left : null),
+                  ]}
+                  onPress={() => {
+                    if (feedback !== 'none') return;
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (isPaired) {
+                      unpair(pair.left);
+                      setSelectedLeft(pair.left);
+                    } else {
+                      setSelectedLeft(isSelected ? null : pair.left);
+                    }
+                  }}
+                  disabled={feedback !== 'none'}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.matchItemText,
+                      isSelected && styles.matchItemTextSelected,
+                      isPaired && styles.matchItemTextPaired,
+                      resultTextStyle(isPaired ? pair.left : null),
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {pair.left}
+                  </Text>
+                  {badge !== null && (
+                    <View style={[styles.matchBadge, badgeResultStyle(pair.left)]}>
+                      <Text style={styles.matchBadgeText}>{badge}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <View style={styles.matchColumn}>
+            {shuffledRights.map((right) => {
+              const left = leftOfRight(right);
+              const badge = left ? badgeFor(left) : null;
+              const isPaired = badge !== null;
+              const canReceive = feedback === 'none' && !!selectedLeft && !isPaired;
+              return (
+                <TouchableOpacity
+                  key={right}
+                  style={[
+                    styles.matchItem,
+                    canReceive && styles.matchItemReceivable,
+                    isPaired && styles.matchItemPaired,
+                    resultStyle(left),
+                  ]}
+                  onPress={() => {
+                    if (feedback !== 'none') return;
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (isPaired && left) {
+                      unpair(left);
+                      setSelectedLeft(left);
+                    } else if (selectedLeft) {
+                      setMatchedPairs({ ...matchedPairs, [selectedLeft]: right });
+                      setSelectedLeft(null);
+                    }
+                  }}
+                  disabled={feedback !== 'none' || (!isPaired && !selectedLeft)}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.matchItemText,
+                      isPaired && styles.matchItemTextPaired,
+                      resultTextStyle(left),
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {right}
+                  </Text>
+                  {badge !== null && (
+                    <View style={[styles.matchBadge, badgeResultStyle(left)]}>
+                      <Text style={styles.matchBadgeText}>{badge}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {feedback === 'none' && (
+          <Text style={styles.matchHint}>
+            {allPaired ? t('lesson.matchTapToUnpair') : t('lesson.matchHint')}
+          </Text>
+        )}
       </View>
-      {renderBattleImage()}
-    </View>
-  );
+    );
+  };
 
   const renderFillBlank = (step: FillBlankStep) => (
     <View style={styles.fillBlankContainer}>
@@ -585,7 +704,6 @@ export default function LessonScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      {renderBattleImage()}
     </View>
   );
 
@@ -670,7 +788,6 @@ export default function LessonScreen() {
         <View style={styles.sliderHint}>
           <Text style={styles.sliderHintText}>{t('lesson.dragToSelect')}</Text>
         </View>
-        {renderBattleImage()}
       </View>
     );
   };
@@ -705,7 +822,6 @@ export default function LessonScreen() {
           </Text>
         </TouchableOpacity>
       ))}
-      {renderBattleImage()}
     </View>
   );
 
@@ -799,9 +915,22 @@ export default function LessonScreen() {
       >
         <View style={styles.content}>
           {currentStep.type !== 'storyCard' && (
-            <Text style={styles.prompt}>{currentStep.prompt}</Text>
+            <>
+              <View style={styles.stepMeta}>
+                <View style={styles.stepTypeChip}>
+                  <Text style={styles.stepTypeText}>
+                    {t(`lesson.stepTypes.${currentStep.type}`)}
+                  </Text>
+                </View>
+                <Text style={styles.stepCounter}>
+                  {t('lesson.questionOf', questionMeta)}
+                </Text>
+              </View>
+              <Text style={styles.prompt}>{currentStep.prompt}</Text>
+            </>
           )}
           {renderStep(currentStep)}
+          {currentStep.type !== 'storyCard' && renderBattleImage()}
         </View>
       </ScrollView>
 
@@ -944,6 +1073,30 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
   },
+  stepMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  stepTypeChip: {
+    backgroundColor: colors.primary + '18',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  stepTypeText: {
+    fontSize: 11 * fs,
+    fontWeight: '700' as const,
+    color: colors.primaryDark,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase' as const,
+  },
+  stepCounter: {
+    fontSize: 12 * fs,
+    fontWeight: '600' as const,
+    color: colors.textLight,
+  },
   prompt: {
     fontSize: 24 * fs,
     fontWeight: '700' as const,
@@ -996,9 +1149,12 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
   },
   battleImage: {
     width: '100%',
-    height: 200,
+    height: 180,
     borderRadius: 16,
-    marginTop: 20,
+    marginTop: 28,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    backgroundColor: colors.backgroundDark,
   },
   mapContainer: {
     flex: 1,
@@ -1095,8 +1251,11 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     flex: 1,
   },
   matchContainer: {
-    flexDirection: 'row',
     gap: 16,
+  },
+  matchColumns: {
+    flexDirection: 'row',
+    gap: 12,
   },
   matchColumn: {
     flex: 1,
@@ -1106,27 +1265,81 @@ const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
     backgroundColor: colors.card,
     borderWidth: 2,
     borderColor: colors.cardBorder,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 14,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    minHeight: 64,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 4,
   },
   matchItemSelected: {
     borderColor: colors.primary,
     backgroundColor: colors.primary + '15',
   },
-  matchItemMatched: {
+  matchItemReceivable: {
+    borderColor: colors.primaryLight,
+    backgroundColor: colors.backgroundDark,
+  },
+  matchItemPaired: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  matchItemCorrect: {
     borderColor: colors.success,
     backgroundColor: colors.successLight,
   },
+  matchItemWrong: {
+    borderColor: colors.error,
+    backgroundColor: colors.errorLight,
+  },
   matchItemText: {
-    fontSize: 14 * fs,
-    fontWeight: '500' as const,
+    fontSize: 15 * fs,
+    fontWeight: '600' as const,
     color: colors.text,
     textAlign: 'center',
   },
   matchItemTextSelected: {
+    color: colors.primaryDark,
+  },
+  matchItemTextPaired: {
+    color: colors.primaryDark,
+  },
+  matchItemTextCorrect: {
     color: colors.success,
-    fontWeight: '600' as const,
+  },
+  matchItemTextWrong: {
+    color: colors.error,
+  },
+  matchBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.background,
+  },
+  matchBadgeCorrect: {
+    backgroundColor: colors.success,
+  },
+  matchBadgeWrong: {
+    backgroundColor: colors.error,
+  },
+  matchBadgeText: {
+    fontSize: 11,
+    fontWeight: '800' as const,
+    color: colors.textInverse,
+  },
+  matchHint: {
+    fontSize: 13 * fs,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic' as const,
   },
   fillBlankContainer: {
     gap: 24,

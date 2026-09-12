@@ -54,6 +54,19 @@ export default {
     keepGoing: 'استمر!',
     outOfHearts: 'نفدت القلوب!',
     lessonNotFound: 'الدرس غير موجود',
+    questionOf: 'السؤال {{current}} من {{total}}',
+    matchHint: 'اضغط على عنصر في اليسار ثم على ما يطابقه في اليمين',
+    matchTapToUnpair: 'اضغط على عنصر مقترن للتراجع',
+    stepTypes: {
+      multiChoice: 'اختيار من متعدد',
+      mapTap: 'حدد المكان',
+      orderEvents: 'رتّب الأحداث',
+      matchPairs: 'طابق الأزواج',
+      fillBlank: 'أكمل الفراغ',
+      timelineSlider: 'الخط الزمني',
+      twoTruths: 'حقيقتان وكذبة',
+      nameBattle: 'سمِّ المعركة',
+    },
   },
 
   // Lesson Complete

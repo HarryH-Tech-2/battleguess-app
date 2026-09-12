@@ -54,6 +54,19 @@ export default {
     keepGoing: 'Keep going!',
     outOfHearts: "You're out of hearts!",
     lessonNotFound: 'Lesson not found',
+    questionOf: 'Question {{current}} of {{total}}',
+    matchHint: 'Tap an item on the left, then its match on the right',
+    matchTapToUnpair: 'Tap a paired item to undo it',
+    stepTypes: {
+      multiChoice: 'Multiple choice',
+      mapTap: 'Find the place',
+      orderEvents: 'Put in order',
+      matchPairs: 'Match pairs',
+      fillBlank: 'Fill the blank',
+      timelineSlider: 'Timeline',
+      twoTruths: 'Two truths, one lie',
+      nameBattle: 'Name the battle',
+    },
   },
 
   // Lesson Complete
