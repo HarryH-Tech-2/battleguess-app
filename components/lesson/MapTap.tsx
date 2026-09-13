@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import Svg, { Line, Rect, Circle, Ellipse } from 'react-native-svg';
+import Svg, { Line, Rect, Circle, Ellipse, Path } from 'react-native-svg';
 import { MapPin } from 'lucide-react-native';
 import { useSettings } from '@/contexts/SettingsContext';
 import { fonts, radius } from '@/constants/theme';
 import type { MapTapStep } from '@/types';
+import { WORLD_LAND } from '@/mocks/worldLand';
 import { tap } from '@/utils/haptics';
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
 }
 
 const LABEL_W = 120;
+// Cap the chart so it stays a readable map on tablets and web, not a wall of grid.
+const MAX_W = 440;
 
 /**
  * A commander's chart: pins are placed by real latitude and longitude on a graticule,
@@ -23,7 +26,7 @@ const LABEL_W = 120;
 export function MapTap({ step, selected, feedback, onSelect }: Props) {
   const { width } = useWindowDimensions();
   const { colors, haptics, fontScale } = useSettings();
-  const W = width - 40;
+  const W = Math.min(width - 40, MAX_W);
   const H = Math.round(W * 0.58);
 
   // Fit the projection to the pins with generous padding, so nearby regions are readable.
@@ -40,6 +43,36 @@ export function MapTap({ step, selected, feedback, onSelect }: Props) {
     x: ((lng - minLng) / (maxLng - minLng)) * W,
     y: ((maxLat - lat) / (maxLat - minLat)) * H,
   });
+
+  // Coastlines from Natural Earth, projected with the same math as the pins so land and
+  // markers always agree. Rings fully outside the viewport are skipped.
+  const landPath = useMemo(() => {
+    const parts: string[] = [];
+    for (const ring of WORLD_LAND) {
+      let rMinLng = Infinity;
+      let rMaxLng = -Infinity;
+      let rMinLat = Infinity;
+      let rMaxLat = -Infinity;
+      for (let i = 0; i < ring.length; i += 2) {
+        const lng = ring[i];
+        const lat = ring[i + 1];
+        if (lng < rMinLng) rMinLng = lng;
+        if (lng > rMaxLng) rMaxLng = lng;
+        if (lat < rMinLat) rMinLat = lat;
+        if (lat > rMaxLat) rMaxLat = lat;
+      }
+      if (rMaxLng < minLng || rMinLng > maxLng || rMaxLat < minLat || rMinLat > maxLat) continue;
+      let d = '';
+      for (let i = 0; i < ring.length; i += 2) {
+        const { x, y } = project(ring[i + 1], ring[i]);
+        d += `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+      }
+      parts.push(d + 'Z');
+    }
+    return parts.join('');
+    // project is derived from these bounds and the chart size.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minLng, maxLng, minLat, maxLat, W, H]);
 
   const gridLines: React.ReactNode[] = [];
   const stepDeg = maxLng - minLng > 90 ? 20 : 10;
@@ -73,11 +106,12 @@ export function MapTap({ step, selected, feedback, onSelect }: Props) {
   return (
     <View style={[styles.chart, { width: W, height: H, backgroundColor: colors.bgRaised, borderColor: colors.surfaceBorder }]}>
       <Svg width={W} height={H} style={StyleSheet.absoluteFill}>
-        <Rect x={0} y={0} width={W} height={H} fill={colors.bgSunken} />
+        <Rect x={0} y={0} width={W} height={H} fill={colors.mapSea} />
+        <Path d={landPath} fill={colors.mapLand} stroke={colors.mapCoast} strokeWidth={1} fillRule="evenodd" />
         {gridLines}
         {step.data.regions.map((r) => {
           const p = project(r.lat, r.lng);
-          return <Ellipse key={`s${r.id}`} cx={p.x} cy={p.y + 2} rx={18} ry={6} fill="rgba(0,0,0,0.35)" />;
+          return <Ellipse key={`s${r.id}`} cx={p.x} cy={p.y + 2} rx={18} ry={6} fill="rgba(0,0,0,0.22)" />;
         })}
         {feedback !== 'none'
           ? step.data.regions

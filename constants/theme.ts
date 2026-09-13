@@ -113,6 +113,10 @@ export interface ThemeColors {
   pathLocked: string;
   pathLockedEdge: string;
   pathLine: string;
+  /** Landmass fill and coastline stroke on the MapTap chart. */
+  mapSea: string;
+  mapLand: string;
+  mapCoast: string;
 
   // Legacy keys (kept so older screens keep compiling)
   primary: string;
@@ -170,6 +174,9 @@ export const darkTheme: ThemeColors = {
   pathLocked: palette.ink3,
   pathLockedEdge: palette.ink4,
   pathLine: 'rgba(217, 164, 65, 0.28)',
+  mapSea: '#0C1730',
+  mapLand: palette.ink3,
+  mapCoast: 'rgba(217, 164, 65, 0.5)',
 
   primary: palette.ember,
   primaryLight: palette.emberLight,
@@ -226,6 +233,9 @@ export const lightTheme: ThemeColors = {
   pathLocked: palette.parchment2,
   pathLockedEdge: palette.parchment3,
   pathLine: 'rgba(169, 120, 42, 0.35)',
+  mapSea: '#CFDDE3',
+  mapLand: palette.parchment2,
+  mapCoast: palette.brassDark,
 
   primary: palette.ember,
   primaryLight: palette.emberLight,
