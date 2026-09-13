@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { X, Check } from 'lucide-react-native';
@@ -13,9 +12,9 @@ import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { ChunkyButton } from '@/components/ui/ChunkyButton';
 import { fonts, radius } from '@/constants/theme';
 import { tap, success } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 
 export default function ChooseGuideScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { progress, updateProgress } = useUserProgress();
@@ -26,7 +25,7 @@ export default function ChooseGuideScreen() {
   const save = () => {
     if (haptics) success();
     updateProgress({ selectedMascotId: selected });
-    router.back();
+    goBack('/(tabs)/player-profile');
   };
 
   return (
@@ -34,7 +33,7 @@ export default function ChooseGuideScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <View style={{ width: 42 }} />
         <Text style={[styles.title, { color: colors.text, fontSize: 22 * fontScale }]}>{t('chooseGuide.title')}</Text>
-        <Pressable onPress={() => router.back()} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+        <Pressable onPress={() => goBack('/(tabs)/player-profile')} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.close')}>
           <X size={22} color={colors.text} />
         </Pressable>
       </View>

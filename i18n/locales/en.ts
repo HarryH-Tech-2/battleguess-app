@@ -79,7 +79,7 @@ export default {
     wrong: 'Not quite',
     dragToSelect: 'Drag to pick the year',
     completeSentence: 'Complete the sentence:',
-    putInOrder: 'Put these events in the correct order:',
+    putInOrder: 'Tap the events below in the order they happened',
     findFalse: 'Find the FALSE statement:',
     matchPairs: 'Match the pairs:',
     tapRegion: 'Tap the correct region',

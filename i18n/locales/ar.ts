@@ -79,7 +79,7 @@ export default {
     wrong: 'ليست تمامًا',
     dragToSelect: 'اسحب لتحديد السنة',
     completeSentence: 'أكمل الجملة:',
-    putInOrder: 'رتّب هذه الأحداث بالترتيب الصحيح:',
+    putInOrder: 'اضغط على الأحداث أدناه بالترتيب الذي وقعت فيه',
     findFalse: 'اعثر على العبارة الخاطئة:',
     matchPairs: 'طابق بين الأزواج:',
     tapRegion: 'انقر على المنطقة الصحيحة',

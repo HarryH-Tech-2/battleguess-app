@@ -143,7 +143,7 @@ export default function PlayerProfileScreen() {
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
             <View style={styles.calendar}>
               {Array.from({ length: calendar.firstWeekday }).map((_, i) => (
-                <View key={`pad${i}`} style={styles.day} />
+                <View key={`pad${i}`} style={[styles.day, styles.dayPad]} />
               ))}
               {Array.from({ length: calendar.daysInMonth }, (_, i) => i + 1).map((d) => {
                 const active = calendar.active.has(d);
@@ -324,9 +324,10 @@ const styles = StyleSheet.create({
   miniLabel: { fontFamily: fonts.bodySemi, textAlign: 'center' },
   calendar: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   day: { width: '12.2%', aspectRatio: 1, borderRadius: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+  dayPad: { borderColor: 'transparent' },
   dayText: { fontFamily: fonts.bodyBold, fontSize: 11 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  badge: { width: '23%', flexGrow: 1, aspectRatio: 0.95, borderRadius: radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6 },
+  badge: { width: '23%', aspectRatio: 0.95, borderRadius: radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6 },
   badgeIcon: { fontSize: 26 },
   badgeTitle: { fontFamily: fonts.bodyBold, textAlign: 'center' },
   filters: { flexDirection: 'row', gap: 8 },

@@ -98,3 +98,17 @@ export function questProgress(q: QuestDef, stats: DailyStats): number {
 export function isQuestComplete(q: QuestDef, stats: DailyStats): boolean {
   return questProgress(q, stats) >= q.target;
 }
+
+/** Human label for a quest, e.g. "Complete 2 lessons". `t` is the i18n translate function. */
+export function questLabel(t: (key: string, opts?: Record<string, unknown>) => string, q: QuestDef): string {
+  switch (q.metric) {
+    case 'lessons':
+      return t('quests.metric.lessons', { count: q.target });
+    case 'newBattles':
+      return t('quests.metric.newBattles', { count: q.target });
+    case 'perfect':
+      return t('quests.metric.perfect');
+    default:
+      return t(`quests.metric.${q.metric}`, { target: q.target });
+  }
+}

@@ -79,7 +79,7 @@ export default {
     wrong: 'No es correcto',
     dragToSelect: 'Arrastra para seleccionar el año',
     completeSentence: 'Completa la oración:',
-    putInOrder: 'Ordena estos eventos correctamente:',
+    putInOrder: 'Toca los eventos de abajo en el orden en que ocurrieron',
     findFalse: 'Encuentra la afirmación FALSA:',
     matchPairs: 'Empareja los pares:',
     tapRegion: 'Toca la región correcta',

@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Star, Flame, Target, BookOpen, Trophy } from 'lucide-react-native';
+import { Star, Flame, Target, BookOpen, Trophy, Check, Sparkles } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -17,6 +17,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { fonts, radius } from '@/constants/theme';
 import { getRankProgress } from '@/utils/ranks';
 import { success } from '@/utils/haptics';
+import { isQuestComplete, questLabel, questProgress } from '@/utils/quests';
 
 const PERFECT_BONUS = 10;
 const comboBonusFor = (best: number) => (best >= 5 ? 10 : best >= 3 ? 5 : 0);
@@ -58,7 +59,7 @@ export default function LessonCompleteScreen() {
     xpReward: string;
     bestCombo: string;
   }>();
-  const { completeLesson, progress, claimableQuestCount } = useUserProgress();
+  const { completeLesson, progress, claimableQuestCount, daily, dailyQuests } = useUserProgress();
   const { colors, fontScale, haptics, reducedMotion } = useSettings();
   const { getLessonById, getBattleById } = useContent();
 
@@ -204,11 +205,37 @@ export default function LessonCompleteScreen() {
             <ProgressBar value={rankAfter.progress} height={10} />
           </View>
 
-          {claimableQuestCount > 0 ? (
-            <Text style={[styles.questHint, { color: colors.brassLight, fontSize: 13 * fontScale }]}>
-              {t('lessonComplete.questReady', { count: claimableQuestCount })}
-            </Text>
-          ) : null}
+          {/* Today's quests, so the player sees what this lesson moved forward */}
+          <View style={[styles.questCard, { backgroundColor: colors.surface, borderColor: claimableQuestCount > 0 ? colors.brass : colors.surfaceBorder }]}>
+            <View style={styles.rankRow}>
+              <Text style={[styles.questTitle, { color: colors.text, fontSize: 13 * fontScale }]}>{t('quests.title')}</Text>
+              {claimableQuestCount > 0 ? (
+                <View style={styles.questReady}>
+                  <Sparkles size={12} color={colors.brassLight} />
+                  <Text style={[styles.questReadyText, { color: colors.brassLight, fontSize: 12 * fontScale }]}>
+                    {t('lessonComplete.questReady', { count: claimableQuestCount })}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            {dailyQuests.map((q) => {
+              const current = questProgress(q, daily);
+              const done = isQuestComplete(q, daily);
+              return (
+                <View key={q.id} style={styles.questRow}>
+                  <View style={[styles.questDot, { backgroundColor: done ? colors.success : colors.surfaceStrong }]}>
+                    {done ? <Check size={12} color="#fff" strokeWidth={3} /> : null}
+                  </View>
+                  <Text style={[styles.questLabel, { color: done ? colors.textSecondary : colors.text, fontSize: 13 * fontScale }]} numberOfLines={1}>
+                    {questLabel(t, q)}
+                  </Text>
+                  <Text style={[styles.questCount, { color: colors.textSecondary, fontSize: 12 * fontScale }]}>
+                    {t('quests.progress', { current, target: q.target })}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
         </Animated.View>
 
         <View style={{ flex: 1 }} />
@@ -261,5 +288,12 @@ const styles = StyleSheet.create({
   rankRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   rankName: { fontFamily: fonts.display },
   rankNext: { fontFamily: fonts.bodyBold },
-  questHint: { fontFamily: fonts.bodyBold, textAlign: 'center' },
+  questCard: { borderRadius: radius.md, borderWidth: 1, padding: 14, gap: 10 },
+  questTitle: { fontFamily: fonts.bodyBlack, textTransform: 'uppercase', letterSpacing: 0.8 },
+  questReady: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  questReadyText: { fontFamily: fonts.bodyBold },
+  questRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  questDot: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  questLabel: { fontFamily: fonts.bodySemi, flex: 1 },
+  questCount: { fontFamily: fonts.bodyBold, fontVariant: ['tabular-nums'] },
 });

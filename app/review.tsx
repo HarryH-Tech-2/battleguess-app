@@ -13,6 +13,7 @@ import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { ChunkyButton } from '@/components/ui/ChunkyButton';
 import { fonts, radius } from '@/constants/theme';
 import { tap } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function ReviewScreen() {
   return (
     <ScreenBackground>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Pressable onPress={() => router.back()} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.back')}>
+        <Pressable onPress={() => goBack('/(tabs)/player-profile')} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.back')}>
           <ArrowLeft size={22} color={colors.text} />
         </Pressable>
         <Text style={[styles.title, { color: colors.text, fontSize: 22 * fontScale }]}>{t('review.title')}</Text>
@@ -46,7 +47,7 @@ export default function ReviewScreen() {
             <BookOpen size={56} color={colors.textMuted} />
             <Text style={[styles.emptyTitle, { color: colors.text, fontSize: 20 * fontScale }]}>{t('review.noReviews')}</Text>
             <Text style={[styles.emptyBody, { color: colors.textSecondary, fontSize: 14 * fontScale }]}>{t('review.completeLessonsFirst')}</Text>
-            <ChunkyButton label={t('review.backToLearning')} variant="brass" onPress={() => router.back()} style={{ marginTop: 12 }} />
+            <ChunkyButton label={t('review.backToLearning')} variant="brass" onPress={() => goBack()} style={{ marginTop: 12 }} />
           </View>
         ) : (
           <>

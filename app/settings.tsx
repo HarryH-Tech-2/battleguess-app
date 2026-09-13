@@ -10,6 +10,7 @@ import { LANGUAGES, LanguageCode } from '@/i18n';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { fonts, radius } from '@/constants/theme';
 import { tap } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function SettingsScreen() {
   return (
     <ScreenBackground>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Pressable onPress={press(() => router.back())} style={[styles.back, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.back')}>
+        <Pressable onPress={press(() => goBack('/(tabs)/player-profile'))} style={[styles.back, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.back')}>
           <ArrowLeft size={22} color={colors.text} />
         </Pressable>
         <Text style={[styles.title, { color: colors.text, fontSize: 22 * fontScale }]}>{t('settings.title')}</Text>

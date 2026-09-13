@@ -14,6 +14,8 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
+const LABEL_W = 120;
+
 /**
  * A commander's chart: pins are placed by real latitude and longitude on a graticule,
  * so the player has to reason about where in the world the battle happened.
@@ -50,6 +52,24 @@ export function MapTap({ step, selected, feedback, onSelect }: Props) {
     gridLines.push(<Line key={`h${lat}`} x1={0} y1={y} x2={W} y2={y} stroke={colors.pathLine} strokeWidth={1} />);
   }
 
+  // Labels sit centred under their pin. When two pins are close, the later one (by x)
+  // flips its label above the pin so the two never overlap. Pins near the bottom edge
+  // also flip above so the label stays inside the chart.
+  const placed = step.data.regions
+    .map((r) => ({ r, p: project(r.lat, r.lng) }))
+    .sort((a, b) => a.p.x - b.p.x);
+  const labelAbove = new Map<string, boolean>();
+  placed.forEach((cur, i) => {
+    let above = cur.p.y > H - 44;
+    for (let j = 0; j < i && !above; j++) {
+      const prev = placed[j];
+      const close = Math.abs(prev.p.x - cur.p.x) < LABEL_W && Math.abs(prev.p.y - cur.p.y) < 56;
+      if (close && !labelAbove.get(prev.r.id)) above = true;
+    }
+    if (above && cur.p.y < 70) above = false;
+    labelAbove.set(cur.r.id, above);
+  });
+
   return (
     <View style={[styles.chart, { width: W, height: H, backgroundColor: colors.bgRaised, borderColor: colors.surfaceBorder }]}>
       <Svg width={W} height={H} style={StyleSheet.absoluteFill}>
@@ -74,37 +94,38 @@ export function MapTap({ step, selected, feedback, onSelect }: Props) {
         const isCorrect = feedback !== 'none' && r.id === step.data.correctRegionId;
         const isWrong = feedback === 'wrong' && isSel;
         const color = isCorrect ? colors.success : isWrong ? colors.error : isSel ? colors.brass : colors.ember;
-        const labelLeft = p.x > W * 0.6;
+        const above = labelAbove.get(r.id) ?? false;
         return (
-          <Pressable
-            key={r.id}
-            onPress={() => {
-              if (feedback !== 'none') return;
-              if (haptics) tap();
-              onSelect(r.id);
-            }}
-            disabled={feedback !== 'none'}
-            accessibilityRole="button"
-            accessibilityLabel={r.name}
-            accessibilityState={{ selected: isSel }}
-            style={[styles.pinWrap, { left: p.x - 22, top: p.y - 40 }]}
-          >
-            <View style={[styles.pin, { transform: [{ scale: isSel || isCorrect ? 1.15 : 1 }] }]}>
+          <View key={r.id} pointerEvents="box-none" style={[styles.pinWrap, { left: p.x - LABEL_W / 2, top: p.y - 40 }]}>
+            <Pressable
+              onPress={() => {
+                if (feedback !== 'none') return;
+                if (haptics) tap();
+                onSelect(r.id);
+              }}
+              disabled={feedback !== 'none'}
+              accessibilityRole="button"
+              accessibilityLabel={r.name}
+              accessibilityState={{ selected: isSel }}
+              hitSlop={6}
+              style={[styles.pin, { transform: [{ scale: isSel || isCorrect ? 1.15 : 1 }] }]}
+            >
               <MapPin size={36} color={color} fill={color} strokeWidth={1.5} />
               <View style={[styles.pinHole, { backgroundColor: colors.bgSunken }]} />
-            </View>
+            </Pressable>
             <View
+              pointerEvents="none"
               style={[
                 styles.labelWrap,
                 { backgroundColor: colors.option, borderColor: color },
-                labelLeft ? { right: 44 } : { left: 44 },
+                above ? { bottom: 52 } : { top: 40 },
               ]}
             >
               <Text style={[styles.label, { color: colors.optionText, fontSize: 12 * fontScale }]} numberOfLines={1}>
                 {r.name}
               </Text>
             </View>
-          </Pressable>
+          </View>
         );
       })}
     </View>
@@ -120,30 +141,31 @@ const styles = StyleSheet.create({
   },
   pinWrap: {
     position: 'absolute',
-    width: 44,
+    width: LABEL_W,
     height: 48,
     alignItems: 'center',
   },
   pin: {
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pinHole: {
     position: 'absolute',
-    top: 10,
+    top: 14,
     width: 9,
     height: 9,
     borderRadius: 5,
   },
   labelWrap: {
     position: 'absolute',
-    top: 4,
     paddingHorizontal: 8,
     height: 24,
     borderRadius: 12,
     borderWidth: 1.5,
     justifyContent: 'center',
-    maxWidth: 130,
+    maxWidth: LABEL_W,
   },
   label: {
     fontFamily: fonts.bodyBlack,

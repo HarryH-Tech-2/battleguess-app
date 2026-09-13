@@ -14,6 +14,7 @@ import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { ChunkyButton } from '@/components/ui/ChunkyButton';
 import { fonts, radius } from '@/constants/theme';
 import { tap } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 
 export default function BattleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -46,7 +47,7 @@ export default function BattleDetailScreen() {
           <Pressable
             onPress={() => {
               if (haptics) tap();
-              router.back();
+              goBack('/(tabs)/codex');
             }}
             style={[styles.back, { top: insets.top + 8, backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
             accessibilityRole="button"

@@ -1,16 +1,16 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '@/contexts/SettingsContext';
 import { fonts } from '@/constants/theme';
 import { tap } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 
 /** Simple back-arrow header for secondary screens. */
-export function PageHeader({ title, right }: { title: string; right?: React.ReactNode }) {
-  const router = useRouter();
+export function PageHeader({ title, right, fallback }: { title: string; right?: React.ReactNode; fallback?: Href }) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { colors, fontScale, haptics } = useSettings();
@@ -19,7 +19,7 @@ export function PageHeader({ title, right }: { title: string; right?: React.Reac
       <Pressable
         onPress={() => {
           if (haptics) tap();
-          router.back();
+          goBack(fallback);
         }}
         style={[styles.btn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]}
         accessibilityRole="button"

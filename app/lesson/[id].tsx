@@ -20,6 +20,7 @@ import { TimelineSlider, formatYear } from '@/components/lesson/TimelineSlider';
 import { FeedbackSheet } from '@/components/lesson/FeedbackSheet';
 import { fonts, radius } from '@/constants/theme';
 import { success, failure, warn, tap } from '@/utils/haptics';
+import { goBack } from '@/utils/navigation';
 import {
   Step,
   MultiChoiceStep,
@@ -98,6 +99,18 @@ export default function LessonScreen() {
   const shuffledRights = useMemo(() => {
     if (!currentStep || currentStep.type !== 'matchPairs') return [];
     return seededShuffle(currentStep.data.pairs.map((p) => p.right), currentStep.id);
+  }, [currentStep]);
+
+  const shuffledEvents = useMemo(() => {
+    if (!currentStep || currentStep.type !== 'orderEvents') return [];
+    const events = currentStep.data.events;
+    const sortedIds = [...events].sort((a, b) => a.order - b.order).map((e) => e.id);
+    let attempt = seededShuffle(events, currentStep.id);
+    // Never present the pool already in the correct order.
+    for (let i = 0; i < 5 && attempt.map((e) => e.id).join() === sortedIds.join(); i++) {
+      attempt = seededShuffle(events, `${currentStep.id}-${i}`);
+    }
+    return attempt;
   }, [currentStep]);
 
   const questionMeta = useMemo(() => {
@@ -376,7 +389,7 @@ export default function LessonScreen() {
   };
 
   const renderOrderEvents = (step: OrderEventsStep) => {
-    const unordered = step.data.events.filter((e) => !orderedItems.includes(e.id));
+    const unordered = shuffledEvents.filter((e) => !orderedItems.includes(e.id));
     const sorted = [...step.data.events].sort((a, b) => a.order - b.order);
     return (
       <View style={styles.stack}>
@@ -708,7 +721,7 @@ export default function LessonScreen() {
           variant="ghost"
           onPress={() => {
             setShowQuit(false);
-            router.back();
+            goBack();
           }}
         />
       </Dialog>

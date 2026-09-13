@@ -79,7 +79,7 @@ export default {
     wrong: '惜しい！',
     dragToSelect: 'ドラッグして年を選んでください',
     completeSentence: '文を完成させてください：',
-    putInOrder: 'これらの出来事を正しい順序に並べてください：',
+    putInOrder: '下の出来事を起こった順にタップしてください',
     findFalse: '誤りの文を見つけてください：',
     matchPairs: 'ペアを合わせてください：',
     tapRegion: '正しい地域をタップしてください',

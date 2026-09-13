@@ -9,7 +9,7 @@ import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ChunkyButton } from '@/components/ui/ChunkyButton';
 import { fonts, radius } from '@/constants/theme';
-import { isQuestComplete, questProgress, QuestDef } from '@/utils/quests';
+import { isQuestComplete, questProgress, questLabel, QuestDef } from '@/utils/quests';
 import { success } from '@/utils/haptics';
 
 const METRIC_ICON: Record<QuestDef['metric'], typeof Star> = {
@@ -27,19 +27,6 @@ export default function QuestsScreen() {
   const { colors, fontScale, haptics } = useSettings();
 
   const allDone = dailyQuests.every((q) => daily.claimed.includes(q.id));
-
-  const questLabel = (q: QuestDef) => {
-    switch (q.metric) {
-      case 'lessons':
-        return t('quests.metric.lessons', { count: q.target });
-      case 'newBattles':
-        return t('quests.metric.newBattles', { count: q.target });
-      case 'perfect':
-        return t('quests.metric.perfect');
-      default:
-        return t(`quests.metric.${q.metric}`, { target: q.target });
-    }
-  };
 
   return (
     <ScreenBackground>
@@ -87,7 +74,7 @@ export default function QuestsScreen() {
                     {claimed ? <Check size={22} color="#fff" strokeWidth={3} /> : <Icon size={22} color={colors.brassLight} />}
                   </View>
                   <View style={{ flex: 1, gap: 4 }}>
-                    <Text style={[styles.questLabel, { color: colors.text, fontSize: 15 * fontScale }]}>{questLabel(q)}</Text>
+                    <Text style={[styles.questLabel, { color: colors.text, fontSize: 15 * fontScale }]}>{questLabel(t, q)}</Text>
                     <View style={styles.rewardRow}>
                       {q.reward.xp ? (
                         <View style={styles.reward}>
