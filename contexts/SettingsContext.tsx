@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useColorScheme, I18nManager } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { lightColors, darkColors, ColorScheme } from '@/constants/colors';
+import { lightTheme, darkTheme, ThemeColors, fonts } from '@/constants/theme';
 import type { LanguageCode } from '@/i18n';
 
 const SETTINGS_KEY = 'battleguess_settings';
@@ -28,7 +28,7 @@ const defaultSettings: AppSettings = {
   reducedMotion: false,
   largerText: false,
   selectedContinent: 'all',
-  themeMode: 'system',
+  themeMode: 'dark',
   language: 'auto',
 };
 
@@ -41,21 +41,17 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
   const settingsQuery = useQuery({
     queryKey: ['appSettings'],
     queryFn: async () => {
-      console.log('[Settings] Loading from storage...');
       const stored = await AsyncStorage.getItem(SETTINGS_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as AppSettings;
-        console.log('[Settings] Loaded:', parsed);
         return { ...defaultSettings, ...parsed };
       }
-      console.log('[Settings] No stored data, using defaults');
       return defaultSettings;
     },
   });
 
   const { mutate: saveSettings } = useMutation({
     mutationFn: async (newSettings: AppSettings) => {
-      console.log('[Settings] Saving...', newSettings);
       await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
       return newSettings;
     },
@@ -79,7 +75,6 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
       if (i18n.language !== settings.language) {
         i18n.changeLanguage(settings.language);
       }
-      // Enable RTL for Arabic
       const isRTL = settings.language === 'ar';
       if (I18nManager.isRTL !== isRTL) {
         I18nManager.forceRTL(isRTL);
@@ -88,7 +83,7 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
   }, [settings.language, i18n]);
 
   const updateSettings = useCallback((updates: Partial<AppSettings>) => {
-    setSettings(prev => {
+    setSettings((prev) => {
       const newSettings = { ...prev, ...updates };
       saveSettingsRef.current(newSettings);
       return newSettings;
@@ -111,28 +106,39 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     updateSettings({ largerText: !settings.largerText });
   }, [settings.largerText, updateSettings]);
 
-  const setContinent = useCallback((continent: Continent) => {
-    updateSettings({ selectedContinent: continent });
-  }, [updateSettings]);
+  const setContinent = useCallback(
+    (continent: Continent) => {
+      updateSettings({ selectedContinent: continent });
+    },
+    [updateSettings]
+  );
 
-  const setThemeMode = useCallback((mode: ThemeMode) => {
-    updateSettings({ themeMode: mode });
-  }, [updateSettings]);
+  const setThemeMode = useCallback(
+    (mode: ThemeMode) => {
+      updateSettings({ themeMode: mode });
+    },
+    [updateSettings]
+  );
 
-  const setLanguage = useCallback((lang: LanguageCode | 'auto') => {
-    updateSettings({ language: lang });
-    if (lang !== 'auto') {
-      i18n.changeLanguage(lang);
-    }
-  }, [updateSettings, i18n]);
+  const setLanguage = useCallback(
+    (lang: LanguageCode | 'auto') => {
+      updateSettings({ language: lang });
+      if (lang !== 'auto') {
+        i18n.changeLanguage(lang);
+      }
+    },
+    [updateSettings, i18n]
+  );
 
-  // Determine the actual theme based on settings and system preference
-  const isDarkMode = settings.themeMode === 'dark' ||
-    (settings.themeMode === 'system' && systemColorScheme === 'dark');
+  const isDarkMode =
+    settings.themeMode === 'dark' ||
+    (settings.themeMode === 'system' && systemColorScheme !== 'light');
 
-  const colors: ColorScheme = isDarkMode ? darkColors : lightColors;
+  const colors: ThemeColors = isDarkMode ? darkTheme : lightTheme;
+  const fontScale = settings.largerText ? 1.15 : 1;
 
-  const fontScale = settings.largerText ? 1.2 : 1;
+  /** Fire a haptic only when the user has vibration enabled. */
+  const haptics = settings.vibrationEnabled;
 
   return {
     settings,
@@ -147,6 +153,9 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     setLanguage,
     isDarkMode,
     colors,
+    fonts,
     fontScale,
+    haptics,
+    reducedMotion: settings.reducedMotion,
   };
 });

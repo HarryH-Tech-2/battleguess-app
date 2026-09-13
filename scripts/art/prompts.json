@@ -1,0 +1,394 @@
+{
+  "battles": [
+    {
+      "id": "thermopylae",
+      "prompt": "Battle of Thermopylae, August 480 BC, Greece. Greek City-States versus Persian Empire. King Leonidas led 300 Spartans and 7,000 Greeks against the massive Persian army. Their heroic last stand at the narrow pass bought time for Greek forces to prepare. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "marathon",
+      "prompt": "Battle of Marathon, September 490 BC, Greece. Athens versus Persian Empire. Athenian forces defeated a Persian invasion force on the plain of Marathon. A messenger ran 26 miles to Athens to announce victory, inspiring the modern marathon race. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "hastings",
+      "prompt": "Battle of Hastings, October 14, 1066, England. Normans versus Anglo-Saxons. William of Normandy defeated King Harold II, ending Anglo-Saxon rule in England. Harold was killed, possibly by an arrow to the eye, as depicted in the Bayeux Tapestry. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "agincourt",
+      "prompt": "Battle of Agincourt, October 25, 1415, France. England versus France. Henry V's outnumbered and exhausted English army defeated a much larger French force. English longbowmen devastated the French cavalry charges in the muddy terrain. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "waterloo",
+      "prompt": "Battle of Waterloo, June 18, 1815, Belgium. Coalition (Britain, Prussia) versus French Empire. Napoleon's final defeat ended his rule and the Napoleonic Wars. Wellington's forces held until Prussian reinforcements arrived, crushing the French army. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "austerlitz",
+      "prompt": "Battle of Austerlitz, December 2, 1805, Czech Republic. French Empire versus Russia & Austria. Napoleon's greatest victory. He feigned weakness to lure the Allies into a trap, then crushed their center while they overextended their flanks. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "somme",
+      "prompt": "Battle of the Somme, July 1 - November 18, 1916, France. Britain & France versus German Empire. One of the bloodiest battles in history. The first day alone saw 57,000 British casualties. Tanks were used in combat for the first time. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "stalingrad",
+      "prompt": "Battle of Stalingrad, August 23, 1942 - February 2, 1943, Russia. Soviet Union versus Nazi Germany. The turning point of WWII on the Eastern Front. German 6th Army was encircled and destroyed in brutal urban combat during the harsh Russian winter. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "dday",
+      "prompt": "D-Day (Normandy), June 6, 1944, France. Allied Forces versus Nazi Germany. The largest amphibious invasion in history. Allied forces landed on five beaches in Normandy, establishing a foothold that would lead to the liberation of Western Europe. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "gettysburg",
+      "prompt": "Battle of Gettysburg, July 1-3, 1863, United States. Union (North) versus Confederacy (South). The bloodiest battle of the American Civil War and a turning point. Pickett's Charge failed disastrously, ending Lee's invasion of the North. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "yorktown",
+      "prompt": "Siege of Yorktown, September 28 - October 19, 1781, United States. American & French Forces versus British Empire. The decisive siege that ended the American Revolutionary War. Cornwallis surrendered his entire army, leading Britain to negotiate peace. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "alamo",
+      "prompt": "Battle of the Alamo, February 23 - March 6, 1836, Texas. Texan Defenders versus Mexican Army. A small group of Texan defenders held a former mission against thousands of Mexican soldiers for 13 days before being overwhelmed. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "puebla",
+      "prompt": "Battle of Puebla, May 5, 1862, Mexico. Mexican Republic versus French Empire. A poorly equipped Mexican army defeated the French forces, one of the best armies in the world at the time. This is celebrated as Cinco de Mayo. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "ayacucho",
+      "prompt": "Battle of Ayacucho, December 9, 1824, Peru. Revolutionary Forces versus Spanish Royalists. The decisive battle that ended Spanish colonial rule in South America. Sucre's forces defeated the last major Spanish army on the continent. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "gaugamela",
+      "prompt": "Battle of Gaugamela, October 1, 331 BC, Iraq. Macedonian Empire versus Persian Empire. Alexander's decisive victory over the Persian Empire. Despite being vastly outnumbered, his tactical genius crushed Darius's massive army. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "sekigahara",
+      "prompt": "Battle of Sekigahara, October 21, 1600, Japan. Eastern Army versus Western Army. The decisive battle that unified Japan under Tokugawa rule. Betrayals and defections turned the tide, establishing 250 years of peace. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "red-cliffs",
+      "prompt": "Battle of Red Cliffs, Winter 208-209 AD, China. Sun-Liu Alliance versus Cao Cao's Forces. A pivotal naval battle where fire ships destroyed Cao Cao's massive fleet, preventing unification of China and establishing the Three Kingdoms. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "panipat-first",
+      "prompt": "First Battle of Panipat, April 21, 1526, India. Mughal Empire versus Delhi Sultanate. Babur's smaller army used gunpowder weapons and cavalry tactics to defeat the much larger Delhi Sultanate forces, founding the Mughal Empire. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "tsushima",
+      "prompt": "Battle of Tsushima, May 27-28, 1905, Japan. Imperial Japanese Navy versus Russian Baltic Fleet. Japan annihilated the Russian fleet that had sailed halfway around the world. This shocking victory made Japan a world power. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "midway",
+      "prompt": "Battle of Midway, June 4-7, 1942, Pacific Ocean. United States Navy versus Imperial Japanese Navy. The turning point of the Pacific War. American dive bombers sank four Japanese carriers in minutes, shifting the balance of power. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "zama",
+      "prompt": "Battle of Zama, October 19, 202 BC, Tunisia. Roman Republic versus Carthage. The final battle between Rome and Carthage. Scipio defeated Hannibal using the general's own tactics against him, ending the Second Punic War. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "el-alamein",
+      "prompt": "Second Battle of El Alamein, October 23 - November 11, 1942, Egypt. British Eighth Army versus Axis (Germany & Italy). Montgomery's Eighth Army broke through Rommel's Afrika Korps defenses, beginning the end of the North African campaign. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "isandlwana",
+      "prompt": "Battle of Isandlwana, January 22, 1879, South Africa. Zulu Kingdom versus British Empire. The Zulu army overwhelmed a British force in one of the worst defeats in British colonial history. Over 1,300 British soldiers were killed. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "adwa",
+      "prompt": "Battle of Adwa, March 1, 1896, Ethiopia. Ethiopian Empire versus Kingdom of Italy. Ethiopia crushed the Italian invasion force, becoming the only African nation to successfully resist European colonization. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "cannae",
+      "prompt": "Battle of Cannae, August 2, 216 BC, Italy. Carthage versus Roman Republic. Hannibal's masterpiece of tactical warfare. His double envelopment destroyed a Roman army of 80,000, killing over 50,000 in a single day. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "verdun",
+      "prompt": "Battle of Verdun, February 21 - December 18, 1916, France. France versus German Empire. The longest single battle of WWI. Germany tried to \"bleed France white\" at this symbolic fortress, but both sides suffered equally. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "kursk",
+      "prompt": "Battle of Kursk, July 5 - August 23, 1943, Russia. Soviet Union versus Nazi Germany. The largest tank battle in history. Germany's last major offensive on the Eastern Front was stopped cold, and the Soviets seized the initiative. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "tours",
+      "prompt": "Battle of Tours, October 10, 732, France. Frankish Kingdom versus Umayyad Caliphate. Charles Martel halted the Umayyad advance into Western Europe, earning his nickname \"The Hammer\" and preserving Christendom. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "gallipoli",
+      "prompt": "Gallipoli Campaign, February 19, 1915 - January 9, 1916, Turkey. Ottoman Empire versus Allied Forces (Britain, France, ANZAC). Allied forces attempted to seize the Dardanelles but were repelled by Ottoman defenders. The campaign launched Atatürk's rise to prominence. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "lepanto",
+      "prompt": "Battle of Lepanto, October 7, 1571, Greece. Holy League versus Ottoman Empire. The largest naval battle in Western history since antiquity. The Holy League crushed Ottoman naval power, ending the myth of Ottoman invincibility at sea. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "borodino",
+      "prompt": "Battle of Borodino, September 7, 1812, Russia. French Empire versus Russian Empire. The bloodiest single day of the Napoleonic Wars. Napoleon won the field but failed to destroy the Russian army, leading to his disastrous retreat from Moscow. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "trafalgar",
+      "prompt": "Battle of Trafalgar, October 21, 1805, Spain. Royal Navy versus Franco-Spanish Fleet. Britain's greatest naval victory secured control of the seas for a century. Admiral Nelson was killed but became Britain's greatest hero. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "vienna-1683",
+      "prompt": "Battle of Vienna, September 12, 1683, Austria. Holy Roman Empire & Poland versus Ottoman Empire. The largest cavalry charge in history broke the Ottoman siege of Vienna, marking the beginning of the Ottoman Empire's decline in Europe. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "plassey",
+      "prompt": "Battle of Plassey, June 23, 1757, India. British East India Company versus Nawab of Bengal. A small British force defeated the Nawab through conspiracy and bribery, beginning British colonial rule over the Indian subcontinent. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "singapore",
+      "prompt": "Fall of Singapore, February 8-15, 1942, Singapore. Imperial Japanese Army versus British Commonwealth. The largest surrender in British military history. Japan captured the \"impregnable fortress\" in just one week, shocking the world. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "dien-bien-phu",
+      "prompt": "Battle of Dien Bien Phu, March 13 - May 7, 1954, Vietnam. Viet Minh versus French Union. Vietnamese forces besieged and overwhelmed a French garrison in a remote valley, ending French colonial rule in Indochina. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "changping",
+      "prompt": "Battle of Changping, 260 BC, China. State of Qin versus State of Zhao. One of the bloodiest battles in ancient history. Qin forces trapped and massacred 400,000 Zhao soldiers, paving the way for China's unification. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "omdurman",
+      "prompt": "Battle of Omdurman, September 2, 1898, Sudan. British-Egyptian Army versus Mahdist Sudan. Modern weapons devastated the Mahdist army in the last cavalry charge in British history. Winston Churchill participated as a young officer. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "carthage-destruction",
+      "prompt": "Siege of Carthage, 149-146 BC, Tunisia. Roman Republic versus Carthage. Rome completely destroyed its ancient rival. The city was razed, inhabitants killed or enslaved, and salt allegedly sown into the earth. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "tobruk",
+      "prompt": "Siege of Tobruk, April 10 - December 7, 1941, Libya. Allied Forces (Australia, Britain) versus Axis (Germany, Italy). Australian and British forces held the Libyan port against Rommel's Afrika Korps for 241 days, becoming known as the \"Rats of Tobruk.\" Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "saratoga",
+      "prompt": "Battle of Saratoga, September 19 - October 7, 1777, United States. Continental Army versus British Army. The turning point of the American Revolution. British surrender convinced France to ally with America, changing the war's outcome. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "chacabuco",
+      "prompt": "Battle of Chacabuco, February 12, 1817, Chile. Army of the Andes versus Spanish Royalists. San Martín's army crossed the Andes and defeated the Spanish, liberating Chile from colonial rule. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "new-orleans",
+      "prompt": "Battle of New Orleans, January 8, 1815, United States. United States versus British Empire. Andrew Jackson's ragtag army crushed a British invasion force, making him a national hero. The battle was fought after peace had already been signed. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "boyaca",
+      "prompt": "Battle of Boyacá, August 7, 1819, Colombia. Gran Colombian Patriots versus Spanish Royalists. Bolívar's decisive victory that secured independence for New Granada (Colombia). The Spanish army was destroyed in just two hours. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "rorkes-drift",
+      "prompt": "Battle of Rorke's Drift, January 22-23, 1879, South Africa. British Army versus Zulu Kingdom. About 150 British soldiers held a mission station against 4,000 Zulu warriors for 12 hours, earning 11 Victoria Crosses. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "iwo-jima",
+      "prompt": "Battle of Iwo Jima, February 19 - March 26, 1945, Japan. United States Marines versus Imperial Japanese Army. Marines captured a volcanic island fortress in some of the bloodiest fighting of WWII. The flag raising became an iconic image. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "marne",
+      "prompt": "First Battle of the Marne, September 5-12, 1914, France. France & Britain versus German Empire. The \"Miracle of the Marne\" stopped the German advance on Paris and ended hopes for a quick victory, leading to four years of trench warfare. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "passchendaele",
+      "prompt": "Battle of Passchendaele, July 31 - November 10, 1917, Belgium. British Empire & Allies versus German Empire. Three months of fighting in mud and rain gained five miles at the cost of half a million casualties. The name became synonymous with senseless slaughter. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "bulge",
+      "prompt": "Battle of the Bulge, December 16, 1944 - January 25, 1945, Belgium. Allied Forces versus Nazi Germany. Germany's last major offensive in the West. The surprise attack created a \"bulge\" in Allied lines before being crushed, hastening Germany's defeat. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "buena-vista",
+      "prompt": "Battle of Buena Vista, February 22-23, 1847, Mexico. United States versus Mexico. Outnumbered American forces defeated Santa Anna's large army, securing northern Mexico and making Zachary Taylor a national hero. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "talas",
+      "prompt": "Battle of Talas, July 751, Kazakhstan. Abbasid Caliphate versus Tang Dynasty China. Arab forces defeated the Chinese Tang Dynasty, halting Chinese expansion westward and spreading papermaking to the Islamic world. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "constantinople-1453",
+      "prompt": "Fall of Constantinople, May 29, 1453, Turkey. Ottoman Empire versus Byzantine Empire. The Ottomans conquered the Byzantine capital using massive cannons, ending the Roman Empire after 1,500 years and reshaping world history. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "nagashino",
+      "prompt": "Battle of Nagashino, June 29, 1575, Japan. Oda-Tokugawa Alliance versus Takeda Clan. Oda Nobunaga used massed firearms behind wooden palisades to devastate the famous Takeda cavalry, revolutionizing Japanese warfare. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "myeongnyang",
+      "prompt": "Battle of Myeongnyang, October 26, 1597, Korea. Joseon Korea versus Toyotomi Japan. Admiral Yi Sun-sin with just 13 ships defeated a Japanese fleet of 333 ships using the narrow strait's currents to his advantage. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "kohima",
+      "prompt": "Battle of Kohima, April 4 - June 22, 1944, India. British-Indian Forces versus Imperial Japan. British and Indian forces stopped the Japanese invasion of India in brutal fighting around a tennis court, turning the tide in Burma. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "bach-dang",
+      "prompt": "Battle of Bạch Đằng, 938 AD, Vietnam. Vietnamese Forces versus Southern Han China. Vietnamese forces used iron-tipped stakes hidden underwater to destroy the Chinese fleet, ending 1,000 years of Chinese rule. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "panipat-third",
+      "prompt": "Third Battle of Panipat, January 14, 1761, India. Durrani Empire versus Maratha Empire. One of the largest and bloodiest 18th century battles, the Afghan victory devastated the Marathas and changed Indian history. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "pyramids",
+      "prompt": "Battle of the Pyramids, July 21, 1798, Egypt. French Republic versus Mamluk Egypt. Napoleon's army defeated the Mamluk cavalry using infantry squares, conquering Egypt and beginning modern Egyptology. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "khartoum",
+      "prompt": "Siege of Khartoum, March 13, 1884 - January 26, 1885, Sudan. Mahdist Sudan versus Egyptian-British Forces. Mahdist forces captured Khartoum and killed General \"Chinese\" Gordon, shocking Victorian Britain and creating a legendary martyr. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "tangier",
+      "prompt": "Battle of Alcácer Quibir, August 4, 1578, Morocco. Saadian Morocco versus Kingdom of Portugal. Three kings died in this battle as Morocco crushed Portuguese ambitions in North Africa, leading to the end of Portuguese independence. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "kairouan",
+      "prompt": "Battle of Kairouan, 683 AD, Tunisia. Berber Forces versus Umayyad Caliphate. Berber forces ambushed and killed the Arab conqueror Uqba ibn Nafi, temporarily halting the Arab conquest of North Africa. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "tenochtitlan",
+      "prompt": "Fall of Tenochtitlan, May 26 - August 13, 1521, Mexico. Spanish-Tlaxcalan Alliance versus Aztec Empire. Cortés and his indigenous allies conquered the Aztec capital after a brutal siege, ending one of history's great civilizations. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "cajamarca",
+      "prompt": "Battle of Cajamarca, November 16, 1532, Peru. Spanish Conquistadors versus Inca Empire. Pizarro captured the Inca emperor Atahualpa in a surprise attack, beginning the fall of the mighty Inca Empire. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "san-juan-hill",
+      "prompt": "Battle of San Juan Hill, July 1, 1898, Cuba. United States versus Kingdom of Spain. American forces including Roosevelt's Rough Riders stormed Spanish positions outside Santiago, making Teddy Roosevelt a national hero. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "falklands",
+      "prompt": "Falklands War, April 2 - June 14, 1982, Falkland Islands. United Kingdom versus Argentina. Britain recaptured the Falkland Islands from Argentina in a short but intense modern war 8,000 miles from home. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "chapultepec",
+      "prompt": "Battle of Chapultepec, September 12-13, 1847, Mexico. United States versus Mexico. American forces stormed Chapultepec Castle, where young Mexican cadets died defending it, becoming the legendary \"Niños Héroes.\" Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    },
+    {
+      "id": "carabobo",
+      "prompt": "Battle of Carabobo, June 24, 1821, Venezuela. Gran Colombian Patriots versus Spanish Royalists. Bolívar's decisive victory secured Venezuelan independence and opened the path to liberating the rest of northern South America. Epic painterly digital matte painting, cinematic wide shot, premium strategy-game key art, bold confident brushwork, rich saturated palette with deep blues, crimson and brass gold, strong silhouettes, dramatic sky and atmospheric depth. No text, no letters, no watermark, no borders."
+    }
+  ],
+  "emblems": [
+    {
+      "id": "ancient-beginnings",
+      "prompt": "Game emblem icon: a Spartan hoplite bronze helmet with tall crimson crest and a round lambda shield, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "medieval-clashes",
+      "prompt": "Game emblem icon: a Norman kite shield with a longsword and a conical nasal helmet, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "napoleonic-era",
+      "prompt": "Game emblem icon: a French imperial eagle standard atop a brass pole with a bicorne hat and tricolour ribbons, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "great-war",
+      "prompt": "Game emblem icon: a WWI Brodie steel helmet resting on coiled barbed wire with a brass field whistle, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "world-war-2",
+      "prompt": "Game emblem icon: a WWII M1 steel helmet with a folded map and a brass compass, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "ancient-asia",
+      "prompt": "Game emblem icon: a Chinese Warring States bronze dragon-crest general helmet with a crossbow, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "mongol-conquests",
+      "prompt": "Game emblem icon: a Mongol composite recurve bow with a fur-trimmed steel helmet and horsetail banner, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "samurai-era",
+      "prompt": "Game emblem icon: a samurai kabuto helmet with golden crescent maedate crest and a katana, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "pacific-theater",
+      "prompt": "Game emblem icon: a navy aviator leather helmet with goggles beside a brass ship telegraph, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "ancient-africa",
+      "prompt": "Game emblem icon: an Egyptian pharaoh war crown khepresh with a Carthaginian elephant tusk ornament, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "colonial-resistance",
+      "prompt": "Game emblem icon: a Zulu cowhide shield with crossed iklwa spears and an Ethiopian lion crown, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "north-africa-ww2",
+      "prompt": "Game emblem icon: a desert-tan tank commander goggles and cap on a jerry can, sand-blasted, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "american-revolution",
+      "prompt": "Game emblem icon: a continental army tricorne hat with a fife and a brass drum, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "american-civil-war",
+      "prompt": "Game emblem icon: a Union kepi cap with a bugle and crossed cavalry sabres, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "latin-american-wars",
+      "prompt": "Game emblem icon: a liberator bicorne with a curved sabre and a laurel wreath, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "roman-empire",
+      "prompt": "Game emblem icon: a Roman legionary galea helmet with crimson crest and an SPQR eagle aquila standard, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "crusades",
+      "prompt": "Game emblem icon: a crusader great helm with a red cross tabard and a longsword, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "naval-supremacy",
+      "prompt": "Game emblem icon: a brass ship wheel with a naval officer bicorne and an anchor, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "indian-subcontinent",
+      "prompt": "Game emblem icon: a Mughal steel helmet with a war elephant headdress and a curved talwar, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "korean-glory",
+      "prompt": "Game emblem icon: a Korean turtle ship geobukseon in miniature with a general helmet and dragon head, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "african-resistance",
+      "prompt": "Game emblem icon: a Mahdist patched jibba banner with a curved sword and a leather shield, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "conquest-of-americas",
+      "prompt": "Game emblem icon: an Aztec eagle warrior helmet with a Spanish morion helmet and obsidian macuahuitl, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    },
+    {
+      "id": "modern-americas",
+      "prompt": "Game emblem icon: a Rough Riders campaign hat with a Krag rifle and a brass bugle, rendered in polished brass and dark steel with painterly stylized shading, centered, slight three-quarter view, soft warm rim light, on a plain deep navy background. Premium mobile game UI icon, clean silhouette, no text, no letters, no frame."
+    }
+  ],
+  "mascots": [
+    {
+      "id": "caesar",
+      "prompt": "Stylized painted character portrait of Julius Caesar: bust shot, laurel wreath, crimson cloak over a brass muscled cuirass, confident slight smile, as a friendly game mascot, warm brass rim light, deep navy background, premium mobile game avatar art, clean silhouette, soft painterly brushwork, no text, no letters, no frame."
+    },
+    {
+      "id": "napoleon",
+      "prompt": "Stylized painted character portrait of Napoleon Bonaparte: bust shot, bicorne hat, dark blue coat with gold epaulettes, confident slight smile, as a friendly game mascot, warm brass rim light, deep navy background, premium mobile game avatar art, clean silhouette, soft painterly brushwork, no text, no letters, no frame."
+    },
+    {
+      "id": "suntzu",
+      "prompt": "Stylized painted character portrait of Sun Tzu: bust shot, elderly Chinese strategist with a long grey beard, black and gold Zhou-era robes and scholar cap, wise kind smile, as a friendly game mascot, warm brass rim light, deep navy background, premium mobile game avatar art, clean silhouette, soft painterly brushwork, no text, no letters, no frame."
+    },
+    {
+      "id": "joan",
+      "prompt": "Stylized painted character portrait of Joan of Arc: bust shot, young woman with short dark hair, polished plate armour with a white and gold banner behind, brave warm smile, as a friendly game mascot, warm brass rim light, deep navy background, premium mobile game avatar art, clean silhouette, soft painterly brushwork, no text, no letters, no frame."
+    }
+  ],
+  "extras": [
+    {
+      "id": "onboarding-hero",
+      "prompt": "Vertical epic painterly matte painting: a lone commander seen from behind on a windswept ridge at dawn, cloak billowing, overlooking a vast valley where the campfires of a great army glow beneath a brass-gold sunrise breaking through deep blue storm clouds. Premium strategy-game key art, bold brushwork, rich deep blues and warm gold, strong silhouette, lots of open sky at the top. No text, no letters, no watermark."
+    },
+    {
+      "id": "app-icon",
+      "prompt": "Flat game app icon: a heraldic kite shield in polished brass with a dark navy field, crossed with two brass swords behind it, a small brass laurel wreath below, centered, painterly stylized shading, soft warm rim light, on a plain deep navy background filling the whole square. Bold clean silhouette readable at small size, no text, no letters, no frame."
+    }
+  ]
+}

@@ -7,18 +7,11 @@ export default function HomeLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.textInverse,
-        headerTitleStyle: { fontWeight: '600' as const },
-        contentStyle: { backgroundColor: colors.background },
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Stack.Screen
-        name="learn"
-        options={{
-          headerShown: false,
-        }}
-      />
+      <Stack.Screen name="learn" />
     </Stack>
   );
 }

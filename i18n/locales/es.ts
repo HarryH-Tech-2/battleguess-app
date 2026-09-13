@@ -1,25 +1,46 @@
 export default {
-  // Interfaz comun
+  // Common UI
   app: {
     name: 'BattleGuess',
   },
 
-  // Navegacion
+  common: {
+    xp: 'XP',
+    hearts: 'Vidas',
+    close: 'Cerrar',
+    back: 'Volver',
+    done: 'Hecho',
+  },
+
+  // Navigation
   nav: {
     learn: 'Aprender',
+    quests: 'Misiones',
+    codex: 'Códice',
     profile: 'Perfil',
     settings: 'Ajustes',
     back: 'Volver',
   },
 
-  // Incorporacion
+  // Onboarding
   onboarding: {
     welcome: 'Bienvenido a BattleGuess',
-    chooseCommander: 'Elige a tu comandante legendario',
-    beginJourney: 'Comienza tu aventura',
+    tagline: 'Aprende las batallas que dieron forma al mundo, cinco minutos a la vez.',
+    startCampaign: 'Comienza la campaña',
+    chooseCommander: 'Elige a tu comandante',
+    chooseCommanderSub: 'Tu guía te anima y te levanta cuando tropiezas.',
+    beginJourney: 'Avanza',
+    features: {
+      pathTitle: 'Sigue la campaña',
+      pathBody: 'Un camino sinuoso a través de 67 batallas en cuatro continentes.',
+      heartsTitle: 'Conserva tus vidas',
+      heartsBody: 'Tres por lección. Piérdelas todas y tendrás que reagruparte.',
+      questsTitle: 'Misiones diarias',
+      questsBody: 'Pequeñas misiones cada día mantienen viva tu racha.',
+    },
   },
 
-  // Elegir guia
+  // Choose Guide
   chooseGuide: {
     title: 'Elige tu guía',
     subtitle: 'Te acompañará en tu aventura',
@@ -27,22 +48,35 @@ export default {
     currentGuide: 'Guía actual',
   },
 
-  // Pantalla de aprendizaje
+  // Learn Screen
   learn: {
-    allContinents: 'Todos los continentes',
+    title: 'Campaña',
+    allContinents: 'Todos',
     europe: 'Europa',
     asia: 'Asia',
     africa: 'África',
     americas: 'Américas',
     noBattles: 'No se encontraron batallas para este continente',
+    chapter: 'Capítulo {{n}}',
+    battlesDone: '{{completed}} de {{total}} batallas',
+    start: 'Empezar',
+    continue: 'Continuar',
+    review: 'Repasar',
+    lockedHint: 'Termina la primera batalla del capítulo anterior para desbloquear',
+    jumpToCurrent: 'Ir al actual',
+    mainBattle: 'Batalla principal',
+    sideBattle: 'Batalla secundaria',
+    dailyGoal: 'Meta diaria',
+    dailyGoalDone: 'Meta diaria alcanzada',
+    minutes: '{{count}} min',
   },
 
-  // Pantalla de leccion
+  // Lesson Screen
   lesson: {
     check: 'Comprobar',
     continue: 'Continuar',
     correct: '¡Correcto!',
-    wrong: '¡Incorrecto!',
+    wrong: 'No es correcto',
     dragToSelect: 'Arrastra para seleccionar el año',
     completeSentence: 'Completa la oración:',
     putInOrder: 'Ordena estos eventos correctamente:',
@@ -52,11 +86,18 @@ export default {
     greatJob: '¡Buen trabajo!',
     tryAgain: '¡Inténtalo de nuevo!',
     keepGoing: '¡Sigue adelante!',
-    outOfHearts: '¡Te quedaste sin vidas!',
+    outOfHearts: 'Te has quedado sin vidas para esta lección.',
+    outOfHeartsBody: 'Reagrúpate e inténtalo de nuevo. Tu progreso en el camino está a salvo.',
+    retreat: 'Volver al campamento',
     lessonNotFound: 'Lección no encontrada',
-    questionOf: 'Pregunta {{current}} de {{total}}',
+    questionOf: '{{current}} de {{total}}',
     matchHint: 'Toca un elemento de la izquierda y luego su pareja a la derecha',
     matchTapToUnpair: 'Toca un elemento emparejado para deshacerlo',
+    combo: 'Combo x{{count}}',
+    quitTitle: '¿Abandonar la batalla?',
+    quitBody: 'Se perderá el progreso de esta lección.',
+    quitConfirm: 'Salir',
+    quitCancel: 'Seguir luchando',
     stepTypes: {
       multiChoice: 'Opción múltiple',
       mapTap: 'Encuentra el lugar',
@@ -66,26 +107,91 @@ export default {
       timelineSlider: 'Línea de tiempo',
       twoTruths: 'Dos verdades, una mentira',
       nameBattle: 'Nombra la batalla',
+      storyCard: 'La historia',
     },
   },
 
-  // Leccion completada
+  // Lesson Complete
   lessonComplete: {
-    perfect: '¡Perfecto!',
-    complete: '¡Lección completada!',
+    perfect: 'Victoria perfecta',
+    complete: 'Victoria',
     xpEarned: 'XP obtenida',
     accuracy: 'Precisión',
     dayStreak: 'Racha de días',
     continue: 'Continuar',
     bonus: '¡bonus!',
     correct: 'correctas',
+    comboBonus: 'Bono de combo',
+    perfectBonus: 'Bono perfecto',
+    addedToCodex: 'Añadido a tu Códice',
+    rankProgress: '{{xp}} XP para {{rank}}',
+    maxRank: 'Rango máximo alcanzado',
+    questReady: '{{count}} misión lista para reclamar',
+    questReady_other: '{{count}} misiones listas para reclamar',
   },
 
-  // Perfil
+  // Quests
+  quests: {
+    title: 'Misiones diarias',
+    subtitle: 'Nuevas misiones cada día a medianoche.',
+    claim: 'Reclamar',
+    claimed: 'Reclamado',
+    allDone: 'Todas las misiones completadas. Nos vemos mañana, comandante.',
+    rewardXp: '+{{xp}} XP',
+    rewardHeart: '+1 vida',
+    progress: '{{current}} / {{target}}',
+    metric: {
+      xp: 'Gana {{target}} XP',
+      lessons_one: 'Completa {{count}} lección',
+      lessons_other: 'Completa {{count}} lecciones',
+      correct: 'Responde correctamente {{target}} preguntas',
+      perfect: 'Termina una lección sin errores',
+      newBattles_one: 'Estudia {{count}} batalla nueva',
+      newBattles_other: 'Estudia {{count}} batallas nuevas',
+    },
+    streakTitle: 'Racha',
+    streakBody_one: '{{count}} día. Mantenla ardiendo.',
+    streakBody_other: '{{count}} días. Mantenla ardiendo.',
+    streakZero: 'Completa una lección hoy para empezar una racha.',
+  },
+
+  // Codex
+  codex: {
+    title: 'Códice',
+    subtitle: '{{unlocked}} de {{total}} batallas estudiadas',
+    locked: 'Bloqueado',
+    lockedHint: 'Completa la lección de esta batalla en el camino de la campaña para desbloquearla.',
+    sides: 'Bandos',
+    commanders: 'Comandantes',
+    outcome: 'Resultado',
+    whyItMatters: 'Por qué importa',
+    facts: 'Notas de campo',
+    study: 'Estudiar esta batalla',
+    replay: 'Repetir lección',
+    era: {
+      ancient: 'Antigüedad',
+      medieval: 'Medieval',
+      napoleonic: 'Napoleónica',
+      ww1: 'Primera Guerra Mundial',
+      ww2: 'Segunda Guerra Mundial',
+      modern: 'Moderna',
+    },
+    filters: {
+      all: 'Todas',
+      unlocked: 'Estudiadas',
+      locked: 'Bloqueadas',
+    },
+    empty: 'Todavía no hay nada aquí. Gana una batalla en el camino de la campaña.',
+  },
+
+  // Profile
   profile: {
     title: 'Perfil',
     historian: 'Historiador',
-    chooseGuide: 'Elegir un guía',
+    rank: 'Rango',
+    nextRank: '{{xp}} XP para {{rank}}',
+    maxRank: 'Rango máximo',
+    chooseGuide: 'Cambiar guía',
     dayStreak: 'Racha de días',
     totalXp: 'XP total',
     hearts: 'Vidas',
@@ -94,7 +200,7 @@ export default {
     lessonsCompleted: 'Lecciones completadas',
     lessonsOf: '{{completed}} de {{total}} lecciones',
     badges: 'Insignias',
-    streakCalendar: 'Calendario de racha',
+    streakCalendar: 'Este mes',
     dayStreakCount: '¡Racha de {{count}} días!',
     startStreak: '¡Comienza tu racha hoy!',
     lastActive: 'Última actividad: {{date}}',
@@ -105,26 +211,58 @@ export default {
     lessons: 'Lecciones',
     learnMore: 'Saber más',
     educationalArticles: 'Artículos educativos sobre historia militar',
+    quizPerformance: 'Rendimiento en cuestionarios',
+    accuracy: 'Precisión',
+    correctAnswers: 'Respuestas correctas',
+    wrongAnswers: 'Respuestas incorrectas',
+    battlesStudied: 'Batallas estudiadas',
+    lessonsMastered: 'Lecciones dominadas',
+    questionHistory: 'Historial de preguntas',
+    answeredCount: '{{count}} respondidas',
+    historyEmpty: 'Responde preguntas para ver tu historial aquí.',
+    historyNoMatch: 'Ninguna pregunta coincide con este filtro.',
+    filterAll: 'Todas',
+    filterWrong: 'Incorrectas',
+    filterCorrect: 'Correctas',
+    yourAnswer: 'Tu respuesta:',
+    correctLabel: 'Correcta:',
+    showLess: 'Mostrar menos',
+    showAll: 'Mostrar todas {{count}}',
+    guide: 'Tu guía',
+    ranks: {
+      recruit: 'Recluta',
+      private: 'Soldado raso',
+      corporal: 'Cabo',
+      sergeant: 'Sargento',
+      lieutenant: 'Teniente',
+      captain: 'Capitán',
+      major: 'Mayor',
+      colonel: 'Coronel',
+      general: 'General',
+      fieldMarshal: 'Mariscal de campo',
+    },
   },
 
-  // Repaso
+  // Review
   review: {
-    title: 'Repaso',
+    title: 'Práctica',
     practiceMakesPerfect: 'La práctica hace al maestro',
-    reviewBattles: 'Repasa las batallas que has aprendido para reforzar tu memoria',
-    earnHeart: '¡Completa un repaso para ganar una vida!',
+    reviewBattles: 'Repite las batallas con las que tuviste dificultades para dominarlas.',
+    earnHeart: 'Completa una práctica para ganar una vida',
     needsPractice: 'Necesita práctica',
     quickReview: 'Repaso rápido',
-    fullLesson: 'Lección completa',
+    fullLesson: 'Repetir lección',
     reviewed: 'Repasado',
-    noReviews: 'Sin repasos aún',
-    completeLessonsFirst: 'Completa algunas lecciones primero para desbloquear sesiones de repaso',
+    noReviews: 'Nada que practicar todavía',
+    completeLessonsFirst: 'Completa algunas lecciones primero. Las batallas en las que falles preguntas aparecerán aquí.',
     backToLearning: 'Volver a aprender',
     reviewsCompleted: '¡{{count}} repaso completado!',
     reviewsCompletedPlural: '¡{{count}} repasos completados!',
+    mistakes_one: '{{count}} error',
+    mistakes_other: '{{count}} errores',
   },
 
-  // Ajustes
+  // Settings
   settings: {
     title: 'Ajustes',
     profile: 'Perfil',
@@ -133,8 +271,8 @@ export default {
     appearance: 'Apariencia',
     theme: 'Tema',
     themeDesc: 'Elige tu apariencia preferida',
-    light: 'Claro',
-    dark: 'Oscuro',
+    light: 'Día',
+    dark: 'Noche',
     system: 'Sistema',
     language: 'Idioma',
     languageDesc: 'Elige tu idioma preferido',
@@ -155,9 +293,10 @@ export default {
     termsOfServiceDesc: 'Reglas y directrices para el uso de la aplicación',
     about: 'Acerca de',
     appVersion: 'Versión de la aplicación',
+    auto: 'Automático',
   },
 
-  // Política de privacidad
+  // Privacy Policy
   privacy: {
     lastUpdated: 'Última actualización: febrero',
     introTitle: 'Introducción',
@@ -189,7 +328,7 @@ export default {
     contactText: 'Si tienes alguna pregunta sobre esta política de privacidad, contáctanos a través de la ficha de la tienda de aplicaciones o de nuestros canales de soporte.',
   },
 
-  // Términos de servicio
+  // Terms of Service
   terms: {
     lastUpdated: 'Última actualización: febrero',
     acceptTitle: 'Aceptación de los términos',

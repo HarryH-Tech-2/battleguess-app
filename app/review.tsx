@@ -1,355 +1,106 @@
-import { useState, useCallback, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import { useRouter, Stack } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { BookOpen, ChevronRight, Heart, Star, Check } from 'lucide-react-native';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { ArrowLeft, BookOpen, ChevronRight, AlertTriangle } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
+import { getBattleImage } from '@/mocks/images';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { ChunkyButton } from '@/components/ui/ChunkyButton';
+import { fonts, radius } from '@/constants/theme';
+import { tap } from '@/utils/haptics';
 
 export default function ReviewScreen() {
   const router = useRouter();
-  const { progress, gainHeartFromReview, isLessonCompleted } = useUserProgress();
-  const { colors } = useSettings();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { progress, isLessonCompleted } = useUserProgress();
+  const { colors, fontScale, haptics } = useSettings();
   const { lessons, getBattleById } = useContent();
-  const [completedReviews, setCompletedReviews] = useState<string[]>([]);
-  const styles = createStyles(colors);
 
   const reviewLessons = useMemo(() => {
-    const completed = lessons.filter(l => isLessonCompleted(l.id));
-    const withWrongAnswers = completed
-      .map(lesson => {
-        const battle = getBattleById(lesson.battleId);
-        const wrongCount = battle ? progress.wrongAnswers[battle.id] || 0 : 0;
-        return { lesson, wrongCount };
-      })
-      .sort((a, b) => b.wrongCount - a.wrongCount)
-      .slice(0, 5);
-    
-    return withWrongAnswers;
-  }, [progress.wrongAnswers, isLessonCompleted, lessons, getBattleById]);
-
-  const handleReviewLesson = useCallback((lessonId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push(`/lesson/${lessonId}` as `/lesson/${string}`);
-  }, [router]);
-
-  const handleQuickReview = useCallback((lessonId: string) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    if (!completedReviews.includes(lessonId)) {
-      setCompletedReviews([...completedReviews, lessonId]);
-      gainHeartFromReview();
-    }
-  }, [completedReviews, gainHeartFromReview]);
-
-  if (reviewLessons.length === 0) {
-    return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <Stack.Screen options={{ title: t('review.title') }} />
-        <View style={styles.emptyContainer}>
-          <BookOpen size={64} color={colors.pathLine} />
-          <Text style={styles.emptyTitle}>{t('review.noReviews')}</Text>
-          <Text style={styles.emptySubtitle}>
-            {t('review.completeLessonsFirst')}
-          </Text>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.backButtonText}>{t('review.backToLearning')}</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
+    return lessons
+      .filter((l) => isLessonCompleted(l.id))
+      .map((lesson) => ({ lesson, battle: getBattleById(lesson.battleId), wrong: progress.wrongAnswers[lesson.battleId] || 0 }))
+      .sort((a, b) => b.wrong - a.wrong)
+      .slice(0, 8);
+  }, [lessons, isLessonCompleted, getBattleById, progress.wrongAnswers]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Stack.Screen options={{ title: t('review.title') }} />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('review.practiceMakesPerfect')}</Text>
-        <Text style={styles.headerSubtitle}>
-          {t('review.reviewBattles')}
-        </Text>
-
-        <View style={styles.rewardBanner}>
-          <Heart size={20} color={colors.hearts} fill={colors.hearts} />
-          <Text style={styles.rewardText}>
-            {t('review.earnHeart')}
-          </Text>
-        </View>
+    <ScreenBackground>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <Pressable onPress={() => router.back()} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.back')}>
+          <ArrowLeft size={22} color={colors.text} />
+        </Pressable>
+        <Text style={[styles.title, { color: colors.text, fontSize: 22 * fontScale }]}>{t('review.title')}</Text>
+        <View style={{ width: 42 }} />
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.listContainer}>
-        {reviewLessons.map(({ lesson, wrongCount }) => {
-          const battle = getBattleById(lesson.battleId);
-          const isReviewed = completedReviews.includes(lesson.id);
-          
-          return (
-            <View key={lesson.id} style={styles.reviewCard}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardIcon}>
-                  <Text style={styles.cardIconText}>
-                    {battle?.era === 'ancient' ? '🏛️' :
-                     battle?.era === 'medieval' ? '⚔️' :
-                     battle?.era === 'napoleonic' ? '👑' :
-                     battle?.era === 'ww1' ? '💣' :
-                     battle?.era === 'ww2' ? '✈️' : '🎖️'}
-                  </Text>
-                </View>
-                <View style={styles.cardInfo}>
-                  <Text style={styles.cardTitle}>{lesson.title}</Text>
-                  <Text style={styles.cardSubtitle}>{battle?.title}</Text>
-                </View>
-                {wrongCount > 0 && (
-                  <View style={styles.needsPractice}>
-                    <Text style={styles.needsPracticeText}>{t('review.needsPractice')}</Text>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  style={[
-                    styles.quickReviewButton,
-                    isReviewed && styles.quickReviewButtonDone,
-                  ]}
-                  onPress={() => handleQuickReview(lesson.id)}
-                  disabled={isReviewed}
-                  activeOpacity={0.7}
-                >
-                  {isReviewed ? (
-                    <>
-                      <Check size={16} color={colors.success} />
-                      <Text style={styles.quickReviewTextDone}>{t('review.reviewed')}</Text>
-                    </>
-                  ) : (
-                    <>
-                      <Star size={16} color={colors.secondary} />
-                      <Text style={styles.quickReviewText}>{t('review.quickReview')}</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.fullLessonButton}
-                  onPress={() => handleReviewLesson(lesson.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.fullLessonText}>{t('review.fullLesson')}</Text>
-                  <ChevronRight size={16} color={colors.primary} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        })}
-      </ScrollView>
-
-      {completedReviews.length > 0 && (
-        <View style={styles.footer}>
-          <View style={styles.completedBanner}>
-            <Check size={20} color={colors.success} />
-            <Text style={styles.completedText}>
-              {completedReviews.length !== 1
-                ? t('review.reviewsCompletedPlural', { count: completedReviews.length })
-                : t('review.reviewsCompleted', { count: completedReviews.length })}
-            </Text>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 40 + insets.bottom }]} showsVerticalScrollIndicator={false}>
+        {reviewLessons.length === 0 ? (
+          <View style={styles.empty}>
+            <BookOpen size={56} color={colors.textMuted} />
+            <Text style={[styles.emptyTitle, { color: colors.text, fontSize: 20 * fontScale }]}>{t('review.noReviews')}</Text>
+            <Text style={[styles.emptyBody, { color: colors.textSecondary, fontSize: 14 * fontScale }]}>{t('review.completeLessonsFirst')}</Text>
+            <ChunkyButton label={t('review.backToLearning')} variant="brass" onPress={() => router.back()} style={{ marginTop: 12 }} />
           </View>
-        </View>
-      )}
-    </SafeAreaView>
+        ) : (
+          <>
+            <Text style={[styles.lead, { color: colors.text, fontSize: 18 * fontScale }]}>{t('review.practiceMakesPerfect')}</Text>
+            <Text style={[styles.sub, { color: colors.textSecondary, fontSize: 14 * fontScale }]}>{t('review.reviewBattles')}</Text>
+            <View style={{ gap: 10, marginTop: 8 }}>
+              {reviewLessons.map(({ lesson, battle, wrong }) => (
+                <Pressable
+                  key={lesson.id}
+                  onPress={() => {
+                    if (haptics) tap();
+                    router.push(`/lesson/${lesson.id}`);
+                  }}
+                  accessibilityRole="button"
+                  style={[styles.card, { backgroundColor: colors.surface, borderColor: wrong > 0 ? colors.error : colors.surfaceBorder }]}
+                >
+                  <View style={[styles.thumb, { borderColor: colors.surfaceBorder }]}>
+                    {battle ? <Image source={getBattleImage(battle.id)} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+                  </View>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={[styles.cardTitle, { color: colors.text, fontSize: 15 * fontScale }]} numberOfLines={1}>{battle?.title ?? lesson.title}</Text>
+                    <Text style={[styles.cardSub, { color: colors.textSecondary, fontSize: 12 * fontScale }]} numberOfLines={1}>{lesson.title}</Text>
+                    {wrong > 0 ? (
+                      <View style={styles.wrongRow}>
+                        <AlertTriangle size={12} color={colors.error} />
+                        <Text style={[styles.wrongText, { color: colors.error, fontSize: 12 * fontScale }]}>{t('review.mistakes', { count: wrong })}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <ChevronRight size={18} color={colors.textMuted} />
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.cardBorder,
-    backgroundColor: colors.card,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: colors.text,
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 16,
-  },
-  rewardBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.hearts + '15',
-    padding: 12,
-    borderRadius: 12,
-  },
-  rewardText: {
-    fontSize: 14,
-    color: colors.text,
-    fontWeight: '500' as const,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  listContainer: {
-    padding: 20,
-    gap: 16,
-  },
-  reviewCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    overflow: 'hidden',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 12,
-  },
-  cardIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.backgroundDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardIconText: {
-    fontSize: 24,
-  },
-  cardInfo: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.text,
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  needsPractice: {
-    backgroundColor: colors.warning + '20',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  needsPracticeText: {
-    fontSize: 11,
-    color: colors.warning,
-    fontWeight: '600' as const,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: colors.cardBorder,
-  },
-  quickReviewButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    borderRightWidth: 1,
-    borderRightColor: colors.cardBorder,
-  },
-  quickReviewButtonDone: {
-    backgroundColor: colors.successLight,
-  },
-  quickReviewText: {
-    fontSize: 14,
-    color: colors.secondary,
-    fontWeight: '500' as const,
-  },
-  quickReviewTextDone: {
-    fontSize: 14,
-    color: colors.success,
-    fontWeight: '500' as const,
-  },
-  fullLessonButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 14,
-  },
-  fullLessonText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '500' as const,
-  },
-  footer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.cardBorder,
-    backgroundColor: colors.card,
-  },
-  completedBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.successLight,
-    padding: 12,
-    borderRadius: 12,
-  },
-  completedText: {
-    fontSize: 14,
-    color: colors.success,
-    fontWeight: '600' as const,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: colors.text,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  backButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.textInverse,
-  },
+const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
+  iconBtn: { width: 42, height: 42, borderRadius: 21, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  title: { fontFamily: fonts.display },
+  content: { paddingHorizontal: 20, paddingTop: 8, gap: 6 },
+  lead: { fontFamily: fonts.display },
+  sub: { fontFamily: fonts.bodySemi, lineHeight: 20 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radius.lg, borderWidth: 1.5 },
+  thumb: { width: 64, height: 64, borderRadius: radius.sm, overflow: 'hidden', borderWidth: 1, backgroundColor: '#26324A' },
+  cardTitle: { fontFamily: fonts.bodyBlack },
+  cardSub: { fontFamily: fonts.bodySemi },
+  wrongRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  wrongText: { fontFamily: fonts.bodyBold },
+  empty: { alignItems: 'center', paddingTop: 60, gap: 10, paddingHorizontal: 12 },
+  emptyTitle: { fontFamily: fonts.display, textAlign: 'center' },
+  emptyBody: { fontFamily: fonts.bodySemi, textAlign: 'center', lineHeight: 20 },
 });

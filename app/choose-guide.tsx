@@ -1,369 +1,110 @@
-import { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Animated,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { useRouter, Stack } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { ChevronRight, ChevronLeft, Check } from 'lucide-react-native';
+import { X, Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
-import { mascots } from '@/mocks/mascots';
-import { Mascot } from '@/types';
-
-const { width } = Dimensions.get('window');
+import { getMascotImage } from '@/mocks/images';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { ChunkyButton } from '@/components/ui/ChunkyButton';
+import { fonts, radius } from '@/constants/theme';
+import { tap, success } from '@/utils/haptics';
 
 export default function ChooseGuideScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { progress, updateProgress } = useUserProgress();
-  const { colors } = useSettings();
-  const { mascots: translatedMascots } = useContent();
-  const [selectedMascot, setSelectedMascot] = useState<Mascot | null>(
-    mascots.find(m => m.id === progress.selectedMascotId) || null
-  );
+  const { colors, fontScale, haptics } = useSettings();
+  const { mascots } = useContent();
+  const [selected, setSelected] = useState(progress.selectedMascotId);
 
-  const headerAnim = useRef(new Animated.Value(0)).current;
-  const cardAnims = useRef(mascots.map(() => new Animated.Value(0))).current;
-  const buttonAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.timing(headerAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-
-    cardAnims.forEach((anim, index) => {
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 400,
-        delay: 200 + index * 100,
-        useNativeDriver: true,
-      }).start();
-    });
-
-    Animated.timing(buttonAnim, {
-      toValue: 1,
-      duration: 400,
-      delay: 700,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.03,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  const handleSelect = () => {
-    if (selectedMascot) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      updateProgress({ selectedMascotId: selectedMascot.id });
-      router.back();
-    }
+  const save = () => {
+    if (haptics) success();
+    updateProgress({ selectedMascotId: selected });
+    router.back();
   };
 
-  const hasChanged = selectedMascot?.id !== progress.selectedMascotId;
-
-  const styles = createStyles(colors);
-
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: '',
-          headerStyle: { backgroundColor: colors.background },
-          headerShadowVisible: false,
-          headerTintColor: colors.text,
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-              <ChevronLeft size={28} color={colors.text} />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-
-      <View style={styles.content}>
-        <Animated.View
-          style={[
-            styles.headerSection,
-            {
-              opacity: headerAnim,
-              transform: [
-                {
-                  translateY: headerAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-20, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <Text style={styles.title}>{t('chooseGuide.title')}</Text>
-          <Text style={styles.subtitle}>{t('chooseGuide.subtitle')}</Text>
-        </Animated.View>
-
-        <View style={styles.mascotGrid}>
-          {translatedMascots.map((mascot, index) => {
-            const isSelected = selectedMascot?.id === mascot.id;
-            return (
-              <Animated.View
-                key={mascot.id}
-                style={[
-                  {
-                    opacity: cardAnims[index],
-                    transform: [
-                      {
-                        translateY: cardAnims[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [40, 0],
-                        }),
-                      },
-                      { scale: isSelected ? pulseAnim : 1 },
-                    ],
-                  },
-                ]}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.mascotCard,
-                    isSelected && styles.mascotCardSelected,
-                  ]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    setSelectedMascot(mascot);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  {isSelected && (
-                    <View style={styles.selectedBadge}>
-                      <Check size={14} color="#FFFFFF" strokeWidth={3} />
-                    </View>
-                  )}
-                  <View
-                    style={[
-                      styles.mascotImageContainer,
-                      isSelected && styles.mascotImageContainerSelected,
-                    ]}
-                  >
-                    <Image
-                      source={{ uri: mascot.avatar }}
-                      style={styles.mascotImage}
-                      contentFit="cover"
-                    />
-                  </View>
-                  <Text
-                    style={[
-                      styles.mascotName,
-                      isSelected && styles.mascotNameSelected,
-                    ]}
-                  >
-                    {mascot.name}
-                  </Text>
-                  <Text style={styles.mascotDescription} numberOfLines={2}>
-                    {mascot.description}
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            );
-          })}
-        </View>
-
-        <Animated.View
-          style={[
-            styles.buttonContainer,
-            {
-              opacity: buttonAnim,
-              transform: [
-                {
-                  translateY: buttonAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[
-              styles.primaryButton,
-              !hasChanged && styles.primaryButtonDisabled,
-            ]}
-            onPress={handleSelect}
-            disabled={!hasChanged}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.primaryButtonText}>
-              {hasChanged ? t('chooseGuide.saveGuide') : t('chooseGuide.currentGuide')}
-            </Text>
-            {hasChanged && <ChevronRight size={20} color={colors.textInverse} />}
-          </TouchableOpacity>
-        </Animated.View>
+    <ScreenBackground>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <View style={{ width: 42 }} />
+        <Text style={[styles.title, { color: colors.text, fontSize: 22 * fontScale }]}>{t('chooseGuide.title')}</Text>
+        <Pressable onPress={() => router.back()} style={[styles.iconBtn, { backgroundColor: colors.glass, borderColor: colors.glassBorder }]} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+          <X size={22} color={colors.text} />
+        </Pressable>
       </View>
-    </SafeAreaView>
+      <Text style={[styles.sub, { color: colors.textSecondary, fontSize: 14 * fontScale }]}>{t('chooseGuide.subtitle')}</Text>
+
+      <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 120 + insets.bottom }]} showsVerticalScrollIndicator={false}>
+        {mascots.map((m) => {
+          const active = selected === m.id;
+          const isCurrent = progress.selectedMascotId === m.id;
+          return (
+            <Pressable
+              key={m.id}
+              onPress={() => {
+                if (haptics) tap();
+                setSelected(m.id);
+              }}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
+              style={[styles.card, { backgroundColor: active ? colors.option : colors.surface, borderColor: active ? colors.brass : colors.surfaceBorder }]}
+            >
+              <View style={[styles.portrait, { borderColor: active ? colors.brass : colors.surfaceBorder }]}>
+                <Image source={getMascotImage(m.id)} style={StyleSheet.absoluteFill} contentFit="cover" />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <View style={styles.nameRow}>
+                  <Text style={[styles.name, { color: active ? colors.textOnParchment : colors.text, fontSize: 17 * fontScale }]}>{m.name}</Text>
+                  {isCurrent ? (
+                    <View style={[styles.currentChip, { backgroundColor: colors.brass }]}>
+                      <Text style={styles.currentText}>{t('chooseGuide.currentGuide')}</Text>
+                    </View>
+                  ) : null}
+                </View>
+                <Text style={[styles.dates, { color: active ? colors.brassDark : colors.brassLight, fontSize: 12 * fontScale }]}>{m.dates}</Text>
+                <Text style={[styles.desc, { color: active ? colors.textOnParchmentSoft : colors.textSecondary, fontSize: 13 * fontScale }]}>{m.description}</Text>
+                <Text style={[styles.quote, { color: active ? colors.textOnParchment : colors.textSecondary, fontSize: 13 * fontScale }]}>
+                  {'“'}{m.cheer}{'”'}
+                </Text>
+              </View>
+              {active ? (
+                <View style={[styles.check, { backgroundColor: colors.brass }]}>
+                  <Check size={14} color="#2B2419" strokeWidth={3.5} />
+                </View>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16), backgroundColor: colors.bg, borderTopColor: colors.surfaceBorder }]}>
+        <ChunkyButton label={t('chooseGuide.saveGuide')} variant="ember" disabled={!selected} onPress={save} />
+      </View>
+    </ScreenBackground>
   );
 }
 
-const createStyles = (colors: any) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingBottom: 32,
-    },
-    headerSection: {
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: '700' as const,
-      color: colors.text,
-      textAlign: 'center',
-      marginBottom: 8,
-    },
-    subtitle: {
-      fontSize: 16,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    mascotGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
-      justifyContent: 'center',
-      flex: 1,
-      alignContent: 'flex-start',
-    },
-    mascotCard: {
-      width: (width - 52) / 2,
-      backgroundColor: colors.card,
-      borderRadius: 20,
-      borderWidth: 2,
-      borderColor: colors.secondary,
-      padding: 16,
-      alignItems: 'center',
-      position: 'relative',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    mascotCardSelected: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryLight,
-      shadowColor: colors.primary,
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
-      elevation: 6,
-    },
-    selectedBadge: {
-      position: 'absolute',
-      top: -8,
-      right: -8,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 3,
-      borderColor: colors.card,
-      zIndex: 10,
-    },
-    mascotImageContainer: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      backgroundColor: colors.secondaryLight,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 12,
-      borderWidth: 3,
-      borderColor: colors.secondary,
-      overflow: 'hidden',
-    },
-    mascotImageContainerSelected: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryLight + '30',
-    },
-    mascotImage: {
-      width: '100%',
-      height: '100%',
-      borderRadius: 36,
-    },
-    mascotName: {
-      fontSize: 15,
-      fontWeight: '700' as const,
-      color: colors.text,
-      marginBottom: 4,
-      textAlign: 'center',
-    },
-    mascotNameSelected: {
-      color: colors.primary,
-    },
-    mascotDescription: {
-      fontSize: 12,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 16,
-    },
-    buttonContainer: {
-      marginTop: 'auto',
-    },
-    primaryButton: {
-      backgroundColor: colors.primary,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 18,
-      paddingHorizontal: 32,
-      borderRadius: 16,
-      gap: 8,
-      shadowColor: colors.primaryDark,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 6,
-      elevation: 6,
-      borderBottomWidth: 4,
-      borderBottomColor: colors.primaryDark,
-    },
-    primaryButtonDisabled: {
-      backgroundColor: colors.pathLine,
-      shadowOpacity: 0,
-      borderBottomColor: colors.textLight,
-    },
-    primaryButtonText: {
-      color: colors.textInverse,
-      fontSize: 18,
-      fontWeight: '700' as const,
-    },
-  });
+const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 4 },
+  iconBtn: { width: 42, height: 42, borderRadius: 21, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  title: { fontFamily: fonts.display },
+  sub: { fontFamily: fonts.bodySemi, textAlign: 'center', paddingHorizontal: 24, marginBottom: 12 },
+  list: { paddingHorizontal: 20, gap: 12 },
+  card: { flexDirection: 'row', gap: 14, padding: 14, borderRadius: radius.lg, borderWidth: 2 },
+  portrait: { width: 84, height: 84, borderRadius: 42, borderWidth: 3, overflow: 'hidden', backgroundColor: '#26324A' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  name: { fontFamily: fonts.bodyBlack },
+  currentChip: { paddingHorizontal: 8, height: 20, borderRadius: 10, justifyContent: 'center' },
+  currentText: { fontFamily: fonts.bodyBlack, fontSize: 10, color: '#2B2419' },
+  dates: { fontFamily: fonts.bodyBold, letterSpacing: 0.4 },
+  desc: { fontFamily: fonts.bodySemi, lineHeight: 18 },
+  quote: { fontFamily: fonts.bodyBold, fontStyle: 'italic', marginTop: 4 },
+  check: { position: 'absolute', top: 10, right: 10, width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 14, borderTopWidth: 1 },
+});

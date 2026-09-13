@@ -1,453 +1,265 @@
-import { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  ScrollView,
-} from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
-import { Star, Flame, ArrowRight } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Star, Flame, Target, BookOpen, Trophy } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
-import Colors from '@/constants/colors';
+import { getBattleImage } from '@/mocks/images';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { ChunkyButton } from '@/components/ui/ChunkyButton';
+import { Confetti } from '@/components/ui/Confetti';
+import { ProgressBar } from '@/components/ui/ProgressBar';
+import { fonts, radius } from '@/constants/theme';
+import { getRankProgress } from '@/utils/ranks';
+import { success } from '@/utils/haptics';
 
-const battleImages: Record<string, any> = {
-  'thermopylae': require('@/assets/images/battles/thermopylae.png'),
-  'marathon': require('@/assets/images/battles/marathon.png'),
-  'hastings': require('@/assets/images/battles/hastings.png'),
-  'agincourt': require('@/assets/images/battles/agincourt.png'),
-  'waterloo': require('@/assets/images/battles/waterloo.png'),
-  'austerlitz': require('@/assets/images/battles/austerlitz.png'),
-  'somme': require('@/assets/images/battles/somme.png'),
-  'stalingrad': require('@/assets/images/battles/stalingrad.png'),
-  'dday': require('@/assets/images/battles/dday.png'),
-  'gettysburg': require('@/assets/images/battles/gettysburg.png'),
-  'yorktown': require('@/assets/images/battles/yorktown.png'),
-  'alamo': require('@/assets/images/battles/alamo.png'),
-  'puebla': require('@/assets/images/battles/puebla.png'),
-  'ayacucho': require('@/assets/images/battles/ayacucho.png'),
-  'gaugamela': require('@/assets/images/battles/gaugamela.png'),
-  'sekigahara': require('@/assets/images/battles/sekigahara.png'),
-  'red-cliffs': require('@/assets/images/battles/red-cliffs.png'),
-  'panipat-first': require('@/assets/images/battles/panipat-first.png'),
-  'tsushima': require('@/assets/images/battles/tsushima.png'),
-  'midway': require('@/assets/images/battles/midway.png'),
-  'zama': require('@/assets/images/battles/zama.png'),
-  'el-alamein': require('@/assets/images/battles/el-alamein.png'),
-  'isandlwana': require('@/assets/images/battles/isandlwana.png'),
-  'adwa': require('@/assets/images/battles/adwa.png'),
-  'cannae': require('@/assets/images/battles/cannae.png'),
-  'verdun': require('@/assets/images/battles/verdun.png'),
-  'kursk': require('@/assets/images/battles/kursk.png'),
-  'tours': require('@/assets/images/battles/tours.png'),
-  'gallipoli': require('@/assets/images/battles/gallipoli.png'),
-  'lepanto': require('@/assets/images/battles/lepanto.png'),
-  'borodino': require('@/assets/images/battles/borodino.png'),
-  'trafalgar': require('@/assets/images/battles/trafalgar.png'),
-  'vienna-1683': require('@/assets/images/battles/vienna-1683.png'),
-  'plassey': require('@/assets/images/battles/plassey.png'),
-  'singapore': require('@/assets/images/battles/singapore.png'),
-  'dien-bien-phu': require('@/assets/images/battles/dien-bien-phu.png'),
-  'changping': require('@/assets/images/battles/changping.png'),
-  'omdurman': require('@/assets/images/battles/omdurman.png'),
-  'carthage-destruction': require('@/assets/images/battles/carthage-destruction.png'),
-  'tobruk': require('@/assets/images/battles/tobruk.png'),
-  'saratoga': require('@/assets/images/battles/saratoga.png'),
-  'chacabuco': require('@/assets/images/battles/chacabuco.png'),
-  'new-orleans': require('@/assets/images/battles/new-orleans.png'),
-  'boyaca': require('@/assets/images/battles/boyaca.png'),
-  'rorkes-drift': require('@/assets/images/battles/rorkes-drift.png'),
-  'iwo-jima': require('@/assets/images/battles/iwo-jima.png'),
-  'marne': require('@/assets/images/battles/marne.png'),
-  'passchendaele': require('@/assets/images/battles/passchendaele.png'),
-  'bulge': require('@/assets/images/battles/bulge.png'),
-  'buena-vista': require('@/assets/images/battles/buena-vista.png'),
-  'talas': require('@/assets/images/battles/talas.png'),
-  'constantinople-1453': require('@/assets/images/battles/constantinople-1453.png'),
-  'nagashino': require('@/assets/images/battles/nagashino.png'),
-  'myeongnyang': require('@/assets/images/battles/myeongnyang.png'),
-  'kohima': require('@/assets/images/battles/kohima.png'),
-  'bach-dang': require('@/assets/images/battles/bach-dang.png'),
-  'panipat-third': require('@/assets/images/battles/panipat-third.png'),
-  'pyramids': require('@/assets/images/battles/pyramids.png'),
-  'khartoum': require('@/assets/images/battles/khartoum.png'),
-  'tangier': require('@/assets/images/battles/tangier.png'),
-  'kairouan': require('@/assets/images/battles/kairouan.png'),
-  'tenochtitlan': require('@/assets/images/battles/tenochtitlan.png'),
-  'cajamarca': require('@/assets/images/battles/cajamarca.png'),
-  'san-juan-hill': require('@/assets/images/battles/san-juan-hill.png'),
-  'falklands': require('@/assets/images/battles/falklands.png'),
-  'chapultepec': require('@/assets/images/battles/chapultepec.png'),
-  'carabobo': require('@/assets/images/battles/carabobo.png'),
-};
+const PERFECT_BONUS = 10;
+const comboBonusFor = (best: number) => (best >= 5 ? 10 : best >= 3 ? 5 : 0);
+
+function useCountUp(target: number, duration = 900, delay = 300, enabled = true) {
+  const [value, setValue] = useState(enabled ? 0 : target);
+  useEffect(() => {
+    if (!enabled) {
+      setValue(target);
+      return;
+    }
+    let raf: ReturnType<typeof setTimeout>;
+    const start = Date.now() + delay;
+    const tick = () => {
+      const now = Date.now();
+      if (now < start) {
+        raf = setTimeout(tick, 16);
+        return;
+      }
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(target * eased));
+      if (p < 1) raf = setTimeout(tick, 16);
+    };
+    tick();
+    return () => clearTimeout(raf);
+  }, [target, duration, delay, enabled]);
+  return value;
+}
 
 export default function LessonCompleteScreen() {
-  const { lessonId, correctAnswers, totalSteps, xpReward } = useLocalSearchParams<{
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const params = useLocalSearchParams<{
     lessonId: string;
     correctAnswers: string;
     totalSteps: string;
     xpReward: string;
+    bestCombo: string;
   }>();
-  
-  const router = useRouter();
-  const { t } = useTranslation();
-  const { completeLesson, progress } = useUserProgress();
-  const { getLessonById, getBattleById, mascots: translatedMascots } = useContent();
-  const mascot = translatedMascots.find(m => m.id === progress.selectedMascotId);
+  const { completeLesson, progress, claimableQuestCount } = useUserProgress();
+  const { colors, fontScale, haptics, reducedMotion } = useSettings();
+  const { getLessonById, getBattleById } = useContent();
 
-  const lesson = getLessonById(lessonId || '');
+  const lesson = getLessonById(params.lessonId || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
-  const correct = parseInt(correctAnswers || '0', 10);
-  const total = parseInt(totalSteps || '1', 10);
-  const xp = parseInt(xpReward || '0', 10);
+  const correct = parseInt(params.correctAnswers || '0', 10);
+  const total = Math.max(1, parseInt(params.totalSteps || '1', 10));
+  const baseXp = parseInt(params.xpReward || '0', 10);
+  const bestCombo = parseInt(params.bestCombo || '0', 10);
   const isPerfect = correct === total;
-  const bonusXp = isPerfect ? Math.round(xp * 0.5) : 0;
-  const totalXp = xp + bonusXp;
+  const accuracy = Math.round((correct / total) * 100);
+  const perfectBonus = isPerfect ? PERFECT_BONUS : 0;
+  const comboBonus = comboBonusFor(bestCombo);
+  const totalXp = baseXp + perfectBonus + comboBonus;
 
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const starsAnim = useRef([
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-  ]).current;
+  const wasNewBattle = useMemo(
+    () => (battle ? !progress.studiedBattles.includes(battle.id) : false),
+    // Evaluate once, before completeLesson mutates progress.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  const xpBefore = useRef(progress.totalXp).current;
+  const committed = useRef(false);
 
   useEffect(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    if (lesson) {
-      completeLesson({
-        lessonId: lesson.id,
-        correctAnswers: correct,
-        totalSteps: total,
-        xpEarned: totalXp,
-        isPerfect,
-      });
-    }
-
-    Animated.sequence([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    starsAnim.forEach((anim, index) => {
-      setTimeout(() => {
-        Animated.spring(anim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 80,
-          friction: 6,
-        }).start();
-      }, 300 + index * 150);
+    if (committed.current || !lesson || !battle) return;
+    committed.current = true;
+    completeLesson({
+      lessonId: lesson.id,
+      battleId: battle.id,
+      correctAnswers: correct,
+      totalSteps: total,
+      xpEarned: totalXp,
+      isPerfect,
+      bestCombo,
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (haptics) success();
+  }, [lesson, battle, completeLesson, correct, total, totalXp, isPerfect, bestCombo, haptics]);
 
-  const starCount = isPerfect ? 3 : correct >= total * 0.7 ? 2 : 1;
+  const xpShown = useCountUp(totalXp, 900, 500, !reducedMotion);
+  const accShown = useCountUp(accuracy, 900, 700, !reducedMotion);
 
-  const handleContinue = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace('/(tabs)/(home)/learn');
-  };
+  const cardAnim = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+  const titleAnim = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+  const rowAnim = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
 
-  const battleImage = battle ? battleImages[battle.id] || null : null;
+  useEffect(() => {
+    if (reducedMotion) return;
+    Animated.sequence([
+      Animated.spring(titleAnim, { toValue: 1, useNativeDriver: true, speed: 10, bounciness: 10 }),
+      Animated.timing(cardAnim, { toValue: 1, duration: 600, easing: Easing.out(Easing.back(1.4)), useNativeDriver: true }),
+      Animated.spring(rowAnim, { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 6 }),
+    ]).start();
+  }, [titleAnim, cardAnim, rowAnim, reducedMotion]);
+
+  const rankAfter = getRankProgress(xpBefore + totalXp);
+  const rankBefore = getRankProgress(xpBefore);
+  const rankedUp = rankAfter.index > rankBefore.index;
+  const streak = progress.currentStreak;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <Animated.View style={[styles.trophyContainer, { transform: [{ scale: scaleAnim }] }]}>
-            <View style={styles.trophy}>
-              {mascot ? (
-                <Image
-                  source={{ uri: mascot.avatar }}
-                  style={styles.mascotCheerImage}
-                  contentFit="cover"
-                />
-              ) : (
-                <Text style={styles.cheerEmoji}>🎉</Text>
-              )}
-            </View>
-          </Animated.View>
+    <ScreenBackground image={battle ? getBattleImage(battle.id) : undefined} imageHeight={360} topography={false}>
+      <Confetti run={!reducedMotion} count={isPerfect ? 90 : 60} />
+      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <Animated.View
+          style={{
+            alignItems: 'center',
+            opacity: titleAnim,
+            transform: [{ scale: titleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }],
+          }}
+        >
+          <Trophy size={30} color={colors.brassLight} />
+          <Text style={[styles.title, { color: colors.brassLight, fontSize: (isPerfect ? 34 : 40) * fontScale }]}>
+            {isPerfect ? t('lessonComplete.perfect') : t('lessonComplete.complete')}
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text, fontSize: 15 * fontScale }]}>{lesson?.title}</Text>
+        </Animated.View>
 
-          <View style={styles.starsContainer}>
-            {[0, 1, 2].map((index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.starWrapper,
-                  {
-                    opacity: starsAnim[index],
-                    transform: [{ scale: starsAnim[index] }],
-                  },
-                ]}
-              >
-                <Star
-                  size={40}
-                  color={index < starCount ? Colors.xp : Colors.pathLine}
-                  fill={index < starCount ? Colors.xp : 'transparent'}
-                />
-              </Animated.View>
-            ))}
+        {/* Battle card */}
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              borderColor: colors.brass,
+              backgroundColor: colors.bgRaised,
+              opacity: cardAnim,
+              transform: [
+                { perspective: 900 },
+                { rotateY: cardAnim.interpolate({ inputRange: [0, 1], outputRange: ['90deg', '0deg'] }) },
+                { scale: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) },
+              ],
+            },
+          ]}
+        >
+          {battle ? <Image source={getBattleImage(battle.id)} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+          <LinearGradient colors={['rgba(15,20,32,0)', 'rgba(15,20,32,0.9)']} style={StyleSheet.absoluteFill} />
+          <View style={styles.cardBody}>
+            {wasNewBattle ? (
+              <View style={[styles.newChip, { backgroundColor: colors.brass }]}>
+                <BookOpen size={12} color="#2B2419" />
+                <Text style={styles.newChipText}>{t('lessonComplete.addedToCodex')}</Text>
+              </View>
+            ) : null}
+            <Text style={[styles.cardTitle, { fontSize: 20 * fontScale }]} numberOfLines={2}>
+              {battle?.title}
+            </Text>
+            <Text style={[styles.cardDate, { fontSize: 12 * fontScale }]}>{battle?.date}</Text>
+          </View>
+        </Animated.View>
+
+        {/* Stats */}
+        <Animated.View
+          style={{
+            gap: 12,
+            opacity: rowAnim,
+            transform: [{ translateY: rowAnim.interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }],
+          }}
+        >
+          <View style={styles.statsRow}>
+            <StatTile icon={<Star size={18} color={colors.xp} fill={colors.xp} />} value={`+${xpShown}`} label={t('lessonComplete.xpEarned')} color={colors.xp} />
+            <StatTile icon={<Target size={18} color={colors.success} />} value={`${accShown}%`} label={t('lessonComplete.accuracy')} color={colors.success} />
+            <StatTile icon={<Flame size={18} color={colors.streak} fill={colors.streak} />} value={String(streak)} label={t('lessonComplete.dayStreak')} color={colors.streak} />
           </View>
 
-          <Animated.View style={[styles.titleContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.title}>
-              {isPerfect ? t('lessonComplete.perfect') : t('lessonComplete.complete')}
+          {(perfectBonus > 0 || comboBonus > 0) ? (
+            <View style={styles.bonusRow}>
+              {perfectBonus > 0 ? <Bonus label={t('lessonComplete.perfectBonus')} value={perfectBonus} /> : null}
+              {comboBonus > 0 ? <Bonus label={t('lessonComplete.comboBonus')} value={comboBonus} /> : null}
+            </View>
+          ) : null}
+
+          <View style={[styles.rankCard, { backgroundColor: colors.surface, borderColor: rankedUp ? colors.brass : colors.surfaceBorder }]}>
+            <View style={styles.rankRow}>
+              <Text style={[styles.rankName, { color: colors.brass, fontSize: 15 * fontScale }]}>
+                {t(`profile.ranks.${rankAfter.rank.id}`)}
+              </Text>
+              <Text style={[styles.rankNext, { color: colors.textSecondary, fontSize: 12 * fontScale }]}>
+                {rankAfter.next
+                  ? t('lessonComplete.rankProgress', { xp: rankAfter.xpToNext, rank: t(`profile.ranks.${rankAfter.next.id}`) })
+                  : t('lessonComplete.maxRank')}
+              </Text>
+            </View>
+            <ProgressBar value={rankAfter.progress} height={10} />
+          </View>
+
+          {claimableQuestCount > 0 ? (
+            <Text style={[styles.questHint, { color: colors.brassLight, fontSize: 13 * fontScale }]}>
+              {t('lessonComplete.questReady', { count: claimableQuestCount })}
             </Text>
-            <Text style={styles.lessonTitle}>{lesson?.title}</Text>
-          </Animated.View>
+          ) : null}
+        </Animated.View>
 
-          {battle && (
-            <Animated.View style={[styles.battleMapContainer, { opacity: fadeAnim }]}>
-              {battleImage && (
-                <Image
-                  source={battleImage}
-                  style={styles.battleMap}
-                  contentFit="cover"
-                />
-              )}
-              <View style={styles.battleInfoCard}>
-                <Text style={styles.battleName}>{battle.title}</Text>
-                <View style={styles.battleMeta}>
-                  <Text style={styles.battleDate}>📅 {battle.date}</Text>
-                  <Text style={styles.battleRegion}>📍 {battle.region}</Text>
-                </View>
-                <Text style={styles.battleSummary}>
-                  {battle.shortSummary}
-                </Text>
-              </View>
-            </Animated.View>
-          )}
-
-          <Animated.View style={[styles.statsContainer, { opacity: fadeAnim }]}>
-            <View style={styles.statCard}>
-              <Star size={24} color={Colors.xp} fill={Colors.xp} />
-              <Text style={styles.statValue}>+{totalXp}</Text>
-              <Text style={styles.statLabel}>{t('lessonComplete.xpEarned')}</Text>
-              {bonusXp > 0 && (
-                <Text style={styles.bonusText}>+{bonusXp} {t('lessonComplete.bonus')}</Text>
-              )}
-            </View>
-
-            <View style={styles.statCard}>
-              <View style={styles.accuracyCircle}>
-                <Text style={styles.accuracyText}>
-                  {Math.round((correct / total) * 100)}%
-                </Text>
-              </View>
-              <Text style={styles.statLabel}>{t('lessonComplete.accuracy')}</Text>
-              <Text style={styles.statSubLabel}>{correct}/{total} {t('lessonComplete.correct')}</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Flame size={24} color={Colors.streak} />
-              <Text style={styles.statValue}>{progress.currentStreak}</Text>
-              <Text style={styles.statLabel}>{t('lessonComplete.dayStreak')}</Text>
-            </View>
-          </Animated.View>
-        </View>
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.continueButtonText}>{t('lessonComplete.continue')}</Text>
-          <ArrowRight size={20} color={Colors.textInverse} />
-        </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        <ChunkyButton label={t('lessonComplete.continue')} variant="ember" onPress={() => router.replace('/(tabs)/(home)/learn')} />
       </View>
-    </SafeAreaView>
+    </ScreenBackground>
+  );
+}
+
+function StatTile({ icon, value, label, color }: { icon: React.ReactNode; value: string; label: string; color: string }) {
+  const { colors, fontScale } = useSettings();
+  return (
+    <View style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
+      {icon}
+      <Text style={[styles.tileValue, { color, fontSize: 22 * fontScale }]}>{value}</Text>
+      <Text style={[styles.tileLabel, { color: colors.textSecondary, fontSize: 11 * fontScale }]}>{label}</Text>
+    </View>
+  );
+}
+
+function Bonus({ label, value }: { label: string; value: number }) {
+  const { colors } = useSettings();
+  return (
+    <View style={[styles.bonus, { borderColor: colors.brass }]}>
+      <Text style={[styles.bonusText, { color: colors.brassLight }]}>{label}</Text>
+      <Text style={[styles.bonusValue, { color: colors.brassLight }]}>+{value}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  trophyContainer: {
-    marginBottom: 20,
-  },
-  trophy: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.secondary + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: Colors.secondary,
-    overflow: 'hidden',
-  },
-  mascotCheerImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-  },
-  cheerEmoji: {
-    fontSize: 64,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
-  },
-  starWrapper: {
-    padding: 4,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  lessonTitle: {
-    fontSize: 18,
-    color: Colors.textSecondary,
-  },
-  battleMapContainer: {
-    width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 24,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  battleMap: {
-    width: '100%',
-    height: 160,
-  },
-  battleInfoCard: {
-    padding: 14,
-  },
-  battleName: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 6,
-  },
-  battleMeta: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 6,
-  },
-  battleDate: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  battleRegion: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  battleSummary: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 18,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 4,
-  },
-  statSubLabel: {
-    fontSize: 11,
-    color: Colors.textLight,
-  },
-  bonusText: {
-    fontSize: 11,
-    color: Colors.success,
-    fontWeight: '600' as const,
-    marginTop: 2,
-  },
-  accuracyCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.primary + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: Colors.primary,
-  },
-  accuracyText: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-    color: Colors.primary,
-  },
-  footer: {
-    padding: 20,
-  },
-  continueButton: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    shadowColor: Colors.primaryDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-    borderBottomWidth: 4,
-    borderBottomColor: Colors.primaryDark,
-  },
-  continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: Colors.textInverse,
-  },
+  container: { flex: 1, paddingHorizontal: 20, gap: 18 },
+  title: { fontFamily: fonts.displayBlack, textAlign: 'center', marginTop: 6, letterSpacing: 1 },
+  subtitle: { fontFamily: fonts.bodyBold, textAlign: 'center', marginTop: 2 },
+  card: { height: 170, borderRadius: radius.lg, borderWidth: 2, overflow: 'hidden', justifyContent: 'flex-end' },
+  cardBody: { padding: 16, gap: 4 },
+  newChip: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 10, height: 24, borderRadius: 12, marginBottom: 6 },
+  newChipText: { fontFamily: fonts.bodyBlack, fontSize: 11, color: '#2B2419' },
+  cardTitle: { fontFamily: fonts.display, color: '#F4E8CF' },
+  cardDate: { fontFamily: fonts.bodySemi, color: 'rgba(244,232,207,0.75)' },
+  statsRow: { flexDirection: 'row', gap: 10 },
+  tile: { flex: 1, alignItems: 'center', gap: 4, paddingVertical: 12, borderRadius: radius.md, borderWidth: 1 },
+  tileValue: { fontFamily: fonts.display, fontVariant: ['tabular-nums'] },
+  tileLabel: { fontFamily: fonts.bodyBold, textTransform: 'uppercase', letterSpacing: 0.6 },
+  bonusRow: { flexDirection: 'row', gap: 10, justifyContent: 'center' },
+  bonus: { flexDirection: 'row', gap: 8, alignItems: 'center', borderWidth: 1.5, borderRadius: 999, paddingHorizontal: 12, height: 30 },
+  bonusText: { fontFamily: fonts.bodyBold, fontSize: 12 },
+  bonusValue: { fontFamily: fonts.bodyBlack, fontSize: 13 },
+  rankCard: { borderRadius: radius.md, borderWidth: 1, padding: 14, gap: 10 },
+  rankRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rankName: { fontFamily: fonts.display },
+  rankNext: { fontFamily: fonts.bodyBold },
+  questHint: { fontFamily: fonts.bodyBold, textAlign: 'center' },
 });

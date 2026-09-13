@@ -1,108 +1,40 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  LayoutChangeEvent,
-  ScrollView,
-  PanResponder,
-} from 'react-native';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { X, Check, MapPin, ArrowRight, GripVertical } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { X, Heart, Flame, GripVertical, MapPin, Calendar } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useContent } from '@/i18n/useContent';
-import { mascots } from '@/mocks/mascots';
-import { Step, MultiChoiceStep, MapTapStep, OrderEventsStep, MatchPairsStep, FillBlankStep, TimelineSliderStep, TwoTruthsStep, StoryCardStep } from '@/types';
-
-const { width } = Dimensions.get('window');
+import { getBattleImage, getMascotImage } from '@/mocks/images';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { ChunkyButton } from '@/components/ui/ChunkyButton';
+import { ProgressBar } from '@/components/ui/ProgressBar';
+import { Dialog } from '@/components/ui/Modal';
+import { OptionCard, OptionStatus } from '@/components/lesson/OptionCard';
+import { MapTap } from '@/components/lesson/MapTap';
+import { TimelineSlider, formatYear } from '@/components/lesson/TimelineSlider';
+import { FeedbackSheet } from '@/components/lesson/FeedbackSheet';
+import { fonts, radius } from '@/constants/theme';
+import { success, failure, warn, tap } from '@/utils/haptics';
+import {
+  Step,
+  MultiChoiceStep,
+  MapTapStep,
+  OrderEventsStep,
+  MatchPairsStep,
+  FillBlankStep,
+  TimelineSliderStep,
+  TwoTruthsStep,
+  StoryCardStep,
+} from '@/types';
 
 type FeedbackState = 'none' | 'correct' | 'wrong';
 
 const QUIZ_STARTING_HEARTS = 3;
-
-// Local battle images generated with Gemini API (nano-banana)
-// Images are stored in assets/images/battles/{battleId}.png
-const battleImages: Record<string, any> = {
-  'thermopylae': require('@/assets/images/battles/thermopylae.png'),
-  'marathon': require('@/assets/images/battles/marathon.png'),
-  'hastings': require('@/assets/images/battles/hastings.png'),
-  'agincourt': require('@/assets/images/battles/agincourt.png'),
-  'waterloo': require('@/assets/images/battles/waterloo.png'),
-  'austerlitz': require('@/assets/images/battles/austerlitz.png'),
-  'somme': require('@/assets/images/battles/somme.png'),
-  'stalingrad': require('@/assets/images/battles/stalingrad.png'),
-  'dday': require('@/assets/images/battles/dday.png'),
-  'gettysburg': require('@/assets/images/battles/gettysburg.png'),
-  'yorktown': require('@/assets/images/battles/yorktown.png'),
-  'alamo': require('@/assets/images/battles/alamo.png'),
-  'puebla': require('@/assets/images/battles/puebla.png'),
-  'ayacucho': require('@/assets/images/battles/ayacucho.png'),
-  'gaugamela': require('@/assets/images/battles/gaugamela.png'),
-  'sekigahara': require('@/assets/images/battles/sekigahara.png'),
-  'red-cliffs': require('@/assets/images/battles/red-cliffs.png'),
-  'panipat-first': require('@/assets/images/battles/panipat-first.png'),
-  'tsushima': require('@/assets/images/battles/tsushima.png'),
-  'midway': require('@/assets/images/battles/midway.png'),
-  'zama': require('@/assets/images/battles/zama.png'),
-  'el-alamein': require('@/assets/images/battles/el-alamein.png'),
-  'isandlwana': require('@/assets/images/battles/isandlwana.png'),
-  'adwa': require('@/assets/images/battles/adwa.png'),
-  'cannae': require('@/assets/images/battles/cannae.png'),
-  'verdun': require('@/assets/images/battles/verdun.png'),
-  'kursk': require('@/assets/images/battles/kursk.png'),
-  'tours': require('@/assets/images/battles/tours.png'),
-  'gallipoli': require('@/assets/images/battles/gallipoli.png'),
-  'lepanto': require('@/assets/images/battles/lepanto.png'),
-  'borodino': require('@/assets/images/battles/borodino.png'),
-  'trafalgar': require('@/assets/images/battles/trafalgar.png'),
-  'vienna-1683': require('@/assets/images/battles/vienna-1683.png'),
-  'plassey': require('@/assets/images/battles/plassey.png'),
-  'singapore': require('@/assets/images/battles/singapore.png'),
-  'dien-bien-phu': require('@/assets/images/battles/dien-bien-phu.png'),
-  'changping': require('@/assets/images/battles/changping.png'),
-  'omdurman': require('@/assets/images/battles/omdurman.png'),
-  'carthage-destruction': require('@/assets/images/battles/carthage-destruction.png'),
-  'tobruk': require('@/assets/images/battles/tobruk.png'),
-  'saratoga': require('@/assets/images/battles/saratoga.png'),
-  'chacabuco': require('@/assets/images/battles/chacabuco.png'),
-  'new-orleans': require('@/assets/images/battles/new-orleans.png'),
-  'boyaca': require('@/assets/images/battles/boyaca.png'),
-  'rorkes-drift': require('@/assets/images/battles/rorkes-drift.png'),
-  'iwo-jima': require('@/assets/images/battles/iwo-jima.png'),
-  'marne': require('@/assets/images/battles/marne.png'),
-  'passchendaele': require('@/assets/images/battles/passchendaele.png'),
-  'bulge': require('@/assets/images/battles/bulge.png'),
-  'buena-vista': require('@/assets/images/battles/buena-vista.png'),
-  'talas': require('@/assets/images/battles/talas.png'),
-  'constantinople-1453': require('@/assets/images/battles/constantinople-1453.png'),
-  'nagashino': require('@/assets/images/battles/nagashino.png'),
-  'myeongnyang': require('@/assets/images/battles/myeongnyang.png'),
-  'kohima': require('@/assets/images/battles/kohima.png'),
-  'bach-dang': require('@/assets/images/battles/bach-dang.png'),
-  'panipat-third': require('@/assets/images/battles/panipat-third.png'),
-  'pyramids': require('@/assets/images/battles/pyramids.png'),
-  'khartoum': require('@/assets/images/battles/khartoum.png'),
-  'tangier': require('@/assets/images/battles/tangier.png'),
-  'kairouan': require('@/assets/images/battles/kairouan.png'),
-  'tenochtitlan': require('@/assets/images/battles/tenochtitlan.png'),
-  'cajamarca': require('@/assets/images/battles/cajamarca.png'),
-  'san-juan-hill': require('@/assets/images/battles/san-juan-hill.png'),
-  'falklands': require('@/assets/images/battles/falklands.png'),
-  'chapultepec': require('@/assets/images/battles/chapultepec.png'),
-  'carabobo': require('@/assets/images/battles/carabobo.png'),
-};
-
-const getBattleImage = (battleId: string): any => {
-  return battleImages[battleId] || null;
-};
 
 // Deterministic shuffle so the right-hand column of a match question is
 // stable across re-renders but never in the same order as the left column.
@@ -122,7 +54,6 @@ const seededShuffle = <T,>(items: T[], seed: string): T[] => {
     const j = Math.floor(rand() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  // Guard against the shuffle landing on the original order (trivial puzzle).
   if (arr.length > 1 && arr.every((v, i) => v === items[i])) {
     arr.push(arr.shift() as T);
   }
@@ -133,64 +64,61 @@ export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { progress, recordQuestionAttempt } = useUserProgress();
-  const { colors, fontScale } = useSettings();
-  const { getLessonById, getBattleById, mascots: translatedMascots } = useContent();
+  const { colors, fontScale, haptics, reducedMotion } = useSettings();
+  const { getLessonById, getBattleById, mascots } = useContent();
 
   const lesson = getLessonById(id || '');
   const battle = lesson ? getBattleById(lesson.battleId) : null;
+  const battleImage = battle ? getBattleImage(battle.id) : undefined;
+  const mascot = mascots.find((m) => m.id === progress.selectedMascotId);
+  const mascotImage = mascot ? getMascotImage(mascot.id) : undefined;
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | number | string[] | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | number | null>(null);
   const [feedback, setFeedback] = useState<FeedbackState>('none');
   const [correctCount, setCorrectCount] = useState(0);
   const [orderedItems, setOrderedItems] = useState<string[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [sliderValue, setSliderValue] = useState<number | null>(null);
-  // Per-quiz hearts - start with 3 for each quiz
   const [quizHearts, setQuizHearts] = useState(QUIZ_STARTING_HEARTS);
+  const [outOfHearts, setOutOfHearts] = useState(false);
+  const [combo, setCombo] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [showQuit, setShowQuit] = useState(false);
 
-  // Battle image (local file)
-  const battleImage = battle ? getBattleImage(battle.id) : null;
-
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const mascotAnim = useRef(new Animated.Value(0)).current;
-  const mascotBounceAnim = useRef(new Animated.Value(0)).current;
-  const sliderWidthRef = useRef(0);
-
-  const mascot = translatedMascots.find(m => m.id === progress.selectedMascotId);
-
-  const styles = createStyles(colors, fontScale);
-
-  useEffect(() => {
-    if (lesson) {
-      Animated.timing(progressAnim, {
-        toValue: (currentStepIndex + 1) / lesson.steps.length,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [currentStepIndex, lesson, progressAnim]);
-
+  const stepAnim = useRef(new Animated.Value(1)).current;
+  const comboAnim = useRef(new Animated.Value(0)).current;
+  const heartShake = useRef(new Animated.Value(0)).current;
 
   const currentStep = lesson?.steps[currentStepIndex];
 
-  // Right-hand column for match questions, shuffled once per step.
   const shuffledRights = useMemo(() => {
     if (!currentStep || currentStep.type !== 'matchPairs') return [];
-    return seededShuffle(currentStep.data.pairs.map(p => p.right), currentStep.id);
+    return seededShuffle(currentStep.data.pairs.map((p) => p.right), currentStep.id);
   }, [currentStep]);
 
-  // "Question N of M" ignores passive story cards.
   const questionMeta = useMemo(() => {
     if (!lesson) return { current: 0, total: 0 };
-    const total = lesson.steps.filter(s => s.type !== 'storyCard').length;
-    const current = lesson.steps
-      .slice(0, currentStepIndex + 1)
-      .filter(s => s.type !== 'storyCard').length;
+    const total = lesson.steps.filter((s) => s.type !== 'storyCard').length;
+    const current = lesson.steps.slice(0, currentStepIndex + 1).filter((s) => s.type !== 'storyCard').length;
     return { current, total };
   }, [lesson, currentStepIndex]);
+
+  // Slide each new step in from the right.
+  useEffect(() => {
+    if (reducedMotion) return;
+    stepAnim.setValue(0);
+    Animated.spring(stepAnim, { toValue: 1, useNativeDriver: true, speed: 14, bounciness: 4 }).start();
+  }, [currentStepIndex, stepAnim, reducedMotion]);
+
+  useEffect(() => {
+    if (combo < 2 || reducedMotion) return;
+    comboAnim.setValue(0);
+    Animated.spring(comboAnim, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 14 }).start();
+  }, [combo, comboAnim, reducedMotion]);
 
   const resetStepState = useCallback(() => {
     setSelectedAnswer(null);
@@ -201,59 +129,38 @@ export default function LessonScreen() {
     setSliderValue(null);
   }, []);
 
-  const [outOfHearts, setOutOfHearts] = useState(false);
-
-  const showFeedback = useCallback((isCorrect: boolean) => {
-    setFeedback(isCorrect ? 'correct' : 'wrong');
-
-    mascotAnim.setValue(0);
-    mascotBounceAnim.setValue(0);
-
-    if (isCorrect) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setCorrectCount(prev => prev + 1);
-
-      Animated.parallel([
-        Animated.spring(mascotAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 80,
-          friction: 6,
-        }),
-        Animated.sequence([
-          Animated.timing(mascotBounceAnim, { toValue: -15, duration: 150, useNativeDriver: true }),
-          Animated.timing(mascotBounceAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-          Animated.timing(mascotBounceAnim, { toValue: -10, duration: 100, useNativeDriver: true }),
-          Animated.timing(mascotBounceAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
-        ]),
-      ]).start();
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      // Lose a quiz heart (per-quiz, not global)
-      setQuizHearts(prev => prev - 1);
-
-      Animated.parallel([
-        Animated.spring(mascotAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 80,
-          friction: 6,
-        }),
-        Animated.sequence([
-          Animated.timing(mascotBounceAnim, { toValue: -8, duration: 100, useNativeDriver: true }),
-          Animated.timing(mascotBounceAnim, { toValue: 0, duration: 100, useNativeDriver: true }),
-        ]),
-      ]).start();
-
-      if (quizHearts <= 1) {
-        setOutOfHearts(true);
+  const showFeedback = useCallback(
+    (isCorrect: boolean) => {
+      setFeedback(isCorrect ? 'correct' : 'wrong');
+      if (isCorrect) {
+        if (haptics) success();
+        setCorrectCount((c) => c + 1);
+        setCombo((c) => {
+          const next = c + 1;
+          setBestCombo((b) => Math.max(b, next));
+          return next;
+        });
+      } else {
+        if (haptics) failure();
+        setCombo(0);
+        setQuizHearts((h) => h - 1);
+        if (!reducedMotion) {
+          heartShake.setValue(0);
+          Animated.sequence([
+            Animated.timing(heartShake, { toValue: 1, duration: 60, useNativeDriver: true }),
+            Animated.timing(heartShake, { toValue: -1, duration: 60, useNativeDriver: true }),
+            Animated.timing(heartShake, { toValue: 1, duration: 60, useNativeDriver: true }),
+            Animated.timing(heartShake, { toValue: 0, duration: 60, useNativeDriver: true }),
+          ]).start();
+        }
+        if (quizHearts <= 1) setOutOfHearts(true);
       }
-    }
-  }, [mascotAnim, mascotBounceAnim, quizHearts]);
+    },
+    [haptics, quizHearts, heartShake, reducedMotion]
+  );
 
   const checkAnswer = useCallback(() => {
     if (!currentStep) return;
-
     let isCorrect = false;
     let userAnswerText = '';
     let correctAnswerText = '';
@@ -269,26 +176,25 @@ export default function LessonScreen() {
       case 'mapTap': {
         const step = currentStep as MapTapStep;
         isCorrect = selectedAnswer === step.data.correctRegionId;
-        userAnswerText = step.data.regions.find(r => r.id === selectedAnswer)?.name ?? '';
-        correctAnswerText = step.data.regions.find(r => r.id === step.data.correctRegionId)?.name ?? '';
+        userAnswerText = step.data.regions.find((r) => r.id === selectedAnswer)?.name ?? '';
+        correctAnswerText = step.data.regions.find((r) => r.id === step.data.correctRegionId)?.name ?? '';
         break;
       }
       case 'orderEvents': {
         const step = currentStep as OrderEventsStep;
         const sorted = [...step.data.events].sort((a, b) => a.order - b.order);
-        const correctOrder = sorted.map(e => e.id);
-        isCorrect = JSON.stringify(orderedItems) === JSON.stringify(correctOrder);
+        isCorrect = JSON.stringify(orderedItems) === JSON.stringify(sorted.map((e) => e.id));
         userAnswerText = orderedItems
-          .map((id, i) => `${i + 1}. ${step.data.events.find(e => e.id === id)?.text ?? ''}`)
+          .map((eid, i) => `${i + 1}. ${step.data.events.find((e) => e.id === eid)?.text ?? ''}`)
           .join(' | ');
         correctAnswerText = sorted.map((e, i) => `${i + 1}. ${e.text}`).join(' | ');
         break;
       }
       case 'matchPairs': {
         const step = currentStep as MatchPairsStep;
-        isCorrect = step.data.pairs.every(p => matchedPairs[p.left] === p.right);
+        isCorrect = step.data.pairs.every((p) => matchedPairs[p.left] === p.right);
         userAnswerText = Object.entries(matchedPairs).map(([l, r]) => `${l} → ${r}`).join(' | ');
-        correctAnswerText = step.data.pairs.map(p => `${p.left} → ${p.right}`).join(' | ');
+        correctAnswerText = step.data.pairs.map((p) => `${p.left} → ${p.right}`).join(' | ');
         break;
       }
       case 'fillBlank': {
@@ -304,16 +210,15 @@ export default function LessonScreen() {
         const maxYear = Number(step.data.maxYear);
         const correctYear = Number(step.data.correctYear);
         const tolerance = Number(step.data.tolerance);
-        const currentSliderValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
-        isCorrect = Math.abs(currentSliderValue - correctYear) <= tolerance;
-        const formatYear = (y: number) => (y < 0 ? `${Math.abs(y)} BC` : `${y} AD`);
-        userAnswerText = formatYear(currentSliderValue);
+        const v = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
+        isCorrect = Math.abs(v - correctYear) <= tolerance;
+        userAnswerText = formatYear(v);
         correctAnswerText = formatYear(correctYear);
         break;
       }
       case 'twoTruths': {
         const step = currentStep as TwoTruthsStep;
-        const lieIndex = step.data.statements.findIndex(s => s.isLie);
+        const lieIndex = step.data.statements.findIndex((s) => s.isLie);
         isCorrect = selectedAnswer === lieIndex;
         userAnswerText = typeof selectedAnswer === 'number' ? step.data.statements[selectedAnswer]?.text ?? '' : '';
         correctAnswerText = step.data.statements[lieIndex]?.text ?? '';
@@ -324,7 +229,6 @@ export default function LessonScreen() {
         break;
     }
 
-    // Story cards are passive — don't log them as quiz attempts.
     if (currentStep.type !== 'storyCard' && lesson && battle) {
       recordQuestionAttempt({
         lessonId: lesson.id,
@@ -338,44 +242,36 @@ export default function LessonScreen() {
         isCorrect,
       });
     }
-
     showFeedback(isCorrect);
   }, [currentStep, selectedAnswer, orderedItems, matchedPairs, sliderValue, showFeedback, lesson, battle, recordQuestionAttempt]);
 
   const handleContinue = useCallback(() => {
     if (!lesson) return;
-
     if (outOfHearts) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      if (haptics) warn();
       router.replace('/(tabs)/(home)/learn');
       return;
     }
-
     if (currentStepIndex < lesson.steps.length - 1) {
       resetStepState();
-      setCurrentStepIndex(prev => prev + 1);
+      setCurrentStepIndex((i) => i + 1);
     } else {
-      const totalSteps = lesson.steps.filter(s => s.type !== 'storyCard').length;
+      const totalSteps = lesson.steps.filter((s) => s.type !== 'storyCard').length;
       router.replace({
         pathname: '/lesson-complete',
         params: {
           lessonId: lesson.id,
-          correctAnswers: correctCount.toString(),
-          totalSteps: totalSteps.toString(),
-          xpReward: lesson.xpReward.toString(),
+          correctAnswers: String(correctCount),
+          totalSteps: String(totalSteps),
+          xpReward: String(lesson.xpReward),
+          bestCombo: String(bestCombo),
         },
       });
     }
-  }, [lesson, currentStepIndex, correctCount, resetStepState, router, outOfHearts]);
-
-  const handleClose = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.back();
-  };
+  }, [lesson, currentStepIndex, correctCount, bestCombo, resetStepState, router, outOfHearts, haptics]);
 
   const canCheck = useCallback(() => {
     if (!currentStep) return false;
-
     switch (currentStep.type) {
       case 'multiChoice':
       case 'mapTap':
@@ -386,142 +282,139 @@ export default function LessonScreen() {
         return orderedItems.length === (currentStep as OrderEventsStep).data.events.length;
       case 'matchPairs':
         return Object.keys(matchedPairs).length === (currentStep as MatchPairsStep).data.pairs.length;
-      case 'timelineSlider':
-        return true;
-      case 'storyCard':
+      default:
         return true;
     }
   }, [currentStep, selectedAnswer, orderedItems, matchedPairs]);
 
-  const renderBattleImage = () => {
-    if (!battle || !battleImage) return null;
-
-    return (
-      <Image
-        source={battleImage}
-        style={styles.battleImage}
-        contentFit="cover"
-      />
-    );
+  const choiceStatus = (index: number, correctIndex: number): OptionStatus => {
+    if (feedback === 'none') return selectedAnswer === index ? 'selected' : 'idle';
+    if (index === correctIndex) return 'correct';
+    if (selectedAnswer === index) return 'wrong';
+    return 'muted';
   };
 
   const renderMultiChoice = (step: MultiChoiceStep) => (
-    <View style={styles.optionsContainer}>
+    <View style={styles.stack}>
       {step.data.options.map((option, index) => (
-        <TouchableOpacity
+        <OptionCard
           key={index}
-          style={[
-            styles.optionButton,
-            selectedAnswer === index && styles.optionButtonSelected,
-            feedback === 'correct' && selectedAnswer === index && styles.optionButtonCorrect,
-            feedback === 'wrong' && selectedAnswer === index && styles.optionButtonWrong,
-            feedback !== 'none' && index === step.data.correctIndex && styles.optionButtonCorrect,
-          ]}
-          onPress={() => {
-            if (feedback === 'none') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedAnswer(index);
-            }
-          }}
+          label={option}
+          status={choiceStatus(index, step.data.correctIndex)}
           disabled={feedback !== 'none'}
-          activeOpacity={0.7}
-        >
-          <Text style={[
-            styles.optionText,
-            selectedAnswer === index && styles.optionTextSelected,
-            feedback !== 'none' && index === step.data.correctIndex && styles.optionTextCorrect,
-          ]}>
-            {option}
-          </Text>
-        </TouchableOpacity>
+          onPress={() => setSelectedAnswer(index)}
+          left={
+            <View style={[styles.letter, { backgroundColor: colors.optionEdge }]}>
+              <Text style={[styles.letterText, { color: colors.textOnParchment }]}>{String.fromCharCode(65 + index)}</Text>
+            </View>
+          }
+        />
       ))}
     </View>
   );
 
-  const renderMapTap = (step: MapTapStep) => (
-    <View style={styles.mapContainer}>
-      <View style={styles.mapGrid}>
-        {step.data.regions.map((region) => (
-          <TouchableOpacity
-            key={region.id}
-            style={[
-              styles.regionButton,
-              selectedAnswer === region.id && styles.regionButtonSelected,
-              feedback === 'correct' && selectedAnswer === region.id && styles.regionButtonCorrect,
-              feedback === 'wrong' && selectedAnswer === region.id && styles.regionButtonWrong,
-              feedback !== 'none' && region.id === step.data.correctRegionId && styles.regionButtonCorrect,
-            ]}
-            onPress={() => {
-              if (feedback === 'none') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedAnswer(region.id);
-              }
-            }}
+  const renderTwoTruths = (step: TwoTruthsStep) => {
+    const lieIndex = step.data.statements.findIndex((s) => s.isLie);
+    return (
+      <View style={styles.stack}>
+        {step.data.statements.map((s, index) => (
+          <OptionCard
+            key={index}
+            label={s.text}
+            status={choiceStatus(index, lieIndex)}
             disabled={feedback !== 'none'}
-            activeOpacity={0.7}
-          >
-            <MapPin size={24} color={
-              selectedAnswer === region.id ? colors.textInverse :
-              feedback !== 'none' && region.id === step.data.correctRegionId ? colors.textInverse :
-              colors.primary
-            } />
-            <Text style={[
-              styles.regionText,
-              (selectedAnswer === region.id || (feedback !== 'none' && region.id === step.data.correctRegionId)) && styles.regionTextSelected,
-            ]}>
-              {region.name}
-            </Text>
-          </TouchableOpacity>
+            onPress={() => setSelectedAnswer(index)}
+          />
         ))}
       </View>
-    </View>
-  );
+    );
+  };
 
-  const renderOrderEvents = (step: OrderEventsStep) => {
-    const unordered = step.data.events.filter(e => !orderedItems.includes(e.id));
-
+  const renderFillBlank = (step: FillBlankStep) => {
+    const chosen = typeof selectedAnswer === 'string' ? selectedAnswer : null;
+    const [before, after] = step.data.sentence.split('_____');
     return (
-      <View style={styles.orderContainer}>
-        <View style={styles.orderedList}>
-          {orderedItems.map((itemId, index) => {
-            const event = step.data.events.find(e => e.id === itemId);
+      <View style={styles.stack}>
+        <View style={[styles.sentenceCard, { backgroundColor: colors.option, borderColor: colors.optionEdge }]}>
+          <Text style={[styles.sentence, { color: colors.textOnParchment, fontSize: 18 * fontScale }]}>
+            {before}
+            <Text
+              style={{
+                color: feedback === 'correct' ? colors.successDark : feedback === 'wrong' ? colors.errorDark : colors.brassDark,
+                textDecorationLine: chosen ? 'none' : 'underline',
+                fontFamily: fonts.bodyBlack,
+              }}
+            >
+              {chosen ?? '______'}
+            </Text>
+            {after}
+          </Text>
+        </View>
+        <View style={styles.wrapRow}>
+          {step.data.options.map((option) => {
+            let status: OptionStatus = 'idle';
+            if (feedback === 'none') status = chosen === option ? 'selected' : 'idle';
+            else if (option === step.data.blankWord) status = 'correct';
+            else if (chosen === option) status = 'wrong';
+            else status = 'muted';
             return (
-              <TouchableOpacity
-                key={itemId}
-                style={styles.orderedItem}
-                onPress={() => {
-                  if (feedback === 'none') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setOrderedItems(orderedItems.filter(id => id !== itemId));
-                  }
-                }}
+              <OptionCard
+                key={option}
+                label={option}
+                status={status}
+                compact
+                align="center"
                 disabled={feedback !== 'none'}
-              >
-                <View style={styles.orderNumber}>
-                  <Text style={styles.orderNumberText}>{index + 1}</Text>
-                </View>
-                <Text style={styles.orderedItemText}>{event?.text}</Text>
-              </TouchableOpacity>
+                onPress={() => setSelectedAnswer(option)}
+                style={{ minWidth: '46%', flexGrow: 1 }}
+              />
             );
           })}
         </View>
+      </View>
+    );
+  };
 
-        <View style={styles.unorderedList}>
-          {unordered.map((event) => (
-            <TouchableOpacity
-              key={event.id}
-              style={styles.unorderedItem}
-              onPress={() => {
-                if (feedback === 'none') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setOrderedItems([...orderedItems, event.id]);
+  const renderOrderEvents = (step: OrderEventsStep) => {
+    const unordered = step.data.events.filter((e) => !orderedItems.includes(e.id));
+    const sorted = [...step.data.events].sort((a, b) => a.order - b.order);
+    return (
+      <View style={styles.stack}>
+        <View style={[styles.orderSlot, { borderColor: colors.surfaceBorder, minHeight: 72 }]}>
+          {orderedItems.length === 0 ? (
+            <Text style={[styles.slotHint, { color: colors.textMuted }]}>{t('lesson.putInOrder')}</Text>
+          ) : null}
+          {orderedItems.map((itemId, index) => {
+            const event = step.data.events.find((e) => e.id === itemId);
+            let status: OptionStatus = 'selected';
+            if (feedback !== 'none') status = sorted[index]?.id === itemId ? 'correct' : 'wrong';
+            return (
+              <OptionCard
+                key={itemId}
+                label={event?.text ?? ''}
+                status={status}
+                compact
+                disabled={feedback !== 'none'}
+                onPress={() => setOrderedItems(orderedItems.filter((x) => x !== itemId))}
+                left={
+                  <View style={[styles.letter, { backgroundColor: colors.brass }]}>
+                    <Text style={[styles.letterText, { color: '#2B2419' }]}>{index + 1}</Text>
+                  </View>
                 }
-              }}
+              />
+            );
+          })}
+        </View>
+        <View style={styles.stack}>
+          {unordered.map((event) => (
+            <OptionCard
+              key={event.id}
+              label={event.text}
+              compact
               disabled={feedback !== 'none'}
-            >
-              <GripVertical size={16} color={colors.textSecondary} />
-              <Text style={styles.unorderedItemText}>{event.text}</Text>
-            </TouchableOpacity>
+              onPress={() => setOrderedItems([...orderedItems, event.id])}
+              left={<GripVertical size={18} color={colors.textOnParchmentSoft} />}
+            />
           ))}
         </View>
       </View>
@@ -529,58 +422,48 @@ export default function LessonScreen() {
   };
 
   const renderMatchPairs = (step: MatchPairsStep) => {
-    // Badge number for each pair = the order it was made in.
     const pairOrder = Object.keys(matchedPairs);
     const badgeFor = (left: string) => {
       const i = pairOrder.indexOf(left);
       return i === -1 ? null : i + 1;
     };
-    const leftOfRight = (right: string) =>
-      pairOrder.find(l => matchedPairs[l] === right) ?? null;
-    const isPairCorrect = (left: string) =>
-      step.data.pairs.some(p => p.left === left && p.right === matchedPairs[left]);
-
+    const leftOfRight = (right: string) => pairOrder.find((l) => matchedPairs[l] === right) ?? null;
+    const isPairCorrect = (left: string) => step.data.pairs.some((p) => p.left === left && p.right === matchedPairs[left]);
     const unpair = (left: string) => {
       const next = { ...matchedPairs };
       delete next[left];
       setMatchedPairs(next);
     };
-
     const allPaired = pairOrder.length === step.data.pairs.length;
-
-    const resultStyle = (left: string | null) => {
-      if (feedback === 'none' || !left) return null;
-      return isPairCorrect(left) ? styles.matchItemCorrect : styles.matchItemWrong;
+    const statusFor = (left: string | null, base: OptionStatus): OptionStatus => {
+      if (feedback === 'none' || !left) return base;
+      return isPairCorrect(left) ? 'correct' : 'wrong';
     };
-    const resultTextStyle = (left: string | null) => {
-      if (feedback === 'none' || !left) return null;
-      return isPairCorrect(left) ? styles.matchItemTextCorrect : styles.matchItemTextWrong;
-    };
-    const badgeResultStyle = (left: string | null) => {
-      if (feedback === 'none' || !left) return null;
-      return isPairCorrect(left) ? styles.matchBadgeCorrect : styles.matchBadgeWrong;
-    };
+    const badge = (n: number | null) =>
+      n === null ? null : (
+        <View style={[styles.letter, { backgroundColor: colors.brass, width: 24, height: 24 }]}>
+          <Text style={[styles.letterText, { color: '#2B2419', fontSize: 12 }]}>{n}</Text>
+        </View>
+      );
 
     return (
-      <View style={styles.matchContainer}>
-        <View style={styles.matchColumns}>
-          <View style={styles.matchColumn}>
+      <View style={styles.stack}>
+        <View style={styles.columns}>
+          <View style={styles.column}>
             {step.data.pairs.map((pair) => {
-              const badge = badgeFor(pair.left);
+              const b = badgeFor(pair.left);
               const isSelected = selectedLeft === pair.left;
-              const isPaired = badge !== null;
+              const isPaired = b !== null;
+              const base: OptionStatus = isSelected ? 'selected' : isPaired ? 'paired' : 'idle';
               return (
-                <TouchableOpacity
+                <OptionCard
                   key={pair.left}
-                  style={[
-                    styles.matchItem,
-                    isSelected && styles.matchItemSelected,
-                    isPaired && styles.matchItemPaired,
-                    resultStyle(isPaired ? pair.left : null),
-                  ]}
+                  label={pair.left}
+                  compact
+                  align="center"
+                  status={statusFor(isPaired ? pair.left : null, base)}
+                  disabled={feedback !== 'none'}
                   onPress={() => {
-                    if (feedback !== 'none') return;
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     if (isPaired) {
                       unpair(pair.left);
                       setSelectedLeft(pair.left);
@@ -588,48 +471,27 @@ export default function LessonScreen() {
                       setSelectedLeft(isSelected ? null : pair.left);
                     }
                   }}
-                  disabled={feedback !== 'none'}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.matchItemText,
-                      isSelected && styles.matchItemTextSelected,
-                      isPaired && styles.matchItemTextPaired,
-                      resultTextStyle(isPaired ? pair.left : null),
-                    ]}
-                    numberOfLines={2}
-                  >
-                    {pair.left}
-                  </Text>
-                  {badge !== null && (
-                    <View style={[styles.matchBadge, badgeResultStyle(pair.left)]}>
-                      <Text style={styles.matchBadgeText}>{badge}</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
+                  right={badge(b)}
+                />
               );
             })}
           </View>
-
-          <View style={styles.matchColumn}>
+          <View style={styles.column}>
             {shuffledRights.map((right) => {
               const left = leftOfRight(right);
-              const badge = left ? badgeFor(left) : null;
-              const isPaired = badge !== null;
+              const b = left ? badgeFor(left) : null;
+              const isPaired = b !== null;
               const canReceive = feedback === 'none' && !!selectedLeft && !isPaired;
+              const base: OptionStatus = isPaired ? 'paired' : canReceive ? 'receivable' : 'idle';
               return (
-                <TouchableOpacity
+                <OptionCard
                   key={right}
-                  style={[
-                    styles.matchItem,
-                    canReceive && styles.matchItemReceivable,
-                    isPaired && styles.matchItemPaired,
-                    resultStyle(left),
-                  ]}
+                  label={right}
+                  compact
+                  align="center"
+                  status={statusFor(left, base)}
+                  disabled={feedback !== 'none' || (!isPaired && !selectedLeft)}
                   onPress={() => {
-                    if (feedback !== 'none') return;
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     if (isPaired && left) {
                       unpair(left);
                       setSelectedLeft(left);
@@ -638,219 +500,44 @@ export default function LessonScreen() {
                       setSelectedLeft(null);
                     }
                   }}
-                  disabled={feedback !== 'none' || (!isPaired && !selectedLeft)}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.matchItemText,
-                      isPaired && styles.matchItemTextPaired,
-                      resultTextStyle(left),
-                    ]}
-                    numberOfLines={2}
-                  >
-                    {right}
-                  </Text>
-                  {badge !== null && (
-                    <View style={[styles.matchBadge, badgeResultStyle(left)]}>
-                      <Text style={styles.matchBadgeText}>{badge}</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
+                  right={badge(b)}
+                />
               );
             })}
           </View>
         </View>
-
-        {feedback === 'none' && (
-          <Text style={styles.matchHint}>
+        {feedback === 'none' ? (
+          <Text style={[styles.slotHint, { color: colors.textMuted }]}>
             {allPaired ? t('lesson.matchTapToUnpair') : t('lesson.matchHint')}
           </Text>
-        )}
+        ) : null}
       </View>
     );
   };
-
-  const renderFillBlank = (step: FillBlankStep) => (
-    <View style={styles.fillBlankContainer}>
-      <Text style={styles.fillBlankSentence}>
-        {step.data.sentence.replace('_____', selectedAnswer as string || '_____')}
-      </Text>
-      <View style={styles.fillBlankOptions}>
-        {step.data.options.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={[
-              styles.fillBlankOption,
-              selectedAnswer === option && styles.fillBlankOptionSelected,
-              feedback === 'correct' && selectedAnswer === option && styles.fillBlankOptionCorrect,
-              feedback === 'wrong' && selectedAnswer === option && styles.fillBlankOptionWrong,
-              feedback !== 'none' && option === step.data.blankWord && styles.fillBlankOptionCorrect,
-            ]}
-            onPress={() => {
-              if (feedback === 'none') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setSelectedAnswer(option);
-              }
-            }}
-            disabled={feedback !== 'none'}
-          >
-            <Text style={[
-              styles.fillBlankOptionText,
-              (selectedAnswer === option || (feedback !== 'none' && option === step.data.blankWord)) && styles.fillBlankOptionTextSelected,
-            ]}>
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-
-  const renderTimelineSlider = (step: TimelineSliderStep) => {
-    const minYear = Number(step.data.minYear);
-    const maxYear = Number(step.data.maxYear);
-    const range = maxYear - minYear;
-    const currentValue = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
-
-    let displayYear: string;
-    if (minYear < 0 || maxYear < 0) {
-      displayYear = currentValue < 0
-        ? `${Math.abs(currentValue)} BC`
-        : `${currentValue} AD`;
-    } else {
-      displayYear = currentValue.toString();
-    }
-
-    // locationX is relative to the touched view (sliderContainer).
-    // Track starts 14px from the container's left edge (paddingHorizontal: 14).
-    const SLIDER_HORIZONTAL_PADDING = 14;
-    const calcYearFromLocalX = (locationX: number) => {
-      const trackWidth = sliderWidthRef.current || 300;
-      const x = locationX - SLIDER_HORIZONTAL_PADDING;
-      const percent = Math.max(0, Math.min(1, x / trackWidth));
-      return Math.round(minYear + percent * range);
-    };
-
-    const sliderPanResponder = PanResponder.create({
-      onStartShouldSetPanResponder: () => feedback === 'none',
-      onMoveShouldSetPanResponder: () => feedback === 'none',
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: (e) => {
-        const year = calcYearFromLocalX(e.nativeEvent.locationX);
-        setSliderValue(Math.max(minYear, Math.min(maxYear, year)));
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      },
-      onPanResponderMove: (e) => {
-        const year = calcYearFromLocalX(e.nativeEvent.locationX);
-        const clamped = Math.max(minYear, Math.min(maxYear, year));
-        setSliderValue(clamped);
-      },
-      onPanResponderRelease: () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      },
-    });
-
-    const onSliderLayout = (e: LayoutChangeEvent) => {
-      sliderWidthRef.current = e.nativeEvent.layout.width - 28;
-    };
-
-    const fillPercent = ((currentValue - minYear) / range) * 100;
-
-    return (
-      <View style={styles.timelineContainer}>
-        <Text style={styles.timelineYear}>
-          {displayYear}
-        </Text>
-        <View
-          style={styles.sliderContainer}
-          onLayout={onSliderLayout}
-          {...sliderPanResponder.panHandlers}
-        >
-          <View style={styles.sliderTrack}>
-            <View style={[styles.sliderFill, { width: `${fillPercent}%` }]} />
-            <View
-              style={[
-                styles.sliderThumb,
-                { left: `${fillPercent}%` }
-              ]}
-            />
-          </View>
-        </View>
-        <View style={styles.sliderLabels}>
-          <Text style={styles.sliderLabel}>
-            {minYear < 0 ? `${Math.abs(minYear)} BC` : minYear}
-          </Text>
-          <Text style={styles.sliderLabel}>
-            {maxYear < 0 ? `${Math.abs(maxYear)} BC` : maxYear}
-          </Text>
-        </View>
-        <View style={styles.sliderHint}>
-          <Text style={styles.sliderHintText}>{t('lesson.dragToSelect')}</Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderTwoTruths = (step: TwoTruthsStep) => (
-    <View style={styles.optionsContainer}>
-      {step.data.statements.map((statement, index) => (
-        <TouchableOpacity
-          key={index}
-          style={[
-            styles.optionButton,
-            selectedAnswer === index && styles.optionButtonSelected,
-            feedback === 'correct' && selectedAnswer === index && styles.optionButtonCorrect,
-            feedback === 'wrong' && selectedAnswer === index && styles.optionButtonWrong,
-            feedback !== 'none' && statement.isLie && styles.optionButtonCorrect,
-          ]}
-          onPress={() => {
-            if (feedback === 'none') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedAnswer(index);
-            }
-          }}
-          disabled={feedback !== 'none'}
-          activeOpacity={0.7}
-        >
-          <Text style={[
-            styles.optionText,
-            selectedAnswer === index && styles.optionTextSelected,
-            feedback !== 'none' && statement.isLie && styles.optionTextCorrect,
-          ]}>
-            {statement.text}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
 
   const renderStoryCard = (step: StoryCardStep) => (
-    <View style={styles.storyContainer}>
-      {battleImage && (
-        <Image
-          source={battleImage}
-          style={styles.storyBattleImage}
-          contentFit="cover"
-        />
-      )}
-      <View style={styles.storyCard}>
-        <Text style={styles.storyTitle}>{step.data.title}</Text>
-        <Text style={styles.storyNarrative}>{step.data.narrative}</Text>
-        {battle && (
-          <>
-            <View style={styles.storyIconContainer}>
-              <View style={styles.storyIconCircle}>
-                <Text style={styles.storyIconText}>⚔️</Text>
-              </View>
-            </View>
-            <View style={styles.storyMeta}>
-              <Text style={styles.storyMetaText}>📍 {battle.region}</Text>
-              <Text style={styles.storyMetaText}>📅 {battle.date}</Text>
-            </View>
-          </>
-        )}
-      </View>
+    <View style={[styles.storyCard, { backgroundColor: colors.option, borderColor: colors.optionEdge }]}>
+      <Text style={[styles.storyTitle, { color: colors.textOnParchment, fontSize: 24 * fontScale }]}>{step.data.title}</Text>
+      {battle ? (
+        <View style={styles.metaRow}>
+          <View style={styles.metaItem}>
+            <MapPin size={14} color={colors.brassDark} />
+            <Text style={[styles.metaText, { color: colors.textOnParchmentSoft, fontSize: 13 * fontScale }]}>{battle.region}</Text>
+          </View>
+          <View style={styles.metaItem}>
+            <Calendar size={14} color={colors.brassDark} />
+            <Text style={[styles.metaText, { color: colors.textOnParchmentSoft, fontSize: 13 * fontScale }]}>{battle.date}</Text>
+          </View>
+        </View>
+      ) : null}
+      <View style={[styles.rule, { backgroundColor: colors.optionEdge }]} />
+      <Text style={[styles.storyText, { color: colors.textOnParchment, fontSize: 16 * fontScale }]}>{step.data.narrative}</Text>
+      {battle ? (
+        <View style={[styles.outcomeBox, { borderColor: colors.brass }]}>
+          <Text style={[styles.outcomeLabel, { color: colors.brassDark, fontSize: 11 * fontScale }]}>{t('codex.outcome')}</Text>
+          <Text style={[styles.outcomeText, { color: colors.textOnParchment, fontSize: 14 * fontScale }]}>{battle.outcome}</Text>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -859,7 +546,14 @@ export default function LessonScreen() {
       case 'multiChoice':
         return renderMultiChoice(step as MultiChoiceStep);
       case 'mapTap':
-        return renderMapTap(step as MapTapStep);
+        return (
+          <MapTap
+            step={step as MapTapStep}
+            selected={typeof selectedAnswer === 'string' ? selectedAnswer : null}
+            feedback={feedback}
+            onSelect={(rid) => setSelectedAnswer(rid)}
+          />
+        );
       case 'orderEvents':
         return renderOrderEvents(step as OrderEventsStep);
       case 'matchPairs':
@@ -867,7 +561,9 @@ export default function LessonScreen() {
       case 'fillBlank':
         return renderFillBlank(step as FillBlankStep);
       case 'timelineSlider':
-        return renderTimelineSlider(step as TimelineSliderStep);
+        return (
+          <TimelineSlider step={step as TimelineSliderStep} value={sliderValue} feedback={feedback} onChange={setSliderValue} />
+        );
       case 'twoTruths':
         return renderTwoTruths(step as TwoTruthsStep);
       case 'storyCard':
@@ -877,789 +573,200 @@ export default function LessonScreen() {
     }
   };
 
-  if (!lesson || !currentStep) {
+  if (!lesson || !currentStep || !battle) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>{t('lesson.lessonNotFound')}</Text>
-      </SafeAreaView>
+      <ScreenBackground>
+        <View style={[styles.center, { paddingTop: insets.top + 40 }]}>
+          <Text style={{ color: colors.textSecondary, fontFamily: fonts.bodyBold }}>{t('lesson.lessonNotFound')}</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
+  const isStory = currentStep.type === 'storyCard';
+  const heroHeight = isStory ? 220 : 128;
+  const footerSpace = 110 + insets.bottom;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+    <ScreenBackground topography={false}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
+        <Pressable
+          onPress={() => {
+            if (haptics) tap();
+            setShowQuit(true);
+          }}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+          style={styles.closeBtn}
+        >
           <X size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <View style={styles.progressBar}>
+        </Pressable>
+        <ProgressBar value={(currentStepIndex + 1) / lesson.steps.length} height={14} style={{ flex: 1 }} />
+        {combo >= 2 ? (
           <Animated.View
             style={[
-              styles.progressFill,
-              { width: progressAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              })}
+              styles.comboChip,
+              { backgroundColor: colors.ember, transform: [{ scale: comboAnim.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] },
             ]}
-          />
-        </View>
-        <View style={styles.heartsContainer}>
-          <Text style={styles.heartsIcon}>❤️</Text>
-          <Text style={styles.heartsText}>{quizHearts}</Text>
+          >
+            <Flame size={14} color="#fff" fill="#fff" />
+            <Text style={styles.comboText}>{t('lesson.combo', { count: combo })}</Text>
+          </Animated.View>
+        ) : null}
+        <Animated.View
+          style={[
+            styles.hearts,
+            { transform: [{ translateX: heartShake.interpolate({ inputRange: [-1, 1], outputRange: [-5, 5] }) }] },
+          ]}
+        >
+          <Heart size={20} color={colors.hearts} fill={colors.hearts} />
+          <Text style={[styles.heartsText, { color: colors.hearts }]}>{quizHearts}</Text>
+        </Animated.View>
+      </View>
+
+      {/* Hero */}
+      <View style={[styles.hero, { height: heroHeight }]}>
+        {battleImage ? <Image source={battleImage} style={StyleSheet.absoluteFill} contentFit="cover" transition={300} /> : null}
+        <LinearGradient
+          colors={['rgba(15,20,32,0.05)', 'rgba(15,20,32,0.55)', colors.bg]}
+          locations={[0, 0.6, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.heroText}>
+          <Text style={[styles.heroTitle, { fontSize: (isStory ? 13 : 12) * fontScale }]} numberOfLines={1}>
+            {battle.title}
+          </Text>
+          <Text style={[styles.heroDate, { fontSize: 11 * fontScale }]} numberOfLines={1}>
+            {battle.date}
+          </Text>
         </View>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.content, { paddingBottom: footerSpace }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.content}>
-          {currentStep.type !== 'storyCard' && (
-            <>
-              <View style={styles.stepMeta}>
-                <View style={styles.stepTypeChip}>
-                  <Text style={styles.stepTypeText}>
-                    {t(`lesson.stepTypes.${currentStep.type}`)}
-                  </Text>
-                </View>
-                <Text style={styles.stepCounter}>
-                  {t('lesson.questionOf', questionMeta)}
-                </Text>
-              </View>
-              <Text style={styles.prompt}>{currentStep.prompt}</Text>
-            </>
-          )}
-          {renderStep(currentStep)}
-          {currentStep.type !== 'storyCard' && renderBattleImage()}
-        </View>
-      </ScrollView>
-
-      {feedback !== 'none' && mascot && (
         <Animated.View
-          style={[
-            styles.mascotCelebration,
-            {
-              opacity: mascotAnim,
-              transform: [
-                { scale: mascotAnim },
-                { translateY: mascotBounceAnim },
-              ]
-            }
-          ]}
+          style={{
+            opacity: stepAnim,
+            transform: [{ translateX: stepAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+          }}
         >
-          <View style={[styles.mascotBubble, feedback === 'wrong' && styles.mascotBubbleWrong]}>
-            <Image
-              source={{ uri: mascot.avatar }}
-              style={styles.mascotAvatarImage}
-              contentFit="cover"
-            />
-          </View>
-          <View style={[styles.cheerBubble, feedback === 'wrong' && styles.cheerBubbleWrong]}>
-            <Text style={styles.cheerText}>
-              {feedback === 'correct' ? t('lesson.greatJob') : outOfHearts ? t('lesson.tryAgain') : t('lesson.keepGoing')}
-            </Text>
-          </View>
-        </Animated.View>
-      )}
-
-      <View style={styles.footer}>
-        {feedback !== 'none' && (
-          <View style={[
-            styles.feedbackInline,
-            feedback === 'correct' ? styles.feedbackInlineCorrect : styles.feedbackInlineWrong,
-          ]}>
-            <View style={styles.feedbackHeader}>
-              {feedback === 'correct' ? (
-                <Check size={20} color={colors.success} />
-              ) : (
-                <X size={20} color={colors.error} />
-              )}
-              <Text style={[
-                styles.feedbackTitle,
-                feedback === 'correct' ? styles.feedbackTitleCorrect : styles.feedbackTitleWrong,
-              ]}>
-                {feedback === 'correct' ? t('lesson.correct') : t('lesson.wrong')}
+          <View style={styles.stepMeta}>
+            <View style={[styles.typeChip, { borderColor: colors.brass }]}>
+              <Text style={[styles.typeText, { color: colors.brass, fontSize: 11 * fontScale }]}>
+                {t(`lesson.stepTypes.${currentStep.type}`)}
               </Text>
             </View>
-            <Text style={styles.feedbackText} numberOfLines={2}>
-              {outOfHearts
-                ? t('lesson.outOfHearts')
-                : (feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong)}
-            </Text>
+            {!isStory ? (
+              <Text style={[styles.counter, { color: colors.textMuted, fontSize: 12 * fontScale }]}>
+                {t('lesson.questionOf', questionMeta)}
+              </Text>
+            ) : null}
           </View>
-        )}
-
-        {feedback === 'none' ? (
-          <TouchableOpacity
-            style={[
-              styles.checkButton,
-              !canCheck() && styles.checkButtonDisabled,
-            ]}
-            onPress={currentStep.type === 'storyCard' ? handleContinue : checkAnswer}
-            disabled={!canCheck()}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.checkButtonText}>
-              {currentStep.type === 'storyCard' ? t('lesson.continue') : t('lesson.check')}
+          {!isStory ? (
+            <Text style={[styles.prompt, { color: colors.text, fontSize: 22 * fontScale, lineHeight: 30 * fontScale }]}>
+              {currentStep.prompt}
             </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              feedback === 'correct' ? styles.continueButtonCorrect : styles.continueButtonWrong,
-            ]}
-            onPress={handleContinue}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.continueButtonText}>{t('lesson.continue')}</Text>
-            <ArrowRight size={20} color={colors.textInverse} />
-          </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+          ) : null}
+          {renderStep(currentStep)}
+        </Animated.View>
+      </ScrollView>
+
+      {/* Footer */}
+      {feedback === 'none' ? (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16), backgroundColor: colors.bg, borderTopColor: colors.surfaceBorder }]}>
+          <ChunkyButton
+            label={isStory ? t('lesson.continue') : t('lesson.check')}
+            variant={isStory ? 'brass' : 'ember'}
+            disabled={!canCheck()}
+            onPress={isStory ? handleContinue : checkAnswer}
+          />
+        </View>
+      ) : (
+        <FeedbackSheet
+          kind={feedback}
+          title={feedback === 'correct' ? t('lesson.correct') : outOfHearts ? t('lesson.outOfHearts') : t('lesson.wrong')}
+          mascotLine={feedback === 'correct' ? mascot?.cheer : mascot?.consolation}
+          mascotImage={mascotImage}
+          explanation={
+            outOfHearts ? t('lesson.outOfHeartsBody') : feedback === 'correct' ? currentStep.feedbackCorrect : currentStep.feedbackWrong
+          }
+          buttonLabel={outOfHearts ? t('lesson.retreat') : t('lesson.continue')}
+          onContinue={handleContinue}
+          bottomInset={insets.bottom}
+        />
+      )}
+
+      <Dialog visible={showQuit} title={t('lesson.quitTitle')} body={t('lesson.quitBody')} onDismiss={() => setShowQuit(false)}>
+        <ChunkyButton label={t('lesson.quitCancel')} variant="brass" onPress={() => setShowQuit(false)} />
+        <ChunkyButton
+          label={t('lesson.quitConfirm')}
+          variant="ghost"
+          onPress={() => {
+            setShowQuit(false);
+            router.back();
+          }}
+        />
+      </Dialog>
+    </ScreenBackground>
   );
 }
 
-const createStyles = (colors: any, fs: number = 1) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: 'center' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 10,
     gap: 12,
+    zIndex: 3,
   },
-  closeButton: {
-    padding: 4,
-  },
-  progressBar: {
-    flex: 1,
-    height: 12,
-    backgroundColor: colors.pathLine,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.success,
-    borderRadius: 6,
-  },
-  heartsContainer: {
+  closeBtn: { padding: 2 },
+  hearts: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  heartsText: { fontFamily: fonts.bodyBlack, fontSize: 16 },
+  comboChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  heartsIcon: {
-    fontSize: 18,
-  },
-  heartsText: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: colors.hearts,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
-  stepMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  stepTypeChip: {
-    backgroundColor: colors.primary + '18',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  stepTypeText: {
-    fontSize: 11 * fs,
-    fontWeight: '700' as const,
-    color: colors.primaryDark,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase' as const,
-  },
-  stepCounter: {
-    fontSize: 12 * fs,
-    fontWeight: '600' as const,
-    color: colors.textLight,
-  },
-  prompt: {
-    fontSize: 24 * fs,
-    fontWeight: '700' as const,
-    color: colors.text,
-    marginBottom: 24,
-    lineHeight: 32 * fs,
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 40,
-  },
-  optionsContainer: {
-    gap: 12,
-  },
-  optionButton: {
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.cardBorder,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionButtonSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '15',
-  },
-  optionButtonCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.successLight,
-  },
-  optionButtonWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorLight,
-  },
-  optionText: {
-    fontSize: 16 * fs,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  optionTextSelected: {
-    color: colors.primary,
-    fontWeight: '600' as const,
-  },
-  optionTextCorrect: {
-    color: colors.success,
-    fontWeight: '600' as const,
-  },
-  battleImage: {
-    width: '100%',
-    height: 180,
-    borderRadius: 16,
-    marginTop: 28,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.backgroundDark,
-  },
-  mapContainer: {
-    flex: 1,
-  },
-  mapGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-  },
-  regionButton: {
-    width: (width - 64) / 2,
-    aspectRatio: 1.5,
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.cardBorder,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    padding: 12,
-  },
-  regionButtonSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
-  },
-  regionButtonCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.success,
-  },
-  regionButtonWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.error,
-  },
-  regionText: {
-    fontSize: 14 * fs,
-    fontWeight: '600' as const,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  regionTextSelected: {
-    color: colors.textInverse,
-  },
-  orderContainer: {
-    flex: 1,
-    gap: 20,
-  },
-  orderedList: {
-    gap: 8,
-    minHeight: 100,
-  },
-  orderedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary + '15',
+    paddingHorizontal: 8,
+    height: 24,
     borderRadius: 12,
-    padding: 12,
-    gap: 12,
   },
-  orderNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  orderNumberText: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-    color: colors.textInverse,
-  },
-  orderedItemText: {
-    fontSize: 14 * fs,
-    color: colors.text,
-    flex: 1,
-  },
-  unorderedList: {
-    gap: 8,
-  },
-  unorderedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 12,
-    padding: 12,
-    gap: 8,
-  },
-  unorderedItemText: {
-    fontSize: 14 * fs,
-    color: colors.text,
-    flex: 1,
-  },
-  matchContainer: {
-    gap: 16,
-  },
-  matchColumns: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  matchColumn: {
-    flex: 1,
-    gap: 12,
-  },
-  matchItem: {
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.cardBorder,
-    borderRadius: 14,
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    minHeight: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderBottomWidth: 4,
-  },
-  matchItemSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '15',
-  },
-  matchItemReceivable: {
-    borderColor: colors.primaryLight,
-    backgroundColor: colors.backgroundDark,
-  },
-  matchItemPaired: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '10',
-  },
-  matchItemCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.successLight,
-  },
-  matchItemWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorLight,
-  },
-  matchItemText: {
-    fontSize: 15 * fs,
-    fontWeight: '600' as const,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  matchItemTextSelected: {
-    color: colors.primaryDark,
-  },
-  matchItemTextPaired: {
-    color: colors.primaryDark,
-  },
-  matchItemTextCorrect: {
-    color: colors.success,
-  },
-  matchItemTextWrong: {
-    color: colors.error,
-  },
-  matchBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.background,
-  },
-  matchBadgeCorrect: {
-    backgroundColor: colors.success,
-  },
-  matchBadgeWrong: {
-    backgroundColor: colors.error,
-  },
-  matchBadgeText: {
-    fontSize: 11,
-    fontWeight: '800' as const,
-    color: colors.textInverse,
-  },
-  matchHint: {
-    fontSize: 13 * fs,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    fontStyle: 'italic' as const,
-  },
-  fillBlankContainer: {
-    gap: 24,
-  },
-  fillBlankSentence: {
-    fontSize: 20 * fs,
-    color: colors.text,
-    lineHeight: 30 * fs,
-    textAlign: 'center',
-  },
-  fillBlankOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
-  },
-  fillBlankOption: {
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.cardBorder,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  fillBlankOptionSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary + '15',
-  },
-  fillBlankOptionCorrect: {
-    borderColor: colors.success,
-    backgroundColor: colors.successLight,
-  },
-  fillBlankOptionWrong: {
-    borderColor: colors.error,
-    backgroundColor: colors.errorLight,
-  },
-  fillBlankOptionText: {
-    fontSize: 16 * fs,
-    color: colors.text,
-  },
-  fillBlankOptionTextSelected: {
-    color: colors.success,
-    fontWeight: '600' as const,
-  },
-  timelineContainer: {
-    alignItems: 'center',
-    gap: 24,
-    paddingTop: 20,
-  },
-  timelineYear: {
-    fontSize: 48,
-    fontWeight: '700' as const,
-    color: colors.primary,
-  },
-  sliderContainer: {
-    width: '100%',
-    height: 80,
-    position: 'relative',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
-  },
-
-  sliderTrack: {
-    position: 'absolute',
-    top: 24,
-    left: 14,
-    right: 14,
-    height: 16,
-    backgroundColor: colors.pathLine,
-    borderRadius: 8,
-    overflow: 'visible',
-  },
-  sliderFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    height: '100%',
-    backgroundColor: colors.primary + '40',
-    borderRadius: 8,
-  },
-  sliderThumb: {
-    position: 'absolute',
-    top: -10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    marginLeft: -20,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
-    elevation: 6,
-    borderWidth: 4,
-    borderColor: colors.textInverse,
-  },
-  sliderHint: {
-    marginTop: 8,
-    alignItems: 'center',
-  },
-  sliderHintText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontStyle: 'italic' as const,
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  sliderLabel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  storyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  storyBattleImage: {
-    width: '100%',
-    height: 180,
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  storyCard: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  storyTitle: {
-    fontSize: 24 * fs,
-    fontWeight: '700' as const,
-    color: colors.primary,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  storyNarrative: {
-    fontSize: 16 * fs,
-    color: colors.text,
-    lineHeight: 26 * fs,
-    marginBottom: 20,
-  },
-  storyMeta: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-  },
-  storyIconContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  storyIconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: colors.textInverse,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  storyIconText: {
-    fontSize: 24,
-  },
-  storyMetaText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  mascotCelebration: {
-    position: 'absolute',
-    right: 16,
-    top: 70,
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  mascotBubble: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: colors.success,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 10,
-    overflow: 'hidden',
-  },
-  mascotBubbleWrong: {
-    borderColor: colors.error,
-  },
-  mascotAvatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  cheerBubble: {
-    backgroundColor: colors.success,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cheerBubbleWrong: {
-    backgroundColor: colors.error,
-  },
-  cheerText: {
-    fontSize: 13,
-    fontWeight: '700' as const,
-    color: colors.textInverse,
-  },
-  footer: {
-    padding: 20,
-    paddingBottom: 24,
-    backgroundColor: colors.background,
-  },
-  feedbackInline: {
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-  },
-  feedbackInlineCorrect: {
-    backgroundColor: colors.success + '20',
-    borderWidth: 1,
-    borderColor: colors.success + '40',
-  },
-  feedbackInlineWrong: {
-    backgroundColor: colors.error + '20',
-    borderWidth: 1,
-    borderColor: colors.error + '40',
-  },
-  feedbackHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  feedbackTitle: {
-    fontSize: 16 * fs,
-    fontWeight: '700' as const,
-  },
-  feedbackTitleCorrect: {
-    color: colors.success,
-  },
-  feedbackTitleWrong: {
-    color: colors.error,
-  },
-  feedbackText: {
-    fontSize: 13 * fs,
-    color: colors.textSecondary,
-    lineHeight: 18 * fs,
-  },
-  checkButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: colors.primaryDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-    borderBottomWidth: 4,
-    borderBottomColor: colors.primaryDark,
-  },
-  checkButtonDisabled: {
-    backgroundColor: colors.pathLine,
-    shadowOpacity: 0,
-    borderBottomColor: '#A8A29E',
-  },
-  checkButtonText: {
-    fontSize: 18 * fs,
-    fontWeight: '700' as const,
-    color: colors.textInverse,
-  },
-  continueButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-    borderBottomWidth: 4,
-  },
-  continueButtonCorrect: {
-    backgroundColor: colors.success,
-    shadowColor: '#16A34A',
-    borderBottomColor: '#16A34A',
-  },
-  continueButtonWrong: {
-    backgroundColor: colors.primary,
-    shadowColor: colors.primaryDark,
-    borderBottomColor: colors.primaryDark,
-  },
-  continueButtonText: {
-    fontSize: 18 * fs,
-    fontWeight: '700' as const,
-    color: colors.textInverse,
-  },
+  comboText: { color: '#fff', fontFamily: fonts.bodyBlack, fontSize: 11 },
+  hero: { width: '100%', overflow: 'hidden', justifyContent: 'flex-end' },
+  heroText: { paddingHorizontal: 20, paddingBottom: 6 },
+  heroTitle: { fontFamily: fonts.display, color: '#F4E8CF', letterSpacing: 1.2, textTransform: 'uppercase' },
+  heroDate: { fontFamily: fonts.bodySemi, color: 'rgba(244,232,207,0.7)', marginTop: 2 },
+  content: { paddingHorizontal: 20, paddingTop: 8 },
+  stepMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  typeChip: { borderWidth: 1.5, borderRadius: 999, paddingHorizontal: 10, height: 24, justifyContent: 'center' },
+  typeText: { fontFamily: fonts.bodyBlack, letterSpacing: 0.6 },
+  counter: { fontFamily: fonts.bodyBold, fontVariant: ['tabular-nums'] },
+  prompt: { fontFamily: fonts.bodyBlack, marginBottom: 20 },
+  stack: { gap: 10 },
+  wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  letter: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  letterText: { fontFamily: fonts.bodyBlack, fontSize: 13 },
+  sentenceCard: { borderRadius: radius.md, borderWidth: 2, padding: 16 },
+  sentence: { fontFamily: fonts.bodyBold, lineHeight: 28 },
+  orderSlot: { borderWidth: 2, borderStyle: 'dashed', borderRadius: radius.md, padding: 8, gap: 8, justifyContent: 'center' },
+  slotHint: { fontFamily: fonts.bodySemi, textAlign: 'center', fontSize: 13, paddingVertical: 4 },
+  columns: { flexDirection: 'row', gap: 10 },
+  column: { flex: 1, gap: 10 },
+  storyCard: { borderRadius: radius.lg, borderWidth: 2, padding: 20, gap: 12 },
+  storyTitle: { fontFamily: fonts.display, lineHeight: 30 },
+  metaRow: { flexDirection: 'row', gap: 16, flexWrap: 'wrap' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  metaText: { fontFamily: fonts.bodyBold },
+  rule: { height: 1, opacity: 0.8 },
+  storyText: { fontFamily: fonts.body, lineHeight: 25 },
+  outcomeBox: { borderLeftWidth: 3, paddingLeft: 12, gap: 2, marginTop: 4 },
+  outcomeLabel: { fontFamily: fonts.bodyBlack, letterSpacing: 1, textTransform: 'uppercase' },
+  outcomeText: { fontFamily: fonts.bodyBold, lineHeight: 20 },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 14, borderTopWidth: 1 },
 });

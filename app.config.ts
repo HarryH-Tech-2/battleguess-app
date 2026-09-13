@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0F1420',
   },
   ios: {
     supportsTablet: false,
@@ -50,7 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#ffffff',
+      backgroundColor: '#0F1420',
     },
     package: `${BASE_ANDROID_PACKAGE}${idSuffix}`,
     permissions: ['android.permission.VIBRATE'],

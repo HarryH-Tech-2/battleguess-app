@@ -1,3 +1,5 @@
+import type { DailyStats } from '@/utils/quests';
+
 export type Era = 'ancient' | 'medieval' | 'napoleonic' | 'ww1' | 'ww2' | 'modern';
 
 export type Continent = 'europe' | 'asia' | 'africa' | 'americas' | 'all';
@@ -11,13 +13,16 @@ export type KnowledgeLevel = 'nothing' | 'some' | 'lots';
 export interface Mascot {
   id: string;
   name: string;
-  avatar: string;
   description: string;
   gender: 'male' | 'female';
   dates: string;
   dob: string;
   dod: string;
   causeOfDeath: string;
+  /** Short line the guide says when you answer correctly. */
+  cheer: string;
+  /** Short line the guide says when you answer wrong. */
+  consolation: string;
 }
 
 export interface Battle {
@@ -58,15 +63,15 @@ export interface Unit {
   icon: string;
 }
 
-export type StepType = 
-  | 'mapTap' 
-  | 'multiChoice' 
-  | 'orderEvents' 
-  | 'matchPairs' 
-  | 'fillBlank' 
-  | 'timelineSlider' 
-  | 'twoTruths' 
-  | 'nameBattle' 
+export type StepType =
+  | 'mapTap'
+  | 'multiChoice'
+  | 'orderEvents'
+  | 'matchPairs'
+  | 'fillBlank'
+  | 'timelineSlider'
+  | 'twoTruths'
+  | 'nameBattle'
   | 'storyCard';
 
 export interface BaseStep {
@@ -152,15 +157,15 @@ export interface StoryCardStep extends BaseStep {
   };
 }
 
-export type Step = 
-  | MapTapStep 
-  | MultiChoiceStep 
-  | OrderEventsStep 
-  | MatchPairsStep 
-  | FillBlankStep 
-  | TimelineSliderStep 
-  | TwoTruthsStep 
-  | NameBattleStep 
+export type Step =
+  | MapTapStep
+  | MultiChoiceStep
+  | OrderEventsStep
+  | MatchPairsStep
+  | FillBlankStep
+  | TimelineSliderStep
+  | TwoTruthsStep
+  | NameBattleStep
   | StoryCardStep;
 
 export interface Lesson {
@@ -216,12 +221,18 @@ export interface UserProgress {
   knowledgeLevel: KnowledgeLevel;
   hasCompletedOnboarding: boolean;
   questionAttempts: QuestionAttempt[];
+  /** Per-day counters used by daily quests. */
+  daily: DailyStats;
+  /** Battle ids the user has finished at least one lesson for (Codex unlocks). */
+  studiedBattles: string[];
 }
 
 export interface LessonAttempt {
   lessonId: string;
+  battleId: string;
   correctAnswers: number;
   totalSteps: number;
   xpEarned: number;
   isPerfect: boolean;
+  bestCombo: number;
 }

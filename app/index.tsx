@@ -1,20 +1,19 @@
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useUserProgress } from '@/contexts/UserProgressContext';
-import Colors from '@/constants/colors';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function IndexScreen() {
   const { progress, isLoading } = useUserProgress();
+  const { colors } = useSettings();
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+        <ActivityIndicator size="large" color={colors.brass} />
       </View>
     );
   }
-
-  console.log('[Index] Checking onboarding status:', progress.hasCompletedOnboarding);
 
   if (progress.hasCompletedOnboarding) {
     return <Redirect href="/(tabs)/(home)/learn" />;
@@ -28,6 +27,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
   },
 });
