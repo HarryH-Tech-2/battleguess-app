@@ -28,8 +28,6 @@ Every battle you master joins your Codex, a growing collection of painted battle
 MADE TO BE BEAUTIFUL
 Original painted artwork for every battle, a campaign map that grows as you progress, and a dark ink-and-brass look that stays out of the way of the history.
 
-Available in English, Spanish, French, Japanese and Arabic.
-
 No history degree required. Just curiosity and a few minutes a day.
 
 ## Release notes for this version (500 chars max)
