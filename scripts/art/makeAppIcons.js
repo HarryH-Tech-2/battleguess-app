@@ -44,24 +44,34 @@ async function main() {
   ctx.drawImage(img, 0, 0, 1024, 1024);
   fs.writeFileSync(out('icon.png'), icon.toBuffer('image/png'));
 
-  // adaptive-icon.png: artwork scaled into the safe zone (66%) over ink.
+  // adaptive-icon.png: full-bleed artwork. The source is edge-to-edge scenery with the
+  // helmet inside the 66% safe zone, so Android's circle / squircle masks crop only sky
+  // and flame; no square edge can show.
   const adaptive = createCanvas(1024, 1024);
   ctx = adaptive.getContext('2d');
   ctx.fillStyle = INK;
   ctx.fillRect(0, 0, 1024, 1024);
-  const s = 1024 * 0.78;
-  ctx.drawImage(img, (1024 - s) / 2, (1024 - s) / 2, s, s);
-  // Feather the artwork's square edge into the fill so the vignette never shows
-  // as a hard square under Android's circular / squircle masks.
-  const feather = ctx.createRadialGradient(512, 512, 350, 512, 512, 430);
-  feather.addColorStop(0, `${INK}00`);
-  feather.addColorStop(1, `${INK}ff`);
-  ctx.fillStyle = feather;
-  ctx.fillRect(0, 0, 1024, 1024);
+  ctx.drawImage(img, 0, 0, 1024, 1024);
   fs.writeFileSync(out('adaptive-icon.png'), adaptive.toBuffer('image/png'));
 
-  // splash-icon.png: same as adaptive, shown centered on the ink splash.
-  fs.writeFileSync(out('splash-icon.png'), adaptive.toBuffer('image/png'));
+  // splash-icon.png: the artwork inside a soft-edged circle on transparency, so the
+  // splash shows a round emblem on the ink background instead of a hard square.
+  const splash = createCanvas(1024, 1024);
+  ctx = splash.getContext('2d');
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(512, 512, 500, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(img, 0, 0, 1024, 1024);
+  ctx.restore();
+  ctx.globalCompositeOperation = 'destination-in';
+  const edge = ctx.createRadialGradient(512, 512, 440, 512, 512, 500);
+  edge.addColorStop(0, 'rgba(0,0,0,1)');
+  edge.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = edge;
+  ctx.fillRect(0, 0, 1024, 1024);
+  ctx.globalCompositeOperation = 'source-over';
+  fs.writeFileSync(out('splash-icon.png'), splash.toBuffer('image/png'));
 
   // favicon.png: small.
   const fav = createCanvas(196, 196);

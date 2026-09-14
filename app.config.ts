@@ -32,7 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name,
   slug: 'battleguess',
-  version: '1.0.0',
+  version: '1.1.0',
   orientation: 'default',
   icon: './assets/images/icon.png',
   scheme,
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#111A24',
+    backgroundColor: '#080D1A',
   },
   ios: {
     supportsTablet: false,
@@ -50,7 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#111A24',
+      backgroundColor: '#080D1A',
     },
     package: `${BASE_ANDROID_PACKAGE}${idSuffix}`,
     permissions: ['android.permission.VIBRATE'],
