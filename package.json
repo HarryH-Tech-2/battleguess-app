@@ -3,12 +3,14 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "bunx rork start -p egmyzs4nm1pjs6t4bj4zw --tunnel",
+    "start": "cross-env APP_VARIANT=development expo start --dev-client",
+    "dev": "cross-env APP_VARIANT=development expo start --dev-client",
+    "dev:android": "cross-env APP_VARIANT=development expo start --dev-client --android",
     "start-web": "bunx rork start -p egmyzs4nm1pjs6t4bj4zw --web --tunnel",
     "start-web-dev": "DEBUG=expo* bunx rork start -p egmyzs4nm1pjs6t4bj4zw --web --tunnel",
     "lint": "expo lint",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "android": "cross-env APP_VARIANT=development expo run:android",
+    "ios": "cross-env APP_VARIANT=development expo run:ios"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.4.2",
@@ -58,6 +60,7 @@
     "@expo/ngrok": "^4.1.0",
     "@types/react": "~19.1.10",
     "canvas": "^3.2.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.31.0",
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"

@@ -54,7 +54,7 @@ export function FeedbackSheet({
         styles.sheet,
         {
           backgroundColor: bg,
-          paddingBottom: Math.max(bottomInset, 16),
+          paddingBottom: bottomInset + 16,
           transform: [{ translateY: slide.interpolate({ inputRange: [0, 1], outputRange: [0, 320] }) }],
         },
       ]}

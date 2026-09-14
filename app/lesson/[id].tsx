@@ -222,9 +222,9 @@ export default function LessonScreen() {
         const minYear = Number(step.data.minYear);
         const maxYear = Number(step.data.maxYear);
         const correctYear = Number(step.data.correctYear);
-        const tolerance = Number(step.data.tolerance);
         const v = sliderValue === null ? Math.round((minYear + maxYear) / 2) : sliderValue;
-        isCorrect = Math.abs(v - correctYear) <= tolerance;
+        // Only the exact year counts; the slider has nudge buttons for fine control.
+        isCorrect = v === correctYear;
         userAnswerText = formatYear(v);
         correctAnswerText = formatYear(correctYear);
         break;
@@ -598,7 +598,7 @@ export default function LessonScreen() {
 
   const isStory = currentStep.type === 'storyCard';
   const heroHeight = isStory ? 220 : 128;
-  const footerSpace = 110 + insets.bottom;
+  const footerSpace = 126 + insets.bottom;
 
   return (
     <ScreenBackground topography={false}>
@@ -691,7 +691,7 @@ export default function LessonScreen() {
 
       {/* Footer */}
       {feedback === 'none' ? (
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16), backgroundColor: colors.bg, borderTopColor: colors.surfaceBorder }]}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 16, backgroundColor: colors.bg, borderTopColor: colors.surfaceBorder }]}>
           <ChunkyButton
             label={isStory ? t('lesson.continue') : t('lesson.check')}
             variant={isStory ? 'brass' : 'ember'}

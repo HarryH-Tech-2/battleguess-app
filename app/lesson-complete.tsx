@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -123,7 +123,10 @@ export default function LessonCompleteScreen() {
   return (
     <ScreenBackground image={battle ? getBattleImage(battle.id) : undefined} imageHeight={360} topography={false}>
       <Confetti run={!reducedMotion} count={isPerfect ? 90 : 60} />
-      <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <Animated.View
           style={{
             alignItems: 'center',
@@ -238,7 +241,8 @@ export default function LessonCompleteScreen() {
           </View>
         </Animated.View>
 
-        <View style={{ flex: 1 }} />
+      </ScrollView>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
         <ChunkyButton label={t('lessonComplete.continue')} variant="ember" onPress={() => router.replace('/(tabs)/(home)/learn')} />
       </View>
     </ScreenBackground>
@@ -267,7 +271,8 @@ function Bonus({ label, value }: { label: string; value: number }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 20, gap: 18 },
+  container: { flexGrow: 1, paddingHorizontal: 20, paddingBottom: 18, gap: 18 },
+  footer: { paddingHorizontal: 20, paddingTop: 6 },
   title: { fontFamily: fonts.displayBlack, textAlign: 'center', marginTop: 6, letterSpacing: 1 },
   subtitle: { fontFamily: fonts.bodyBold, textAlign: 'center', marginTop: 2 },
   card: { height: 170, borderRadius: radius.lg, borderWidth: 2, overflow: 'hidden', justifyContent: 'flex-end' },
