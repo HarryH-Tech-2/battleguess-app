@@ -54,6 +54,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: `${BASE_ANDROID_PACKAGE}${idSuffix}`,
     permissions: ['android.permission.VIBRATE'],
+    // The app never uses location, camera or storage. Keep these out of the
+    // merged manifest even if a dependency declares them (Play privacy review).
+    blockedPermissions: [
+      'android.permission.ACCESS_COARSE_LOCATION',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.CAMERA',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+    ],
   },
   web: {
     favicon: './assets/images/favicon.png',
